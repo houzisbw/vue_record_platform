@@ -6,9 +6,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var ejs = require('ejs');
 var mongoose = require('mongoose');
+var jwt = require('jwt-simple');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+
+//util
+var util = require('./utils');
 
 var app = express();
 //跨域设置
@@ -51,8 +55,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
 
+
+//后台统一拦截检查是否登录
+let interceptorRequest = util.interceptorRequest;
+//首先对所有请求进行登录校验(除去某一些不用进行校验的url，比如/login)
+app.use(interceptorRequest);
+//各个模块的逻辑
 app.use('/', index);
-app.use('/users', users);
+app.use('/users',users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

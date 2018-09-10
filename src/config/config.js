@@ -17,6 +17,11 @@ var config = {
     504:'网关超时',
     505:'HTTP版本不支持'
   },
+  //后端自定义错误码
+  backEndErrorCode:{
+    '-1':'出现未知错误',
+    '0':'用户名或密码错误'
+  }
 }
 
 export default config

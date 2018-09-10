@@ -55,6 +55,20 @@ const mutations = {
   updateUserSignature: function(state,newSig){
     state.signature = newSig
     window.localStorage.setItem('signature',newSig)
+  },
+  //登出
+  logout: function(state){
+    state.username = '';
+    state.profileImgUrl = '';
+    state.nickname = '';
+    state.auth = '';
+    state.signature = '';
+
+    window.localStorage.removeItem('username')
+    window.localStorage.removeItem('profileImgUrl')
+    window.localStorage.removeItem('nickname')
+    window.localStorage.removeItem('auth')
+    window.localStorage.removeItem('signature')
   }
 };
 

@@ -9,6 +9,7 @@ import router from './router'
 import './assets/css/normalize.css'
 import axios from './api/http'
 import store from './store/index'
+import api from './api/api'
 
 //element的组件都在这里引入
 import {
@@ -27,6 +28,8 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownItem,
+  Tabs,
+  TabPane,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -43,6 +46,8 @@ Vue.use(Badge)
 Vue.use(Dropdown);
 Vue.use(DropdownMenu);
 Vue.use(DropdownItem);
+Vue.use(Tabs);
+Vue.use(TabPane)
 //特殊处理
 Vue.prototype.$message = Message
 
@@ -54,9 +59,21 @@ Vue.config.productionTip = false
 router.beforeEach((to,from,next)=>{
   //如果是访问需要登录的页面
   if (to.matched.some(record => record.meta.requireAuth)) {
-    //todo
-    //需要发送请求到后台验证才行
-    next()
+    //需要发送请求到后台验证用户是否处于登录态
+    axios.post(api.checkIsLogin).then((resp)=>{
+        if(resp.data.status === 1){
+          //处于登录态
+          next()
+        }else{
+          //登录过期,清除localStorage和vuex
+          store.commit('logout');
+          //返回登录页面
+          next('/login');
+        }
+    },()=>{
+      //返回登录页面
+      next('/login')
+    });
   }else{
     //如果登录成功后再返回登录页则跳转到首页
     if(to.name === 'Login'){

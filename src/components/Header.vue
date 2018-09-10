@@ -25,7 +25,11 @@
             <i class="fa fa-user-o dropdown-color"></i>
             <span class="padding-small dropdown-color">个人中心</span>
           </el-dropdown-item>
-          <el-dropdown-item divided>
+          <el-dropdown-item>
+            <i class="fa fa-cog dropdown-color"></i>
+            <span class="padding-small dropdown-color" @click="goToPersonalSettingPage">个人设置</span>
+          </el-dropdown-item>
+          <el-dropdown-item divided @click.native="logout">
             <i class="fa fa-arrow-circle-left dropdown-color"></i>
             <span class="padding-small dropdown-color">退出登录</span>
           </el-dropdown-item>
@@ -36,6 +40,7 @@
 </template>
 
 <script>
+  import api from './../api/api'
   import ElDropdown from "../../node_modules/element-ui/packages/dropdown/src/dropdown";
 	export default {
     components: {ElDropdown},
@@ -45,9 +50,27 @@
 				return '管理员'
       }
     },
+    methods:{
+    	//退出登录:清空vuex,清除token,清空localStorage
+      logout: function(){
+        this.axios.post(api.logout).then((resp)=>{
+            this.$store.commit('logout');
+            //跳转登录页
+            this.$router.replace({
+              path:'/login'
+            })
+        })
+      },
+      //去往个人设置页面
+      goToPersonalSettingPage: function(){
+        this.$router.push({
+          path:'/personal_setting'
+        })
+      }
+    },
 		data () {
 			return {
-				msg: 'Welcome to Your Vue.js App'
+
 			}
 		}
 	}
@@ -97,8 +120,8 @@
       }
       .user-potrait{
         .user-avatar-wrapper{
-          width:24px;
-          height:24px;
+          width:30px;
+          height:30px;
           display: inline-block;
         }
         .user-avatar-img{

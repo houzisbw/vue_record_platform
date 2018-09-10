@@ -20,13 +20,14 @@ export default {
       let nickname = window.localStorage.getItem('nickname');
       let auth = window.localStorage.getItem('auth');
       let signature = window.localStorage.getItem('signature');
-
-      this.$store.commit('updateUserName',username);
-      this.$store.commit('updateUserProfile',profileImgUrl);
-      this.$store.commit('updateUserNickname',nickname);
-      this.$store.commit('updateUserAuth',auth);
-      this.$store.commit('updateUserSignature',signature);
-
+      //注意必须判断存在username才行，否则就是非登录状态
+      if(username){
+        this.$store.commit('updateUserName',username);
+        this.$store.commit('updateUserProfile',profileImgUrl);
+        this.$store.commit('updateUserNickname',nickname);
+        this.$store.commit('updateUserAuth',auth);
+        this.$store.commit('updateUserSignature',signature);
+      }
     }
   }
 }

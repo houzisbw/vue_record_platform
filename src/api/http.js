@@ -14,10 +14,17 @@ axios.defaults.withCredentials=true;
 //响应拦截器，处理错误
 axios.interceptors.response.use(
   response => {
+    let status = response.data.status;
     //如果后端返回登录失效则跳转登录页
-    if(response.data.status === config.loginExpire){
+    if(status === config.loginExpire){
       router.replace({
         path:'/login'
+      })
+    }
+    //后端非正确状态码处理
+    else if(status !== 1){
+      Message.error({
+        message:config.backEndErrorCode[status.toString()]
       })
     }
     return response

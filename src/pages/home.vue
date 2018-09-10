@@ -3,7 +3,8 @@
     <!--侧栏-->
     <a-side></a-side>
     <!--主体内容-->
-    <main-content></main-content>
+    <main-content>
+    </main-content>
   </div>
 </template>
 
