@@ -11,6 +11,14 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
+      //图床网站跨域设置(注意只在开发环境有用，生产环境直接写target的地址)
+      '/avatarUpload': {
+        target:'https://sm.ms/api/upload',
+        changeOrigin:true,
+        pathRewrite: {
+          '^/avatarUpload': ''//这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替 比如我要调用'http://40.00.100.100:3002/user/add'，直接写‘/api/user/add’即可
+        }
+      },
       //服务端是在6000端口上的，这里做一个代理，访问/users/*的请求都会被代理到http://localhost:6000上
       '/users/*':{
         target:'http://localhost:6000'

@@ -13,7 +13,9 @@ var userSchema = new mongoose.Schema({
   //签名
   signature:String,
   //权限
-  auth:String
+  auth:String,
+  //组别
+  group:String
 });
 //这里第一个参数是数据库collection的名字(users)，User=>users，会自动映射
 module.exports = mongoose.model('User',userSchema)

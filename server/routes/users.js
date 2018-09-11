@@ -107,9 +107,10 @@ router.post('/checkIsLogin',function(req,res){
             })
           }else{
             if(doc){
-              //用户存在,说明处于登录态
+              //用户存在,说明处于登录态,同时返回用户权限字段
               res.json({
-                status:returnedCodes.CODE_SUCCESS
+                status:returnedCodes.CODE_SUCCESS,
+                auth:doc.auth
               })
             }else{
               res.json({
@@ -186,6 +187,24 @@ router.get('/fetchUserInfo',function(req,res,next){
       }
     }
   })
+});
+
+//更新用户头像
+router.post('/updateUserAvatar',function(req,res){
+  let user = req.user || '',
+      avatarUrl = req.body.url;
+  User.findOneAndUpdate({username:user},{profileImgUrl:avatarUrl},function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+
 });
 
 

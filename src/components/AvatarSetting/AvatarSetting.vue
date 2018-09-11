@@ -1,0 +1,28 @@
+<!--头像上传组件-->
+<template>
+  <div class="avatar-wrapper">
+    <custom-cropper></custom-cropper>
+  </div>
+</template>
+
+<script>
+  import CustomCropper from './CustomCropper.vue'
+	export default {
+		name: 'AvatarWrapper',
+    components:{
+      CustomCropper
+    },
+		data () {
+			return {
+
+			}
+		}
+	}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="less" type="text/less">
+.avatar-wrapper{
+  padding:8px 40px;
+}
+</style>

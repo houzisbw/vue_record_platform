@@ -13,5 +13,9 @@ export default {
   /* 更新个人信息 */
   updateUserInfo:'/users/updateUserInfo',
   /* 获取用户基本信息 */
-  fetchUserInfo:'/users/fetchUserInfo'
+  fetchUserInfo:'/users/fetchUserInfo',
+  /* 更新用户头像url */
+  updateUserAvatar:'/users/updateUserAvatar',
+  /* 图床网站 */
+  pictureBedSite:'https://sm.ms/api/upload'
 }

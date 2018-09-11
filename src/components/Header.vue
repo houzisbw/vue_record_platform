@@ -12,7 +12,7 @@
       <!--用户头像-->
       <span class="user-potrait user-common">
         <span class="user-avatar-wrapper">
-          <img src="./../assets/images/icon/default-avatar.png" class="user-avatar-img" alt="avatar"/>
+          <img :src="userAvatar" class="user-avatar-img" alt="avatar"/>
         </span>
       </span>
       <!--用户昵称-->
@@ -42,12 +42,16 @@
 <script>
   import api from './../api/api'
   import ElDropdown from "../../node_modules/element-ui/packages/dropdown/src/dropdown";
+  import config from './../config/config'
 	export default {
     components: {ElDropdown},
     name: 'Header',
     computed:{
 			userNickname:function(){
-				return '管理员'
+				return this.$store.getters.getUserNickname || '还没有昵称呢!'
+      },
+      userAvatar: function(){
+        return this.$store.getters.getUserProfileImg || config.defaultUserAvatarUrl
       }
     },
     methods:{
@@ -109,20 +113,24 @@
         line-height: 64px;
         font-size: 14px;
         color:rgba(0,0,0,.65);
-        max-width:100px;
+        max-width:80px;
+        padding-left:10px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        text-align: center;
+        text-align: left;
         cursor:pointer;
         position: relative;
         left:-8px;
+        display: block;
       }
       .user-potrait{
         .user-avatar-wrapper{
           width:30px;
           height:30px;
           display: inline-block;
+          border-radius: 50%;
+          overflow: hidden;
         }
         .user-avatar-img{
           width:100%;

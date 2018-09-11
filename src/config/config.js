@@ -21,7 +21,18 @@ var config = {
   backEndErrorCode:{
     '-1':'出现未知错误',
     '0':'用户名或密码错误'
-  }
+  },
+  //用户权限
+  auth:{
+    //超管
+    SUPER_ADMIN:'2',
+    //二级管理员
+    ADMIN:'1',
+    //普通用户
+    ORDINARY_USER:'0'
+  },
+  //用户默认头像
+  defaultUserAvatarUrl:require('./../assets/images/icon/avatar_default_big.png'),
 }
 
 export default config

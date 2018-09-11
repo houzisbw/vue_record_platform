@@ -5,7 +5,8 @@
       <el-tab-pane label="个人信息">
         <personal-info></personal-info>
       </el-tab-pane>
-      <el-tab-pane label="安全设置">
+      <el-tab-pane label="头像设置">
+        <avatar-setting></avatar-setting>
       </el-tab-pane>
       <el-tab-pane label="账号绑定"></el-tab-pane>
       <el-tab-pane label="新消息通知"></el-tab-pane>
@@ -15,10 +16,12 @@
 
 <script>
   import PersonalInfo from './../../components/PersonalInfo.vue'
+  import AvatarSetting from './../../components/AvatarSetting/AvatarSetting.vue'
 	export default {
 		name: 'PersonalSetting',
     components:{
-      PersonalInfo
+      PersonalInfo,
+      AvatarSetting
     },
 		data () {
 			return {

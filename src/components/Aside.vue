@@ -37,12 +37,40 @@
 </template>
 
 <script>
+  import config from './../config/config'
+  //用户权限
+  let auth = config.auth;
 	export default {
 		name: 'Aside',
+    mounted:function(){
+      this.filterMenuByAuth();
+    },
     methods:{
+    	//处理菜单选择
       handleMenuSelect: function(index){
         this.activeMenuIndex = index
-      }
+      },
+      //处理菜单权限过滤
+      filterMenuByAuth: function(){
+      	let menuData = this.menuData;
+      	let userAuth = this.$store.getters.getUserAuth;
+      	//过滤一级菜单
+      	let filteredMenuData = menuData.filter((item)=>{
+      		return item.role.indexOf(userAuth)!==-1
+        });
+        //过滤二级菜单
+        filteredMenuData.forEach((item)=>{
+      		if(item.subMenuNameList){
+      			let sub = item.subMenuNameList.slice();
+      			sub = sub.filter((subItem)=>{
+              return subItem.role.indexOf(userAuth)!==-1
+            });
+            item.subMenuNameList = sub;
+          }
+        });
+        //更新过滤后的菜单
+        this.menuData = filteredMenuData
+      },
     },
 		data () {
 			return {
@@ -53,20 +81,24 @@
           {
           	menuName:'错误记录',
             iconName:'el-icon-tickets',
+            role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
               	index:'1-1',
                 iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
                 subMenuTitle:'查询记录'
               },
               {
                 index:'1-2',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'修改记录'
               },
               {
                 index:'1-3',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'添加记录'
               }
             ]
@@ -74,20 +106,24 @@
           {
             menuName:'配置信息',
             iconName:'el-icon-edit-outline',
+            role:[auth.SUPER_ADMIN],
             subMenuNameList:[
               {
                 index:'2-1',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'公告内容'
               },
               {
                 index:'2-2',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'本组名称'
               },
               {
                 index:'2-3',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'车间名字'
               }
             ]
@@ -95,10 +131,12 @@
           {
             menuName:'用户管理',
             iconName:'el-icon-setting',
+            role:[auth.SUPER_ADMIN],
             subMenuNameList:[
               {
                 index:'3-1',
                 iconName:'',
+                role:[auth.SUPER_ADMIN],
                 subMenuTitle:'添加/删除用户'
               }
             ]
@@ -106,11 +144,26 @@
           {
             menuName:'统计图表',
             iconName:'el-icon-menu',
+            role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
                 index:'4-1',
                 iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
                 subMenuTitle:'当月错误记录图'
+              }
+            ]
+          },
+          {
+            menuName:'公告内容',
+            iconName:'el-icon-info',
+            role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+            subMenuNameList:[
+              {
+                index:'5-1',
+                iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+                subMenuTitle:'公告内容'
               }
             ]
           },
@@ -167,5 +220,11 @@
         }
       }
     }
+  }
+</style>
+<!--elementUI样式设置-->
+<style type='text/less' lang="less">
+  .side-bar-menu .el-menu--inline.el-menu{
+    box-shadow: inset 0 2px 8px rgba(0,0,0,.45);
   }
 </style>

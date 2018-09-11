@@ -1,0 +1,22 @@
+<!--记录的父组件-->
+<template>
+  <div>
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+	export default {
+		name: 'Records',
+		data () {
+			return {
+
+			}
+		}
+	}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="less" type="text/less">
+
+</style>

@@ -62,8 +62,21 @@ router.beforeEach((to,from,next)=>{
     //需要发送请求到后台验证用户是否处于登录态
     axios.post(api.checkIsLogin).then((resp)=>{
         if(resp.data.status === 1){
-          //处于登录态
-          next()
+          //处于登录态,继续判断权限是否合理
+          let userAuth = resp.data.auth;
+          //有权限
+          if(to.meta.role.includes(userAuth)){
+            next()
+          }else{
+            //无权限,提示用户
+            Message.error({
+              message:'没有权限访问该页面!'
+            });
+            //跳转为来源路由
+            next({
+              path:from.path
+            })
+          }
         }else{
           //登录过期,清除localStorage和vuex
           store.commit('logout');

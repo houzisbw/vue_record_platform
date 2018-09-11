@@ -21,8 +21,8 @@ axios.interceptors.response.use(
         path:'/login'
       })
     }
-    //后端非正确状态码处理
-    else if(status !== 1){
+    //后端非正确状态码处理,这里先判断status存在，因为图床网站返回无status
+    else if(status && status !== 1){
       Message.error({
         message:config.backEndErrorCode[status.toString()]
       })
