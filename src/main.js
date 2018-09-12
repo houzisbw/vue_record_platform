@@ -7,6 +7,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import './assets/css/normalize.css'
+import './assets/iconfont/alibaba/iconfont.css'
 import axios from './api/http'
 import store from './store/index'
 import api from './api/api'
@@ -30,6 +31,7 @@ import {
   DropdownItem,
   Tabs,
   TabPane,
+  Loading,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -48,6 +50,7 @@ Vue.use(DropdownMenu);
 Vue.use(DropdownItem);
 Vue.use(Tabs);
 Vue.use(TabPane)
+Vue.use(Loading)
 //特殊处理
 Vue.prototype.$message = Message
 

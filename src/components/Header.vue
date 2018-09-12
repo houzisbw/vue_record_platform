@@ -2,7 +2,7 @@
   <div class="header">
     <div class="header-right-panel">
       <span class="user-group user-common">
-        <el-tag >准备组</el-tag>
+        <el-tag >{{userGroup}}</el-tag>
       </span>
       <span class="user-info-num user-common">
         <el-badge :value="12">
@@ -17,20 +17,20 @@
       </span>
       <!--用户昵称-->
       <el-dropdown size="medium">
-        <span class="user-nickname  no-padding">
+        <span class="user-nickname  no-padding" >
           {{userNickname}}
         </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item>
-            <i class="fa fa-user-o dropdown-color"></i>
-            <span class="padding-small dropdown-color">个人中心</span>
+            <i class="iconfont icon-user dropdown-color"></i>
+            <span class="padding-small dropdown-color" @click="goToPersonalCenterPage">个人中心</span>
           </el-dropdown-item>
           <el-dropdown-item>
-            <i class="fa fa-cog dropdown-color"></i>
+            <i class="iconfont icon-setting dropdown-color"></i>
             <span class="padding-small dropdown-color" @click="goToPersonalSettingPage">个人设置</span>
           </el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
-            <i class="fa fa-arrow-circle-left dropdown-color"></i>
+            <i class="iconfont icon-logout dropdown-color"></i>
             <span class="padding-small dropdown-color">退出登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -52,6 +52,9 @@
       },
       userAvatar: function(){
         return this.$store.getters.getUserProfileImg || config.defaultUserAvatarUrl
+      },
+      userGroup: function(){
+        return this.$store.getters.getUserGroup || '还没有组别呢!'
       }
     },
     methods:{
@@ -69,6 +72,12 @@
       goToPersonalSettingPage: function(){
         this.$router.push({
           path:'/personal_setting'
+        })
+      },
+      //去往个人中心页面
+      goToPersonalCenterPage: function(){
+        this.$router.push({
+          path:'/personal_center'
         })
       }
     },

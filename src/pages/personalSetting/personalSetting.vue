@@ -35,6 +35,8 @@
 <style scoped type="text/less" lang="less">
   .personal-setting-wrapper{
     height:100%;
+    background-color: #fff;
+    padding:20px 0;
     .personal-setting-tab-wrapper{
 
     }

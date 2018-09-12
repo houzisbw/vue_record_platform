@@ -49,6 +49,7 @@
         this.$store.commit('updateUserNickname',userInfo.nickname);
         this.$store.commit('updateUserAuth',userInfo.auth);
         this.$store.commit('updateUserSignature',userInfo.signature);
+        this.$store.commit('updateUserGroup',userInfo.group);
       },
 			//提交登录请求
       submitForm:function(formRef){

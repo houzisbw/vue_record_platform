@@ -12,6 +12,9 @@
     <div class="side-bar-menu">
       <el-menu
         class="el-menu-vertical"
+        :router="true"
+        :default-active="getActiveSubMenu"
+        :default-openeds="getActiveMenu"
         @select="handleMenuSelect"
         background-color="#001529"
         text-color="#D9D9D9"
@@ -45,6 +48,27 @@
     mounted:function(){
       this.filterMenuByAuth();
     },
+    computed:{
+    	//设置当前打开的一级菜单，返回数组
+    	getActiveMenu:function(){
+    		let route = this.$route.path;
+        let targetIndex;
+        this.menuData.forEach((item,index)=>{
+        	item.subMenuNameList&&item.subMenuNameList.forEach((subItem,subIndex)=>{
+        		if(subItem.index === route){
+              targetIndex = index
+            }
+          })
+        })
+        //如果选择个人页面，则置空打开的数组
+        return targetIndex?[targetIndex.toString()]:[]
+      },
+      //设置当前激活的二级菜单
+      getActiveSubMenu: function(){
+    		this.activeMenuIndex = this.$route.path;
+        return this.$route.path
+      }
+    },
     methods:{
     	//处理菜单选择
       handleMenuSelect: function(index){
@@ -76,7 +100,7 @@
 			return {
 				//当前激活菜单index
 				activeMenuIndex:'',
-        //菜单数据
+        //菜单数据,role字段只控制初始的菜单渲染与否，点击菜单导航时还要后台判断合法性
         menuData:[
           {
           	menuName:'错误记录',
@@ -109,13 +133,13 @@
             role:[auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-                index:'2-1',
+                index:'/modify_announcement',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'公告内容'
               },
               {
-                index:'2-2',
+                index:'/group_setting',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'本组名称'
@@ -125,7 +149,13 @@
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'车间名字'
-              }
+              },
+              {
+                index:'2-4',
+                iconName:'',
+                role:[auth.SUPER_ADMIN],
+                subMenuTitle:'记录类型'
+              },
             ]
           },
           {
@@ -134,7 +164,7 @@
             role:[auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-                index:'3-1',
+                index:'/modify_user',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'添加/删除用户'
@@ -160,7 +190,7 @@
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-                index:'5-1',
+                index:'/announcement',
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
                 subMenuTitle:'公告内容'
@@ -178,6 +208,8 @@
   .aside{
     min-height:100vh;
     width:256px;
+    //必须设置最小宽度，否则会被压缩(flex)
+    min-width: 256px;
     background-color: #001529;
     box-shadow:2px 0 6px rgba(0,21,41,0.35);
     /*防止box-shadow被挡住*/

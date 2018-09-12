@@ -17,5 +17,11 @@ export default {
   /* 更新用户头像url */
   updateUserAvatar:'/users/updateUserAvatar',
   /* 图床网站 */
-  pictureBedSite:'https://sm.ms/api/upload'
+  pictureBedSite:'https://sm.ms/api/upload',
+  /* 获取公告信息 */
+  fetchAnnouncement:'/users/getAnnouncement',
+  /* 提交公告信息 */
+  submitAnnouncement:'/users/submitAnnouncement',
+  /* 获取用户组别 */
+  fetchGroup:'/users/getGroup'
 }

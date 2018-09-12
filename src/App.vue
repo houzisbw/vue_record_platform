@@ -20,6 +20,7 @@ export default {
       let nickname = window.localStorage.getItem('nickname');
       let auth = window.localStorage.getItem('auth');
       let signature = window.localStorage.getItem('signature');
+      let group = window.localStorage.getItem('group');
       //注意必须判断存在username才行，否则就是非登录状态
       if(username){
         this.$store.commit('updateUserName',username);
@@ -27,6 +28,7 @@ export default {
         this.$store.commit('updateUserNickname',nickname);
         this.$store.commit('updateUserAuth',auth);
         this.$store.commit('updateUserSignature',signature);
+        this.$store.commit('updateUserGroup',group);
       }
     }
   }

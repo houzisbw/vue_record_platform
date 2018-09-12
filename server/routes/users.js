@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('./../model/user')
+var Announcement = require('./../model/announcement')
 //处理token相关
 var jwt = require('jwt-simple')
 //token密钥
@@ -178,7 +179,8 @@ router.get('/fetchUserInfo',function(req,res,next){
         res.json({
           status:returnedCodes.CODE_SUCCESS,
           nickname:doc.nickname,
-          signature:doc.signature
+          signature:doc.signature,
+          userInfo:doc
         })
       }else{
         res.json({
@@ -206,6 +208,55 @@ router.post('/updateUserAvatar',function(req,res){
   })
 
 });
+
+//获取公告信息
+router.get('/getAnnouncement',function(req,res){
+  Announcement.findOne({},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        content:doc.content
+      })
+    }
+  })
+});
+
+//提交公告信息
+router.post('/submitAnnouncement',function(req,res){
+  let content = req.body.content;
+  Announcement.findOneAndUpdate({},{content:content},function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+})
+
+//获取组别
+router.get('/getGroup',function(req,res){
+  let user = req.user;
+  User.findOne({username:user},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        group:doc.group
+      })
+    }
+  })
+})
 
 
 

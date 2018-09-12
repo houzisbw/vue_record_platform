@@ -32,9 +32,6 @@
     min-width: 800px;
     .main-wrapper{
       margin: 24px 24px 0 24px;
-      background-color: #fff;
-      padding-top:20px;
-      padding-bottom: 20px;
       box-sizing: border-box;
     }
   }

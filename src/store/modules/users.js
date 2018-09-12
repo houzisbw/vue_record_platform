@@ -12,7 +12,9 @@ const state = {
   //用户权限
   auth:'',
   //用户签名
-  signature:''
+  signature:'',
+  //用户组别
+  group:''
 }
 
 //getter,用户获取state
@@ -26,7 +28,9 @@ const getters = {
   //获取用户权限
   getUserAuth:state=>state.auth,
   //获取用户签名
-  getUserSignature:state=>state.signature
+  getUserSignature:state=>state.signature,
+  //获取用户组别
+  getUserGroup:state=>state.group
 }
 
 //mutations,用于改变state,注意要存到localStorage中避免刷新页面数据丢失
@@ -56,6 +60,11 @@ const mutations = {
     state.signature = newSig
     window.localStorage.setItem('signature',newSig)
   },
+  //更新用户组别
+  updateUserGroup: function(state,newGroup){
+    state.group = newGroup
+    window.localStorage.setItem('group',newGroup)
+  },
   //登出
   logout: function(state){
     state.username = '';
@@ -63,12 +72,14 @@ const mutations = {
     state.nickname = '';
     state.auth = '';
     state.signature = '';
+    state.group = ''
 
     window.localStorage.removeItem('username')
     window.localStorage.removeItem('profileImgUrl')
     window.localStorage.removeItem('nickname')
     window.localStorage.removeItem('auth')
     window.localStorage.removeItem('signature')
+    window.localStorage.removeItem('group')
   }
 };
 

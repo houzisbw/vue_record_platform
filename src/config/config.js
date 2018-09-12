@@ -31,6 +31,12 @@ var config = {
     //普通用户
     ORDINARY_USER:'0'
   },
+  //用户权限字段
+  authName:{
+    '2':'超级管理员',
+    '1':'二级管理员',
+    '0':'普通用户'
+  },
   //用户默认头像
   defaultUserAvatarUrl:require('./../assets/images/icon/avatar_default_big.png'),
 }

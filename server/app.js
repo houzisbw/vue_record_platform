@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var ejs = require('ejs');
 var mongoose = require('mongoose');
 var jwt = require('jwt-simple');
+var helmet = require('helmet');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -15,6 +16,8 @@ var users = require('./routes/users');
 var util = require('./utils');
 
 var app = express();
+//安全中间件
+app.use(helmet())
 //跨域设置
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
