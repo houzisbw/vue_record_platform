@@ -29,9 +29,15 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownItem,
+  Dialog,
   Tabs,
   TabPane,
   Loading,
+  Table,
+  TableColumn,
+  Pagination,
+  Select,
+  Option,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -51,6 +57,12 @@ Vue.use(DropdownItem);
 Vue.use(Tabs);
 Vue.use(TabPane)
 Vue.use(Loading)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Pagination)
+Vue.use(Dialog)
+Vue.use(Select)
+Vue.use(Option)
 //特殊处理
 Vue.prototype.$message = Message
 

@@ -17,6 +17,8 @@ module.exports =  {
     //成功
     CODE_SUCCESS:1,
     //用户名或密码错误
-    CODE_LOGIN_INCORRECT:0
+    CODE_LOGIN_INCORRECT:0,
+    //用户名已存在
+    CODE_USERNAME_EXIST:3
   }
 }

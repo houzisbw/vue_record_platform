@@ -9,8 +9,10 @@ var mongoose = require('mongoose');
 var jwt = require('jwt-simple');
 var helmet = require('helmet');
 
+//路由
 var index = require('./routes/index');
 var users = require('./routes/users');
+var modifyUser = require('./routes/modifyUser')
 
 //util
 var util = require('./utils');
@@ -66,6 +68,7 @@ app.use(interceptorRequest);
 //各个模块的逻辑
 app.use('/', index);
 app.use('/users',users);
+app.use('/modifyUser',modifyUser)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

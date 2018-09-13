@@ -37,8 +37,9 @@ let interceptorRequest = function(req,res,next){
             })
           }else{
             if(doc){
-              //将user挂载到req上供后续请求使用
-              req.user = username
+              //将user相关信息挂载到req上供后续请求使用
+              req.user = username;
+              req.group = doc.group;
               //继续下一步
               next()
             }else{

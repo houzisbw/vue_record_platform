@@ -4,6 +4,9 @@
     <header-comp></header-comp>
     <div class="main-wrapper">
       <router-view></router-view>
+      <!--补丁区域-->
+      <div class="padding-comp">
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +36,9 @@
     .main-wrapper{
       margin: 24px 24px 0 24px;
       box-sizing: border-box;
+      .padding-comp{
+        height:100px;
+      }
     }
   }
 </style>

@@ -22,7 +22,7 @@ axios.interceptors.response.use(
       })
     }
     //后端非正确状态码处理,这里先判断status存在，因为图床网站返回无status
-    else if(status && status !== 1){
+    else if(status && status !== 1 && config.backEndErrorCode[status.toString()]){
       Message.error({
         message:config.backEndErrorCode[status.toString()]
       })

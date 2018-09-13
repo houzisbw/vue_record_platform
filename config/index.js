@@ -23,6 +23,9 @@ module.exports = {
       '/users/*':{
         target:'http://localhost:6000'
       },
+      '/modifyUser/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings
