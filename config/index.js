@@ -26,6 +26,12 @@ module.exports = {
       '/modifyUser/*':{
         target:'http://localhost:6000'
       },
+      '/modifyWorkshop/*':{
+        target:'http://localhost:6000'
+      },
+      '/modifyRecordTypes/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

@@ -19,6 +19,10 @@ module.exports =  {
     //用户名或密码错误
     CODE_LOGIN_INCORRECT:0,
     //用户名已存在
-    CODE_USERNAME_EXIST:3
+    CODE_USERNAME_EXIST:3,
+    //车间名已存在
+    CODE_WORKSHOP_EXIST:4,
+    //记录名已存在
+    CODE_RECORDTYPE_EXIST:5
   }
 }

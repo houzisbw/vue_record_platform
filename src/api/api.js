@@ -44,5 +44,15 @@ export default {
   /* 添加新用户 */
   addUser:'/modifyUser/addUser',
   /* 删除用户 */
-  deleteUser:'/modifyUser/deleteUser'
+  deleteUser:'/modifyUser/deleteUser',
+
+  //添加/删除车间相关api
+  fetchWorkshopList:'/modifyWorkshop/getWorkshopList',
+  addWorkshop:'/modifyWorkshop/addWorkshop',
+  deleteWorkshop:'/modifyWorkshop/deleteWorkshop',
+
+  //添加/删除记录类型相关api
+  fetchRecordTypesList:'/modifyRecordTypes/getRecordTypesList',
+  addRecordType:'/modifyRecordTypes/addRecordType',
+  deleteRecordType:'/modifyRecordTypes/deleteRecordType'
 }

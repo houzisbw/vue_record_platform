@@ -13,6 +13,8 @@ var helmet = require('helmet');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var modifyUser = require('./routes/modifyUser')
+var workshop = require('./routes/workshop')
+var recordType = require('./routes/record_types')
 
 //util
 var util = require('./utils');
@@ -68,7 +70,9 @@ app.use(interceptorRequest);
 //各个模块的逻辑
 app.use('/', index);
 app.use('/users',users);
-app.use('/modifyUser',modifyUser)
+app.use('/modifyUser',modifyUser);
+app.use('/modifyWorkshop',workshop);
+app.use('/modifyRecordTypes',recordType)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

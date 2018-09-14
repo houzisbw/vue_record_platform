@@ -145,16 +145,16 @@
                 subMenuTitle:'本组名称'
               },
               {
-                index:'2-3',
+                index:'/add_workshop',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
-                subMenuTitle:'车间名字'
+                subMenuTitle:'添加车间'
               },
               {
-                index:'2-4',
+                index:'/add_recordtype',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
-                subMenuTitle:'记录类型'
+                subMenuTitle:'添加记录类型'
               },
             ]
           },

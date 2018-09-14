@@ -11,6 +11,8 @@ import Announcement from './../pages/Announcement/Announcement.vue'
 import ModifyAnnouncement from './../pages/Announcement/ModifyAnnouncement.vue'
 import GroupSetting from './../pages/groupSetting/GroupSetting.vue'
 import ModifyUser from './../pages/ModifyUser/ModifyUser.vue'
+import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
+import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
 
 import config from './../config/config'
 //用户权限
@@ -115,7 +117,27 @@ export default new Router({
             //超管可以访问
             role:[userAuth.SUPER_ADMIN]
           },
-        }
+        },
+        //添加车间
+        {
+          path:'add_workshop',
+          name:'AddWorkShop',
+          component:AddWorkShop,
+          meta:{
+            //超管可以访问
+            role:[userAuth.SUPER_ADMIN]
+          },
+        },
+        //添加记录类型
+        {
+          path:'add_recordtype',
+          name:'AddRecordType',
+          component:AddRecordType,
+          meta:{
+            //超管可以访问
+            role:[userAuth.SUPER_ADMIN]
+          },
+        },
       ]
     },
     //登录页面,单独的页面
