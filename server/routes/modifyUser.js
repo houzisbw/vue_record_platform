@@ -120,4 +120,60 @@ router.post('/modifyUserInfo',function(req,res){
   })
 })
 
+//添加新用户
+router.post('/addUser',function(req,res){
+  let password = req.body.password,
+      username = req.body.username,
+      auth = req.body.auth;
+  let group = req.group;
+  //判断新用户的名字是否重复
+  User.findOne({username:username},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      if(doc){
+        res.json({
+          status:returnedCodes.CODE_USERNAME_EXIST
+        })
+      }else{
+        let newUser = new User({
+          username:username,
+          password:password,
+          profileImgUrl:'',
+          //昵称
+          nickname:'',
+          //签名
+          signature:'',
+          //权限
+          auth:auth,
+          //组别
+          group:group||''
+        });
+        newUser.save();
+        res.json({
+          status:returnedCodes.CODE_SUCCESS
+        })
+      }
+    }
+  })
+})
+
+//删除用户
+router.post('/deleteUser',function(req,res){
+  let username = req.body.username;
+  User.findOneAndRemove({username:username},function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+})
+
 module.exports = router

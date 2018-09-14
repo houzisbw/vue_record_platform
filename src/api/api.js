@@ -40,5 +40,9 @@ export default {
   /* 获取用户权限列表 */
   fetchUserAuthList:'/modifyUser/fetchUserAuthList',
   /* 修改用户信息 */
-  modifyUserInfo:'/modifyUser/modifyUserInfo'
+  modifyUserInfo:'/modifyUser/modifyUserInfo',
+  /* 添加新用户 */
+  addUser:'/modifyUser/addUser',
+  /* 删除用户 */
+  deleteUser:'/modifyUser/deleteUser'
 }
