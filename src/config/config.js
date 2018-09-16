@@ -40,6 +40,8 @@ var config = {
     '1':'二级管理员',
     '0':'普通用户'
   },
+  //用户权限数组
+  authList:['0','1','2'],
   //用户默认头像
   defaultUserAvatarUrl:require('./../assets/images/icon/avatar_default_big.png'),
 }

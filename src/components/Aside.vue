@@ -108,16 +108,16 @@
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-              	index:'1-1',
-                iconName:'',
-                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
-                subMenuTitle:'查询记录'
-              },
-              {
-                index:'1-2',
+              	index:'/search_record',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
-                subMenuTitle:'修改记录'
+                subMenuTitle:'查询/修改记录'
+              },
+              {
+                index:'/search_record',
+                iconName:'',
+                role:[auth.ORDINARY_USER,auth.ADMIN],
+                subMenuTitle:'查询记录'
               },
               {
                 index:'1-3',
@@ -194,6 +194,19 @@
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
                 subMenuTitle:'公告内容'
+              }
+            ]
+          },
+          {
+            menuName:'留言板',
+            iconName:'el-icon-edit',
+            role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+            subMenuNameList:[
+              {
+                index:'5-1',
+                iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+                subMenuTitle:'留言板'
               }
             ]
           },

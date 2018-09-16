@@ -32,6 +32,9 @@ module.exports = {
       '/modifyRecordTypes/*':{
         target:'http://localhost:6000'
       },
+      '/searchRecord/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

@@ -54,5 +54,9 @@ export default {
   //添加/删除记录类型相关api
   fetchRecordTypesList:'/modifyRecordTypes/getRecordTypesList',
   addRecordType:'/modifyRecordTypes/addRecordType',
-  deleteRecordType:'/modifyRecordTypes/deleteRecordType'
+  deleteRecordType:'/modifyRecordTypes/deleteRecordType',
+
+  //记录查询页面相关api
+  fetchDropdownInfo:'/searchRecord/getDropdownInfo',
+  searchRecords:'/searchRecord/searchRecords'
 }

@@ -97,6 +97,9 @@
     box-sizing: border-box;
     padding-right:20px;
     box-shadow:0 1px 4px rgba(0,21,41,.08);
+    z-index:1000;
+    /*注意必须不是static定位z-index才起作用*/
+    position: relative;
     .el-dropdown-icon{
       width:20px;
       height:20px;

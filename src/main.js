@@ -11,6 +11,7 @@ import './assets/iconfont/alibaba/iconfont.css'
 import axios from './api/http'
 import store from './store/index'
 import api from './api/api'
+import directives from './directives/directives'
 
 //element的组件都在这里引入
 import {
@@ -38,6 +39,8 @@ import {
   Pagination,
   Select,
   Option,
+  Breadcrumb,
+  BreadcrumbItem,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -63,6 +66,8 @@ Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
 //特殊处理
 Vue.prototype.$message = Message
 
@@ -120,6 +125,10 @@ router.beforeEach((to,from,next)=>{
 })
 // 将axios挂载到prototype上，在组件中可以直接使用this.axios访问,不用再import了
 Vue.prototype.axios = axios;
+//挂载指令
+Vue.directive('auth',directives.auth);
+
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

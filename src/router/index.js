@@ -13,6 +13,7 @@ import GroupSetting from './../pages/groupSetting/GroupSetting.vue'
 import ModifyUser from './../pages/ModifyUser/ModifyUser.vue'
 import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
 import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
+import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
 
 import config from './../config/config'
 //用户权限
@@ -136,6 +137,16 @@ export default new Router({
           meta:{
             //超管可以访问
             role:[userAuth.SUPER_ADMIN]
+          },
+        },
+        //管理员查询记录页面
+        {
+          path:'search_record',
+          name:'SearchRecord',
+          component:SearchRecord,
+          meta:{
+            //都可以访问
+            role:authAll
           },
         },
       ]
