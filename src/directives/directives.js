@@ -11,10 +11,12 @@ let directives = {
       //必须包在nextTick中，否则parentNode为null
       vnode.context.$nextTick(function(){
         if(!authList.includes(userAuth)){
+          console.log('here')
           el.parentNode.removeChild(el);
         }
       })
-    }
+    },
+
   }
 }
 

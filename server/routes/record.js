@@ -65,6 +65,9 @@ router.get('/getDropdownInfo',function(req,res){
 router.post('/searchRecords',function(req,res){
   let group = req.group;
   let data = req.body.data;
+  let pageSize = data.pageSize;
+  let currentPage = data.currentPage;
+
   //查询条件
   let condition = {group:group};
   let dateStr = '';
@@ -84,7 +87,7 @@ router.post('/searchRecords',function(req,res){
   }
   //是否只查询未确认
   if(data.isConfirm==='1'){
-    condition.isConfirm = '1'
+    condition.isConfirm = '0'
   }
 
   //查询
@@ -95,8 +98,7 @@ router.post('/searchRecords',function(req,res){
       })
     }else{
       //这里要分页查询
-      //todo
-      Record.find(condition,function(err,docs){
+      Record.find(condition).sort({date:1}).skip((currentPage-1)*pageSize).limit(pageSize).exec(function(err,docs){
         if(err){
           res.json({
             status:returnedCodes.CODE_ERROR,

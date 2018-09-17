@@ -86,27 +86,28 @@
         <i class="iconfont icon-detail title-icon"></i>
         <span class="title-text">错误记录详情</span>
       </div>
-      <div class="content">
+      <div class="content" v-loading="isSearching">
         <div v-if="isRecordListEmpty" class="empty-text">
           <i class="iconfont icon-frown empty-icon"></i>
           <span>暂无数据</span>
         </div>
         <!--表格区域-->
-        <div v-else class="record-table">
+        <div v-else class="record-table clearfix">
           <el-table
             :data="recordList"
             border
+            :row-class-name="tableRowClassName"
             style="width: 100%">
             <el-table-column
               align="center"
-              width="150"
+              width="100"
               prop="username"
               label="姓名"
             >
             </el-table-column>
             <el-table-column
               align="center"
-              width="150"
+              width="100"
               prop="date"
               label="日期"
             >
@@ -134,7 +135,7 @@
               width="100"
               label="图片">
               <template slot-scope="scope">
-                <el-button type="primary" size="small">
+                <el-button type="primary" size="mini">
                   查看
                 </el-button>
               </template>
@@ -149,8 +150,38 @@
                 </span>
               </template>
             </el-table-column>
+            <!--操作栏(只有超级管理员显示)-->
+            <el-table-column
+              align="center"
+              width="150"
+              v-if="userAuth === '2'"
+              label="操作">
+              <template slot-scope="scope">
+                <el-button type="danger" size="mini">
+                  删除
+                </el-button>
+                <el-button type="primary" size="mini">
+                  修改
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
+          <!--分页区域-->
+          <div class="pagination-wrapper">
+            <el-pagination
+              background
+              :disabled="isSearching"
+              @current-change="handleCurrentChange"
+              layout="total,prev, pager, next"
+              :total="totalCount">
+            </el-pagination>
+          </div>
         </div>
+        <!--大图组件-->
+        <album :show="albumShow"
+               img-src="https://i.loli.net/2018/01/15/5a5c921d38264.jpg"
+               @close="handleAlbumClose">
+        </album>
       </div>
     </div>
   </div>
@@ -159,17 +190,42 @@
 <script>
   import config from './../../config/config'
   import api from './../../api/api'
+  import Album from './../../components/Album.vue'
 	export default {
     name: 'SearchRecord',
+    components:{
+      Album
+    },
     mounted:function(){
       this.getDropdownInfo()
     },
     computed:{
     	isRecordListEmpty:function(){
     		return this.recordList.length===0
+      },
+      userAuth:function(){
+    		return this.$store.getters.getUserAuth
       }
     },
     methods:{
+    	//处理大图照片关闭
+      handleAlbumClose: function(){
+        this.albumShow = false
+      },
+    	//重要行高亮
+      tableRowClassName: function({row,rowIndex}){
+        if(row.isImportant === '1'){
+        	return 'warning-row'
+        }
+        return ''
+      },
+    	//分页页码改变
+      handleCurrentChange: function(curPage){
+        //防止点击相同页
+        if(this.currentPage === curPage)return
+        this.currentPage = curPage;
+        this.searchRecords()
+      },
     	//搜索数据
       searchRecords: function(){
       	//首先判断权限
@@ -200,12 +256,15 @@
             yearValue:this.yearValue,
             monthValue:this.monthValue,
             staffValue:this.staffValue,
-            isConfirm:this.onlyUnconfirmed?'1':'0'
+            isConfirm:this.onlyUnconfirmed?'1':'0',
+            currentPage:this.currentPage,
+            pageSize:this.pageSize
           };
           this.isSearching = true;
           this.axios.post(api.searchRecords,{data:data}).then((resp)=>{
           	if(resp.data.status === 1){
           		this.recordList = resp.data.recordArray;
+          		this.totalCount = resp.data.totalCount;
           		if(resp.data.recordArray.length===0){
           			this.$message({
                   type:'warning',
@@ -265,6 +324,10 @@
     },
 		data () {
     	return {
+    		//是否显示大图照片
+        albumShow:true,
+
+
     		//是否正在搜索
         isSearching:false,
 				//是否只看未确认
@@ -279,7 +342,14 @@
         staffOptions:[],
         staffValue:'',
         //记录数组
-        recordList:[]
+        recordList:[],
+        /* 分页相关 */
+        //当前页数
+        currentPage:1,
+        //每页条目数
+        pageSize:10,
+        //总条目数量(后台传递)
+        totalNum:0,
 			}
 		}
 	}
@@ -351,6 +421,13 @@
           .color-blue{
             color:#409EFF;
           }
+          .pagination-wrapper{
+            float:right;
+            overflow: hidden;
+            margin-top: 40px;
+            position: relative;
+            right:-10px;
+          }
         }
         .empty-text{
           color:rgba(0,0,0,.25);
@@ -382,9 +459,20 @@
       margin-left: 5px;
     }
   }
+  .record-table .el-table td{
+    padding:6px 0;
+  }
+  .record-table .el-table .warning-row{
+    color: #dd5b57;
+  }
   .search-dropdown{
     padding-left:20px;
     padding-right:20px;
+  }
+  .record-content{
+    .el-button+.el-button{
+      margin-left: 5px;
+    }
   }
   .record-content .record-table .el-table__header tr th{
     background-color: #fafafa!important;

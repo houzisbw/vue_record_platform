@@ -41,6 +41,7 @@ import {
   Option,
   Breadcrumb,
   BreadcrumbItem,
+  Tooltip,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -68,6 +69,7 @@ Vue.use(Select)
 Vue.use(Option)
 Vue.use(Breadcrumb)
 Vue.use(BreadcrumbItem)
+Vue.use(Tooltip)
 //特殊处理
 Vue.prototype.$message = Message
 
