@@ -115,4 +115,20 @@ router.post('/searchRecords',function(req,res){
   })
 })
 
+//删除记录
+router.post('/removeRecords',function(req,res){
+  let data = req.body.data;
+  Record.findOneAndRemove(data,function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+})
+
 module.exports = router

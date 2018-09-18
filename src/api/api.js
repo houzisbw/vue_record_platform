@@ -58,5 +58,6 @@ export default {
 
   //记录查询页面相关api
   fetchDropdownInfo:'/searchRecord/getDropdownInfo',
-  searchRecords:'/searchRecord/searchRecords'
+  searchRecords:'/searchRecord/searchRecords',
+  removeRecords:'/searchRecord/removeRecords'
 }

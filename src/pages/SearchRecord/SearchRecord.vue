@@ -115,13 +115,13 @@
             <el-table-column
               align="center"
               prop="workshop"
-              width="150"
+              width="80"
               label="车间">
             </el-table-column>
             <el-table-column
               align="center"
               prop="type"
-              width="180"
+              width="150"
               label="类型">
             </el-table-column>
             <el-table-column
@@ -135,9 +135,14 @@
               width="100"
               label="图片">
               <template slot-scope="scope">
-                <el-button type="primary" size="mini">
-                  查看
-                </el-button>
+                <span v-if="scope.row.imageUrl">
+                  <el-button type="primary" size="mini" @click="handleImgShowClick(scope.row.imageUrl)">
+                    查看
+                  </el-button>
+                </span>
+                <span v-else>
+                    无
+                </span>
               </template>
             </el-table-column>
             <el-table-column
@@ -157,7 +162,7 @@
               v-if="userAuth === '2'"
               label="操作">
               <template slot-scope="scope">
-                <el-button type="danger" size="mini">
+                <el-button type="danger" size="mini" @click="removeRecord(scope.row)">
                   删除
                 </el-button>
                 <el-button type="primary" size="mini">
@@ -178,11 +183,30 @@
           </div>
         </div>
         <!--大图组件-->
-        <album :show="albumShow"
-               img-src="https://i.loli.net/2018/01/15/5a5c921d38264.jpg"
+        <album v-if="albumShow"
+               :img-src="albumImgUrl"
                @close="handleAlbumClose">
         </album>
       </div>
+      <!--删除按钮的对话框-->
+      <el-dialog
+        title="删除该记录"
+        :visible.sync="isDeleteDialogShow"
+        top="0"
+        :close-on-click-modal="false"
+        custom-class="user-edit-dialog"
+      >
+        <span>确定删除该条记录({{this.recordDataToRemove.username}})?</span>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="isDeleteDialogShow = false" size="mini">取 消</el-button>
+          <el-button type="primary"
+                     :loading="isModifying"
+                     @click="confirmDeleteRecord"
+                     size="mini">
+            确 定
+          </el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -208,6 +232,32 @@
       }
     },
     methods:{
+    	//确认删除
+      confirmDeleteRecord: function(){
+      	this.isModifying = true;
+        this.axios.post(api.removeRecords,{data:this.recordDataToRemove}).then((resp)=>{
+          if(resp.data.status === 1){
+            this.$message({
+              type:'success',
+              message:'记录删除成功!'
+            })
+          }
+          this.isDeleteDialogShow = false;
+          this.isModifying = false;
+          this.searchRecords();
+        })
+      },
+    	//点击删除按钮
+      removeRecord: function(rowData){
+      	this.recordDataToRemove = rowData;
+      	this.isDeleteDialogShow = true;
+      },
+    	//查看图片
+      handleImgShowClick: function(imageUrl){
+      	//打开大图组件
+        this.albumImgUrl = imageUrl;
+        this.albumShow = true;
+      },
     	//处理大图照片关闭
       handleAlbumClose: function(){
         this.albumShow = false
@@ -276,6 +326,11 @@
           })
         }else{
           //普通用户
+          //todo
+
+
+
+
 
         }
       },
@@ -324,9 +379,17 @@
     },
 		data () {
     	return {
-    		//是否显示大图照片
-        albumShow:true,
+    		//是否正在删除
+        isModifying:false,
+    		//是否显示删除对话框
+        isDeleteDialogShow:false,
+        //要删除的数据
+        recordDataToRemove:{},
 
+    		//是否显示大图照片
+        albumShow:false,
+        //大图组件的图片url
+        albumImgUrl:'',
 
     		//是否正在搜索
         isSearching:false,
@@ -476,5 +539,34 @@
   }
   .record-content .record-table .el-table__header tr th{
     background-color: #fafafa!important;
+  }
+  //对话框自定义类名
+  .user-edit-dialog{
+    width:500px;
+    position: relative;
+    top:50%;
+    transform: translateY(-50%);
+    .el-dialog__header{
+      border-bottom:1px solid #e8e8e8;
+      padding-bottom: 10px;
+      padding-top:10px;
+      .el-dialog__title{
+        font-size: 16px;
+      }
+      .el-dialog__headerbtn{
+        top:15px;
+      }
+    }
+    .el-dialog__footer{
+      border-top:1px solid #e8e8e8;
+      padding-bottom:10px;
+    }
+    .user-edit-dialog-form-wrapper{
+      width:70%;
+      margin: 0 auto;
+    }
+    .el-select--small{
+      width: 140px!important;
+    }
   }
 </style>

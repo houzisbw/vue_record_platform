@@ -1,6 +1,6 @@
 <!--照片大图组件(放大镜原理:一大一小2张图，大图用transform:scale放大，然后计算大小图的比例来修正left,top)-->
 <template>
-  <div class="overlay" v-if="show">
+  <div class="overlay">
     <div class="img-wrapper" ref="imgWrapper">
       <img :src="imgSrc"
            ref="img"
@@ -26,11 +26,12 @@
     </div>
     <!--下载按钮-->
     <div class="download-btn" v-if="isImgLoaded" >
-      <a @click="downloadImg" ref="download" >
+      <span @click="downloadImg" ref="download" >
         <el-tooltip  effect="dark" content="下载图片" placement="top">
-          <i class="iconfont icon-download" style="font-size:60px;"></i>
+          <!--i标签设置outline为none防止出现蓝色边框-->
+          <i class="iconfont icon-download" style="font-size:60px;border:none;outline:none;"></i>
         </el-tooltip>
-      </a>
+      </span>
     </div>
   </div>
 </template>
@@ -56,13 +57,14 @@
         default:false
       }
     },
+    mounted:function(){
+      //console.log('mounted')
+    },
     methods:{
 			//下载图片,注意添加节流函数,1s内只能下载一次
-      //只解决了非ie的下载
-      //todo
       downloadImg: utils.throttle(function(e){
         e.preventDefault();
-        const imgUrl = 'https://i.loli.net/2018/01/15/5a5c921d38264.jpg';
+        const imgUrl = this.imgSrc;
         var image = new Image();
         // 解决跨域 Canvas 污染问题
         image.setAttribute("crossOrigin", "anonymous");
@@ -74,11 +76,19 @@
           var context = canvas.getContext("2d");
           context.drawImage(image, 0, 0, image.width/4, image.height/4);
           var url = canvas.toDataURL("image/png"); //得到图片的base64编码数据
-          var a = document.createElement("a"); // 生成一个a元素
-          var event = new MouseEvent("click"); // 创建一个单击事件
-          a.download = "photo.png"; // 设置图片名称
-          a.href = url; // 将生成的URL设置为a.href属性
-          a.dispatchEvent(event); // 触发a的单击事件
+          //如果是ie(ie不支持a标签的download属性)
+          if(utils.isIE()){
+            //生成blob
+            var blob = utils.dataURLtoBlob(url);
+            //调用ie的方法进行下载
+            window.navigator.msSaveBlob(blob,'photo.png')
+          }else{
+            var a = document.createElement("a"); // 生成一个a元素
+            var event = new MouseEvent("click"); // 创建一个单击事件
+            a.download = "photo.png"; // 设置图片名称
+            a.href = url; // 将生成的URL设置为a.href属性
+            a.dispatchEvent(event); // 触发a的单击事件
+          }
         };
         image.src = imgUrl;
       },1000),
@@ -102,8 +112,8 @@
       //处理鼠标移动
       handleMouseMove: function(e){
       	//获取offsetX和offsetY，注意不能直接用e.offsetX,兼容性问题
-      	let offsetX = utils.getOffsetX(e)
-        let offsetY = utils.getOffsetY(e)
+      	let offsetX = utils.getOffsetX(e);
+        let offsetY = utils.getOffsetY(e);
         //获取图片左侧距离外层wrapper左侧的距离
         let imgWrapperClientWidth = this.$refs.imgWrapper.clientWidth;
       	let imgClientWidth = this.$refs.img.clientWidth;
@@ -215,7 +225,11 @@
     cursor:pointer;
     a{
       outline:none;
+      &:focus{
+        outline:none;
+      }
     }
+
   }
 }
 </style>
