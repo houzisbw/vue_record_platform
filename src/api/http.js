@@ -7,7 +7,7 @@ import router from './../router/index'
 import config from './../config/config'
 import { Message } from 'element-ui'
 // axios 配置
-axios.defaults.timeout = 5000;
+axios.defaults.timeout = 10000;
 //带上cookie(axios默认不带cookie)
 axios.defaults.withCredentials=true;
 
@@ -27,13 +27,20 @@ axios.interceptors.response.use(
         message:config.backEndErrorCode[status.toString()]
       })
     }
+
     return response
   },
   error => {
-    //统一错误处理
-    Message.error({
-      message:'错误码:'+(config.httpCode[error.response.status]||'')
-    })
+    if(error.response){
+      //统一错误处理
+      Message.error({
+        message:'错误码:'+(config.httpCode[error.response.status]||'')
+      })
+    }else{
+      Message.error({
+        message:'未知错误!'
+      })
+    }
     return Promise.reject(error)
   },
 )

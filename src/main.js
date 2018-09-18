@@ -42,6 +42,8 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Tooltip,
+  DatePicker,
+  Switch,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -70,6 +72,8 @@ Vue.use(Option)
 Vue.use(Breadcrumb)
 Vue.use(BreadcrumbItem)
 Vue.use(Tooltip)
+Vue.use(DatePicker)
+Vue.use(Switch)
 //特殊处理
 Vue.prototype.$message = Message
 

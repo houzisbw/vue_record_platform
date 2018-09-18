@@ -136,7 +136,7 @@
               label="图片">
               <template slot-scope="scope">
                 <span v-if="scope.row.imageUrl">
-                  <el-button type="primary" size="mini" @click="handleImgShowClick(scope.row.imageUrl)">
+                  <el-button  size="mini" @click="handleImgShowClick(scope.row.imageUrl)">
                     查看
                   </el-button>
                 </span>
@@ -162,10 +162,14 @@
               v-if="userAuth === '2'"
               label="操作">
               <template slot-scope="scope">
-                <el-button type="danger" size="mini" @click="removeRecord(scope.row)">
+                <el-button type="danger"
+                           size="mini"
+                           @click="removeRecord(scope.row)">
                   删除
                 </el-button>
-                <el-button type="primary" size="mini">
+                <el-button type="primary"
+                           @click="modifyRecord(scope.row)"
+                           size="mini">
                   修改
                 </el-button>
               </template>
@@ -176,6 +180,7 @@
             <el-pagination
               background
               :disabled="isSearching"
+              :current-page="currentPage"
               @current-change="handleCurrentChange"
               layout="total,prev, pager, next"
               :total="totalCount">
@@ -207,6 +212,100 @@
           </el-button>
         </span>
       </el-dialog>
+      <!--修改记录的对话框-->
+      <el-dialog
+        title="修改记录"
+        :visible.sync="isModifyDialogShow"
+        top="0"
+        @close="cancelModifyRecord"
+        :close-on-click-modal="false"
+        custom-class="user-edit-dialog"
+      >
+        <!--表单内容区域-->
+        <div class="user-edit-dialog-form-wrapper" v-loading="isFormLoading">
+          <el-form label-position="right"
+                   ref="modifyRecordForm"
+                   :rules="modifyRecordRules"
+                   label-width="80px"
+                   :model="modifyRecordData">
+            <el-form-item label="用户名" >
+              <el-select v-model="modifyRecordData.username"
+                         size="small"
+                         placeholder="请选择">
+                <el-option
+                  class="user-edit-dialog-select"
+                  v-for="item in usernameList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="记录日期" >
+              <el-date-picker
+                v-model="modifyRecordData.date"
+                type="date"
+                size="small"
+                :editable="false"
+                :clearable="false"
+                placeholder="选择日期">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="车间" >
+              <el-select v-model="modifyRecordData.workshop"
+                         size="small"
+                         placeholder="请选择">
+                <el-option
+                  class="user-edit-dialog-select"
+                  v-for="item in workshopList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="类型" >
+              <el-select v-model="modifyRecordData.type"
+                         size="small"
+                         placeholder="请选择">
+                <el-option
+                  class="user-edit-dialog-select"
+                  v-for="item in typeList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="错误说明" >
+              <el-input v-model="modifyRecordData.error" size="small">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="是否确认" >
+              <el-switch
+                v-model="modifyRecordData.isConfirm"
+                active-text="已确认"
+                inactive-text="未确认">
+              </el-switch>
+            </el-form-item>
+            <el-form-item label="图片" class="no-padding-top">
+              <image-upload v-model="modifyRecordData.imageUrl"
+                            v-if="isModifyDialogShow"
+              >
+              </image-upload>
+            </el-form-item>
+          </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer" v-loading="isFormLoading">
+          <el-button  size="mini">取 消</el-button>
+          <el-button type="primary"
+                     :loading="isModifying"
+                     @click="handleModifyRecordSubmit"
+                     size="mini">
+            确 定
+          </el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -215,10 +314,12 @@
   import config from './../../config/config'
   import api from './../../api/api'
   import Album from './../../components/Album.vue'
+  import ImageUpload from './../../components/ImageUpload.vue'
 	export default {
     name: 'SearchRecord',
     components:{
-      Album
+      Album,
+      ImageUpload
     },
     mounted:function(){
       this.getDropdownInfo()
@@ -232,6 +333,70 @@
       }
     },
     methods:{
+    	//提交修改好的记录
+      handleModifyRecordSubmit: function(){
+      	console.log(this.modifyRecordData)
+      },
+    	//关闭修改对话框
+      cancelModifyRecord: function(){
+        this.isModifyDialogShow = false;
+      },
+    	//修改按钮点击
+      modifyRecord: function(rowData){
+        this.isModifyDialogShow = true;
+        //加载相关数据(姓名列表，车间列表，错误类型列表)
+        this.isFormLoading = true;
+        this.axios.get(api.fetchModifyDialogData).then((resp)=>{
+        	if(resp.data.status === 1){
+        		this.initModifyDialogSelect(resp.data.result);
+            this.initDefaultDataInModifyDialog(rowData);
+          }
+          this.isFormLoading = false;
+        })
+      },
+      //初始化修改对话框里的默认数据
+      initDefaultDataInModifyDialog: function(rowData){
+      	let obj = {
+            workshop:rowData.workshop,
+            username:rowData.username,
+            type:rowData.type,
+            date:rowData.date,
+            isConfirm:rowData.isConfirm==='1',
+            imageUrl:rowData.imageUrl,
+            error:rowData.error,
+        };
+      	this.modifyRecordData = obj;
+      },
+      //初始化修改对话框的下拉列表
+      initModifyDialogSelect: function(data){
+        //初始化人员列表
+        let userList = [];
+        data[0].forEach((item)=>{
+          userList.push({
+            label:item,
+            value:item
+          })
+        })
+        //初始化车间列表
+        let workshopList = [];
+        data[1].forEach((item)=>{
+          workshopList.push({
+            label:item,
+            value:item
+          })
+        })
+        //初始化错误类型列表
+        let typeList = [];
+        data[2].forEach((item)=>{
+          typeList.push({
+            label:item,
+            value:item
+          })
+        })
+        this.usernameList = userList;
+        this.workshopList = workshopList;
+        this.typeList = typeList;
+      },
     	//确认删除
       confirmDeleteRecord: function(){
       	this.isModifying = true;
@@ -244,6 +409,8 @@
           }
           this.isDeleteDialogShow = false;
           this.isModifying = false;
+          //保证从第一页开始搜
+          this.currentPage = 1;
           this.searchRecords();
         })
       },
@@ -274,7 +441,33 @@
         //防止点击相同页
         if(this.currentPage === curPage)return
         this.currentPage = curPage;
-        this.searchRecords()
+        this.search()
+      },
+      //发送搜索请求
+      search: function(){
+        //发送到后台的data
+        let data = {
+          yearValue:this.realYearValue,
+          monthValue:this.realMonthValue,
+          staffValue:this.realStaffValue,
+          isConfirm:this.onlyUnconfirmed?'1':'0',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize
+        };
+        this.isSearching = true;
+        this.axios.post(api.searchRecords,{data:data}).then((resp)=>{
+          if(resp.data.status === 1){
+            this.recordList = resp.data.recordArray;
+            this.totalCount = resp.data.totalCount;
+            if(resp.data.recordArray.length===0){
+              this.$message({
+                type:'warning',
+                message:'没有搜索到数据~'
+              })
+            }
+          }
+          this.isSearching = false
+        })
       },
     	//搜索数据
       searchRecords: function(){
@@ -301,29 +494,11 @@
               return
             }
           }
-          //发送到后台的data
-          let data = {
-            yearValue:this.yearValue,
-            monthValue:this.monthValue,
-            staffValue:this.staffValue,
-            isConfirm:this.onlyUnconfirmed?'1':'0',
-            currentPage:this.currentPage,
-            pageSize:this.pageSize
-          };
-          this.isSearching = true;
-          this.axios.post(api.searchRecords,{data:data}).then((resp)=>{
-          	if(resp.data.status === 1){
-          		this.recordList = resp.data.recordArray;
-          		this.totalCount = resp.data.totalCount;
-          		if(resp.data.recordArray.length===0){
-          			this.$message({
-                  type:'warning',
-                  message:'没有搜索到数据~'
-                })
-              }
-            }
-            this.isSearching = false
-          })
+          //更新值
+          this.realYearValue = this.yearValue;
+          this.realMonthValue = this.monthValue;
+          this.realStaffValue = this.staffValue;
+          this.search();
         }else{
           //普通用户
           //todo
@@ -339,6 +514,10 @@
       	this.yearValue = '';
         this.monthValue = '';
         this.staffValue = '';
+
+        this.realYearValue = '';
+        this.realMonthValue = '';
+        this.realStaffValue = '';
       },
     	//获取记录年份，记录人员列表
       getDropdownInfo:function(){
@@ -379,6 +558,27 @@
     },
 		data () {
     	return {
+    		/* 记录修改相关数据 */
+    		isModifyDialogShow:false,
+        modifyRecordData:{
+    			workshop:'',
+          username:'',
+          type:'',
+          date:'',
+          //确认字段需要转为字符串
+          isConfirm:'',
+          imageUrl:'',
+          error:'',
+          date:''
+        },
+        modifyRecordRules:{},
+        //修改对话框是否在加载数据
+        isFormLoading:false,
+        //下拉用户姓名列表
+        usernameList:[],
+        workshopList:[],
+        typeList:[],
+
     		//是否正在删除
         isModifying:false,
     		//是否显示删除对话框
@@ -404,6 +604,12 @@
         //记录人员相关
         staffOptions:[],
         staffValue:'',
+
+        /* 真正用于搜索的年月人员 */
+        realYearValue:'',
+        realMonthValue:'',
+        realStaffValue:'',
+
         //记录数组
         recordList:[],
         /* 分页相关 */
@@ -539,6 +745,12 @@
   }
   .record-content .record-table .el-table__header tr th{
     background-color: #fafafa!important;
+  }
+  .el-form-item{
+    margin-bottom: 10px;
+  }
+  .no-padding-top .el-form-item__label{
+    line-height: normal!important;
   }
   //对话框自定义类名
   .user-edit-dialog{

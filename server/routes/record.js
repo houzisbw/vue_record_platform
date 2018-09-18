@@ -5,6 +5,8 @@ var express = require('express');
 var router = express.Router();
 var Record = require('./../model/record')
 var User = require('./../model/user')
+var Workshop = require('./../model/workshop')
+var ErrorType = require('./../model/record_type')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
 
@@ -130,5 +132,63 @@ router.post('/removeRecords',function(req,res){
     }
   })
 })
+
+//获取记录修改对话框所需的下拉列表数据
+router.get('/fetchModifyDialogData',function(req,res){
+  let group = req.group;
+  //获取该组下普通用户列表
+  let staffPromise = new Promise((resolve,reject)=>{
+    User.find({group:group,auth:'0'},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        let userList = [];
+        docs.forEach((item)=>{
+          userList.push(item.username)
+        })
+        resolve(userList)
+      }
+    })
+  })
+  //获取车间列表
+  let workshopPromise = new Promise((resolve,reject)=>{
+    Workshop.find({group:group},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        let workshopList = [];
+        docs.forEach((item)=>{
+          workshopList.push(item.name)
+        })
+        resolve(workshopList)
+      }
+    })
+  })
+  //获取错误类型
+  let errorTypePromise = new Promise((resolve,reject)=>{
+    ErrorType.find({group:group},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        let typeList = [];
+        docs.forEach((item)=>{
+          typeList.push(item.name)
+        })
+        resolve(typeList)
+      }
+    })
+  })
+
+  Promise.all([staffPromise,workshopPromise,errorTypePromise]).then((result)=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+      result:result
+    })
+  }).catch((err)=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR
+    })
+  })
+});
 
 module.exports = router
