@@ -134,9 +134,9 @@
         //计算大图的位移
         let bigImgLeft = offsetX * ratio;
         let bigImgTop = offsetY * ratio;
-        //注意大图的left和top是负值,这里必须除以2，因为css里设置了scale为0.5，所以移动的left和top也要减少
-        bigImg.style.left = -bigImgLeft/2 + 'px';
-        bigImg.style.top = -bigImgTop/2 + 'px';
+        //注意大图的left和top是负值
+        bigImg.style.left = -bigImgLeft + 'px';
+        bigImg.style.top = -bigImgTop + 'px';
       }
     },
 		data () {
@@ -144,7 +144,7 @@
 				//是否显示放大的小图
         isDetailBoxShow:false,
         //图片是否加载完成
-        isImgLoaded:false
+        isImgLoaded:false,
 			}
 		}
 	}
@@ -179,8 +179,8 @@
       transform: scale(1);
     }
     .detail-img{
-      width:200px;
-      height:200px;
+      width:250px;
+      height:250px;
       background-color: #000;
       position: absolute;
       left:0;
@@ -192,7 +192,7 @@
       z-index:3000;
       .big-img{
         //注意这里scale后必须设置transform-origin变化原点为左上角，否则不行
-        transform: scale(0.5);
+        transform: scale(1);
         transform-origin: 0 0;
         position: absolute;
         left:0;

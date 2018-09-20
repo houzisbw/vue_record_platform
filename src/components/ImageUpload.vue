@@ -1,11 +1,11 @@
 <!--图片上传组件-->
 <template>
   <div class="wrapper">
-    <label for="recordImgInput" >
+    <label for="recordImgInput" class="outer">
       <!--已经有图片时显示修改图片，没有上传时显示添加图片-->
-      <div v-if="value">
+      <div v-if="value" class="outer">
         <div class="img-wrapper"
-             v-show="isImgLoaded"
+             v-show="!isLoading"
              @mouseleave="handleMouseLeave"
              @mouseenter="handleMouseEnter">
           <img :src="value"
@@ -16,11 +16,12 @@
             <span class="overlay-tip-text">点此修改图片</span>
           </div>
         </div>
-        <div class="loading" v-if="!isImgLoaded">
-          <span>加载中...</span>
+        <!--在加载中则显示文本提示-->
+        <div class="loading" v-if="isLoading">
+          <span>上传中...</span>
         </div>
       </div>
-      <div v-else>
+      <div v-else class="outer">
         <div class="add-img">
           <i class="el-icon-plus" style="font-size:22px;"></i>
         </div>
@@ -29,7 +30,7 @@
 
     <!--上传图片的input,隐藏掉-->
     <input type="file"
-           :disabled="isInputDisabled"
+           :disabled="isLoading"
            ref="recordImgInput"
            id="recordImgInput"
            accept="image/*"
@@ -49,29 +50,30 @@
         default:''
       }
     },
-    computed:{
-			//上传input是否禁用
-			isInputDisabled:function(){
-				if(this.value){
-					return !this.isImgLoaded
-        }else{
-					return false
-        }
+    mounted:function(){
+			if(this.value){
+				this.isLoading = true;
       }
     },
 		data () {
 			return {
-				//图片是否加载完成
-        isImgLoaded:false,
+				//图片是否正在加载
+        isLoading:false,
         //是否显示提示
         isShowTip:false,
         //文件大小限制(MB)
         imgSizeLimit:5,
         //图片压缩比例
-        compressRatio:4
+        compressRatio:4,
+        //图片压缩的最小宽高(小于此值不压缩)
+        imgCompressSize:2000
 			}
 		},
     methods:{
+    	//该组件是否在loading状态,父组件调用此方法判断是否可以提交表单
+      isInLoading: function(){
+      	return this.isLoading;
+      },
       handleMouseLeave: function(){
         this.isShowTip= false;
       },
@@ -103,7 +105,9 @@
           return
         }
         //改变状态为加载中
-        this.isImgLoaded = false;
+        this.isLoading = true;
+        //把加载状态传递给父组件
+        this.$emit('loading',true);
         //处理2次点击同一个图片的问题
         e.target.value = '';
         //将图片读取为base64格式
@@ -116,16 +120,18 @@
           let img = new Image();
           img.src = result;
           img.onload = function(){
-            let compressedImgData = self.compressImg(img);
+          	//如果图片的长宽都大于一定值才压缩图片
+            if(img.width>this.imgCompressSize && img.height>this.imgCompressSize){
+                result = self.compressImg(img);
+            }
             //将base64转为blob对象用于上传到服务器
-            let imgBlob = utils.dataURLtoBlob(compressedImgData);
+            let imgBlob = utils.dataURLtoBlob(result);
             //生成formData
             let formData = new FormData();
             formData.append('smfile',imgBlob);
             //上传图片
             self.uploadToThirdSite(formData)
           }
-
         }
       },
       //上传图片
@@ -135,15 +141,18 @@
         this.axios.post('/avatarUpload',formData).then((resp)=>{
           //注意这里有2个data，第一个是axios的data，第二个是图床网站的data属性
           let status = resp.data.code;
-          console.log(status)
           if(status === 'success'){
             let imgUrl = resp.data.data.url;
-            console.log(imgUrl)
+            //将返回的url传递给父组件
+            this.$emit('input',imgUrl);
           }else{
-
+            this.$message({
+              type:'error',
+              message:'图片上传失败!请稍后重试'
+            })
           }
-
-          this.isImgLoaded = true;
+          this.isLoading = false;
+          this.$emit('loading',false)
         })
       },
       //压缩图片
@@ -163,10 +172,8 @@
 			//图片加载完成
       imgOnLoad: function(){
         this.isImgLoaded = true;
+        this.isLoading = false;
       },
-			test: function(){
-				this.$emit('input','https://test/a.png')
-      }
     }
 	}
 </script>
@@ -175,6 +182,12 @@
 <style scoped type="text/less" lang="less">
 @wrapperSize : 150px;
 .wrapper{
+  width:@wrapperSize;
+  height:@wrapperSize;
+  .outer{
+    width:@wrapperSize;
+    height:@wrapperSize;
+  }
   .img-wrapper{
     width:@wrapperSize;
     height:@wrapperSize;

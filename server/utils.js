@@ -40,6 +40,7 @@ let interceptorRequest = function(req,res,next){
               //将user相关信息挂载到req上供后续请求使用
               req.user = username;
               req.group = doc.group;
+              req.auth = doc.auth;
               //继续下一步
               next()
             }else{

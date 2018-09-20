@@ -60,5 +60,12 @@ export default {
   fetchDropdownInfo:'/searchRecord/getDropdownInfo',
   searchRecords:'/searchRecord/searchRecords',
   removeRecords:'/searchRecord/removeRecords',
-  fetchModifyDialogData:'/searchRecord/fetchModifyDialogData'
+  fetchModifyDialogData:'/searchRecord/fetchModifyDialogData',
+  modifyRecords:'/searchRecord/modifyRecords',
+  currentMonthRecordsCount:'/searchRecord/getRecordsCount',
+  ordinaryUserConfirm:'/searchRecord/ordinaryUserConfirm',
+
+  //添加记录页面api
+  addRecordData:'/searchRecord/addNewRecord'
+
 }

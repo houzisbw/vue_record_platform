@@ -35,6 +35,9 @@ module.exports = {
       '/searchRecord/*':{
         target:'http://localhost:6000'
       },
+      '/addRecord/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

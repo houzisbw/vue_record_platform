@@ -120,7 +120,7 @@
                 subMenuTitle:'查询记录'
               },
               {
-                index:'1-3',
+                index:'/add_record',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'添加记录'

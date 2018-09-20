@@ -14,6 +14,7 @@ import ModifyUser from './../pages/ModifyUser/ModifyUser.vue'
 import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
 import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
 import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
+import AddRecord from '../pages/AddRecord/AddRecord.vue'
 
 import config from './../config/config'
 //用户权限
@@ -139,7 +140,7 @@ export default new Router({
             role:[userAuth.SUPER_ADMIN]
           },
         },
-        //管理员查询记录页面
+        //查询记录页面
         {
           path:'search_record',
           name:'SearchRecord',
@@ -147,6 +148,16 @@ export default new Router({
           meta:{
             //都可以访问
             role:authAll
+          },
+        },
+        //添加记录页面
+        {
+          path:'add_record',
+          name:'AddRecord',
+          component:AddRecord,
+          meta:{
+            //超管访问
+            role:[userAuth.SUPER_ADMIN]
           },
         },
       ]

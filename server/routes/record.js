@@ -23,7 +23,7 @@ router.get('/getDropdownInfo',function(req,res){
         let minYear = Infinity,
             maxYear = -Infinity;
         docs.forEach((item)=>{
-          let year = item.monthDate.split('-')[0];
+          let year = item.monthDate?item.monthDate.split('-')[0]:'';
           year>maxYear ? maxYear=year : '';
           year<minYear ? minYear=year : '';
         })
@@ -65,7 +65,11 @@ router.get('/getDropdownInfo',function(req,res){
 
 //查询记录
 router.post('/searchRecords',function(req,res){
+  //获取从数据库解析的用户数据
   let group = req.group;
+  let auth = req.auth;
+  let username = req.user;
+  //获取前端传递的数据
   let data = req.body.data;
   let pageSize = data.pageSize;
   let currentPage = data.currentPage;
@@ -91,7 +95,12 @@ router.post('/searchRecords',function(req,res){
   if(data.isConfirm==='1'){
     condition.isConfirm = '0'
   }
-
+  //如果是普通用户，特殊处理全部查询的逻辑
+  if(auth === '0'){
+    if(data.yearValue===undefined&&data.monthValue===undefined){
+      condition.username = username;
+    }
+  }
   //查询
   Record.count(condition,function(err1,count){
     if(err1){
@@ -117,9 +126,13 @@ router.post('/searchRecords',function(req,res){
   })
 })
 
+
 //删除记录
 router.post('/removeRecords',function(req,res){
   let data = req.body.data;
+  //删除数据库增加的属性
+  if(data.__v!==undefined)delete data.__v;
+  if(data._id!==undefined)delete data._id;
   Record.findOneAndRemove(data,function(err){
     if(err){
       res.json({
@@ -188,6 +201,108 @@ router.get('/fetchModifyDialogData',function(req,res){
     res.json({
       status:returnedCodes.CODE_ERROR
     })
+  })
+});
+
+//修改记录
+router.post('/modifyRecords',function(req,res){
+  let origin = req.body.origin;
+  let modify = req.body.modified;
+  modify.isConfirm = modify.isConfirm?'1':'0';
+  Record.findOneAndUpdate(origin,modify,function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+});
+
+//获取当月不重要的记录
+router.post('/getRecordsCount',function(req,res){
+  let group = req.group;
+  let isImportant = req.body.isImportant?'1':'0';
+  let monthDate = req.body.monthDate;
+  //查询条件
+  let condition = {
+    group:group,
+    isImportant:isImportant,
+    monthDate:monthDate
+  };
+  Record.find(condition,function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      //返回每个人的记录数量
+      let retObj = {};
+      docs.forEach((item)=>{
+        if(retObj[item.username]!==undefined){
+          retObj[item.username]++
+        }else{
+          retObj[item.username]=1;
+        }
+      });
+      let retArray = [];
+      Object.keys(retObj).forEach((item)=>{
+        retArray.push({
+          username:item,
+          count:retObj[item]
+        })
+      });
+      retArray.sort((a,b)=>{
+        return a.count - b.count
+      });
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        countArray:{
+          data:retArray,
+          isImportant:req.body.isImportant,
+          total:docs.length
+        }
+      })
+    }
+  })
+});
+
+//普通用户确认
+router.post('/ordinaryUserConfirm',function(req,res){
+  let data = req.body.data;
+  //删除数据库增加的属性
+  if(data.__v!==undefined)delete data.__v;
+  if(data._id!==undefined)delete data._id;
+  Record.findOneAndUpdate(data,{isConfirm:'1'},function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+})
+
+//添加记录
+router.post('/addNewRecord',function(req,res){
+  let group = req.group;
+  let data = req.body.data;
+  //添加组别字段
+  data.group = group;
+  //添加月份字段
+  let arr = data.date.split('-');
+  arr.pop();
+  data.monthDate = arr.join('-');
+  let record = new Record(data);
+  record.save();
+  res.json({
+    status:returnedCodes.CODE_SUCCESS
   })
 });
 
