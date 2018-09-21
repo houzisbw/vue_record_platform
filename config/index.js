@@ -38,6 +38,9 @@ module.exports = {
       '/addRecord/*':{
         target:'http://localhost:6000'
       },
+      '/graph/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

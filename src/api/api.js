@@ -66,6 +66,10 @@ export default {
   ordinaryUserConfirm:'/searchRecord/ordinaryUserConfirm',
 
   //添加记录页面api
-  addRecordData:'/searchRecord/addNewRecord'
+  addRecordData:'/searchRecord/addNewRecord',
+
+  //图表页面
+  getGraphYearList:'/graph/getYearList',
+  searchGraphRecord:'/graph/searchGraphRecord'
 
 }

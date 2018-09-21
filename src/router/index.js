@@ -15,6 +15,7 @@ import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
 import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
 import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
 import AddRecord from '../pages/AddRecord/AddRecord.vue'
+import RecordGraph from '../pages/RecordGraph/RecordGraph.vue'
 
 import config from './../config/config'
 //用户权限
@@ -158,6 +159,16 @@ export default new Router({
           meta:{
             //超管访问
             role:[userAuth.SUPER_ADMIN]
+          },
+        },
+        //统计图表页面
+        {
+          path:'record_graph',
+          name:'RecordGraph',
+          component:RecordGraph,
+          meta:{
+            //所有人可访问
+            role:authAll
           },
         },
       ]

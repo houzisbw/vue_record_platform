@@ -177,10 +177,10 @@
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-                index:'4-1',
+                index:'/record_graph',
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
-                subMenuTitle:'当月错误记录图'
+                subMenuTitle:'错误记录统计图'
               }
             ]
           },
