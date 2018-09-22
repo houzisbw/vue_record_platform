@@ -67,8 +67,14 @@ router.post('/searchGraphRecord',function(req,res){
       })
     }
   })
-
 });
+
+//获取最近一年(12个月)的历史数据，个人的和本组平均
+router.get('/getLatestYearRecord',function(req,res){
+  let group = req.group;
+  
+});
+
 
 module.exports = router;
 

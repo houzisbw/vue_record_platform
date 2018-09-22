@@ -1,46 +1,73 @@
 <!--统计图表页面-->
 <template>
-  <div class="graph-wrapper">
-    <div class="title">
-      <div class="title-text">
-        错误记录统计图
+  <div>
+    <!--当月图表-->
+    <div class="graph-wrapper">
+      <!--图表标题-->
+      <div class="title">
+        <div class="title-text">
+          {{barGraphTitle}}
+          <span>(共{{barTotal}}条)</span>
+        </div>
+        <div class="btn-wrapper" >
+          <el-select v-model="yearValue"
+                     size="mini"
+                     :disabled="graphLoading"
+                     placeholder="请选择年份">
+            <el-option
+              v-for="item in yearList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+          <el-select v-model="monthValue"
+                     size="mini"
+                     class="margin-left"
+                     :disabled="graphLoading"
+                     placeholder="请选择月份">
+            <el-option
+              v-for="item in monthList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+          <div class="type-wrapper" v-for="(item,index) in typeList">
+            <span class="type-text"
+                  @click="changeActiveIndex(index)"
+                  :class="{'type-active':index === activeIndex}">
+              {{item.label}}
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="btn-wrapper" v-loading="graphLoading">
-        <el-select v-model="yearValue"
-                   size="mini"
-                   placeholder="请选择年份">
-          <el-option
-            v-for="item in yearList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <el-select v-model="monthValue"
-                   size="mini"
-                   class="margin-left"
-                   placeholder="请选择月份">
-          <el-option
-            v-for="item in monthList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <div class="type-wrapper" v-for="(item,index) in typeList">
-          <span class="type-text"
-                @click="changeActiveIndex(index)"
-                :class="{'type-active':index === activeIndex}">
-            {{item.label}}
-          </span>
+      <!--图表区域-->
+      <div class="graph-content" v-loading="graphLoading">
+        <div class="graph-body" id="recordGraphBody" v-show="!isBarGraphEmpty">
+        </div>
+        <div class="graph-body graph-body-empty"  v-show="isBarGraphEmpty">
+          <i class="iconfont icon-frown" style="margin-right: 10px;font-size: 18px;"></i>
+          <span>数据空空如也</span>
         </div>
       </div>
     </div>
-    <!--图表区域-->
-    <div class="graph-content">
-      <div class="graph-title">
+    <!--历史图表-->
+    <div class="graph-wrapper">
+      <!--图表标题-->
+      <div class="title">
+        <div class="title-text">
+          个人/本组平均 每月历史错误记录数量对比折线图
+        </div>
       </div>
-      <div class="graph-body" id="recordGraphBody">
+      <!--图表区域-->
+      <div class="graph-content" >
+        <div class="graph-body" id="historyGraphBody" >
+        </div>
+        <!--<div class="graph-body graph-body-empty"  v-show="isBarGraphEmpty">-->
+          <!--<i class="iconfont icon-frown" style="margin-right: 10px;font-size: 18px;"></i>-->
+          <!--<span>数据空空如也</span>-->
+        <!--</div>-->
       </div>
     </div>
   </div>
@@ -54,50 +81,163 @@
     mounted:function(){
 			this.getYearList();
 			this.initData();
+      //画柱状图
+      this.drawBarGraph(this.barGraphData,'recordGraphBody','name','value','#1890ff',true);
+      //画折线图
+      this.drawLineGraph();
+    },
+    computed:{
+    	//柱状图标题
+      barGraphTitle:function(){
+      	return this.yearValue+'年'+parseInt(this.monthValue,10)+'月'+this.typeList[this.activeIndex].label+
+               '错误记录统计柱状图'
+      },
+      //柱状图数据是否为空
+      isBarGraphEmpty:function(){
+      	return this.barGraphData.length===0
+      }
+    },
+    watch:{
+      monthValue: function(){
+      	this.update();
+      },
+      yearValue:function(){
+        this.update();
+      },
+      activeIndex:function(){
+        this.update();
+      },
+      barGraphData:function(newVal){
+      	// 在切换显隐后,必须调用如下2句才能使图形重新画出
+        this.chart.forceFit();
+      	this.chart.repaint();
+      }
     },
     methods:{
+    	//更新
+      update:function(){
+      	if(this.graphLoading)return
+        this.graphLoading = true;
+        let promise = this.fetchRecordData();
+        promise.then(()=>{
+          this.updateBarGraph(this.barGraphData);
+          this.graphLoading = false;
+        });
+      },
+    	//更新柱状图
+      updateBarGraph: function(dataList){
+        // 计算总数
+        let total = this.barGraphData.reduce((t,c)=>{return t+parseInt(c.value,10)},0);
+        this.barTotal = total;
+        this.chart.changeData(dataList);
+      },
+      //画折线图
+      drawLineGraph:function(){
+        this.lineChart = new G2.Chart({
+          container: 'historyGraphBody', // 指定图表容器 ID
+          height : 400, // 指定图表高度
+          forceFit: true, //自适应容器宽度,
+        });
+        // 载入数据源
+        this.lineChart.source(this.lineGraphData);
+        this.lineChart.tooltip({
+          crosshairs: {
+            type: 'line'
+          }
+        });
+        this.lineChart.line().position('month*temperature').color('city');
+        this.lineChart.point().position('month*temperature').color('city').size(4).shape('circle').style({
+          stroke: '#fff',
+          lineWidth: 1
+        });
+        this.lineChart.render();
+      },
+    	//画柱状图
+      drawBarGraph:function(dataList,domId,xAttr,yAttr,color,isHorizontal){
+        //初始化图表
+        this.chart = new G2.Chart({
+          container: domId, // 指定图表容器 ID
+          height : 600, // 指定图表高度
+          forceFit: true, //自适应容器宽度,
+          padding: [ 0, 60, 80, 120 ],
+        });
+        // 载入数据源
+        this.chart.source(dataList);
+        // 计算总数
+        let total = dataList.reduce((t,c)=>{return t+parseInt(c.value,10)},0);
+        this.barTotal = total;
+        // 创建图形语法，绘制柱状图
+        let pos = xAttr+'*'+yAttr;
+        this.chart.interval().position(pos).color(color).label('value', {
+        	offset:5,
+          textStyle: {
+            textAlign: 'start',
+          },
+          formatter: (text, item, index) => {
+            return (text/this.barTotal*100).toFixed(1)+'%';
+          }
+        });
+        this.chart.axis(xAttr, {
+          label:{
+            offset:10,
+            textStyle:{
+              textAlign:'end',
+            }
+          }
+        });
+        //坐标轴别名
+        this.chart.scale(yAttr,{
+          alias:'错误记录数量'
+        });
+        this.chart.axis(yAttr, {
+          title:{}
+        });
+        // 隐藏图例
+        this.chart.legend(false);
+        // 变为横向柱状图
+        if(isHorizontal) this.chart.coord().transpose();
+        // 渲染图表
+        this.chart.render();
+      },
     	//初始化数据
       initData:function(){
       	let date = new Date();
       	this.yearValue = date.getFullYear().toString();
-
         let month = date.getMonth()+1;
-        //this.monthValue = month<10?('0'+month):month.toString();
-        this.monthValue = '02'
-        //初始化图表
-        // Step 1: 创建 Chart 对象
-        this.chart = new G2.Chart({
-          container: 'recordGraphBody', // 指定图表容器 ID
-          height : 300, // 指定图表高度
-          forceFit: true, //自适应容器宽度
-        });
-        // Step 2: 载入数据源
-        this.chart.source(this.graphData);
-        // Step 3：创建图形语法，绘制柱状图，由 genre 和 sold 两个属性决定图形位置，genre 映射至 x 轴，sold 映射至 y 轴
-        this.chart.interval().position('genre*sold').color('genre');
-        // Step 4: 渲染图表
-        this.chart.render();
-
-
+        this.monthValue = month<10?('0'+month):month.toString();
         //请求数据
         this.fetchRecordData();
       },
       //请求记录数据
       fetchRecordData: function(){
-      	let data = {
-      		year:this.yearValue,
-          month:this.monthValue,
-          type:this.typeList[this.activeIndex].value
-        };
-      	this.axios.post(api.searchGraphRecord,{data:data}).then((resp)=>{
-      		if(resp.data.status === 1){
-            console.log(resp.data.dataObj)
-          }
-        })
-
+      	return new Promise((resolve,reject)=>{
+          let data = {
+            year:this.yearValue,
+            month:this.monthValue,
+            type:this.typeList[this.activeIndex].value
+          };
+          this.axios.post(api.searchGraphRecord,{data:data}).then((resp)=>{
+            if(resp.data.status === 1){
+              let dataObj = resp.data.dataObj;
+              let list = [];
+              Object.keys(dataObj).forEach((item)=>{
+                list.push({
+                  name:item,
+                  value:dataObj[item]
+                })
+              });
+              list.sort((a,b)=>{return a.value - b.value});
+              this.barGraphData = list;
+              resolve()
+            }else{
+            	reject()
+            }
+          })
+        });
       },
 			//切换type的tab
       changeActiveIndex: function(index){
+      	if(this.graphLoading)return
       	this.activeIndex = index;
       },
       //构建下拉列表数据
@@ -136,22 +276,51 @@
     },
 		data () {
 			return {
-				//测试数据
-        graphData:[
-          { genre: 'Sports', sold: 275 },
-          { genre: 'Strategy', sold: 115 },
-          { genre: 'Action', sold: 120 },
-          { genre: 'Shooter', sold: 350 },
-          { genre: 'Other', sold: 150 }
+				/* 折线图数据 */
+				lineChart:null,
+        lineGraphData:[
+          {
+            "month": "Jan",
+            "city": "Tokyo",
+            "temperature": 7
+          }, {
+            "month": "Jan",
+            "city": "London",
+            "temperature": 3.9
+          }, {
+            "month": "Feb",
+            "city": "Tokyo",
+            "temperature": 6.9
+          }, {
+            "month": "Feb",
+            "city": "London",
+            "temperature": 4.2
+          }, {
+            "month": "Mar",
+            "city": "Tokyo",
+            "temperature": 9.5
+          }, {
+            "month": "Mar",
+            "city": "London",
+            "temperature": 5.7
+          }, {
+            "month": "Apr",
+            "city": "Tokyo",
+            "temperature": 14.5
+          }, {
+            "month": "Apr",
+            "city": "London",
+            "temperature": 8.5
+          },
         ],
+				/* 柱状图数据 */
+        barTotal:0,
+        barGraphData:[],
         chart:null,
-
         yearList:[],
         yearValue:'',
-
         monthList:[],
         monthValue:'',
-
         //图表类别:个人 还是 本组
         typeList:[
           {
@@ -165,7 +334,10 @@
         ],
         activeIndex:1,
         //是否在loading过程
-        graphLoading:false
+        graphLoading:false,
+
+
+        /* 折线图数据 */
 			}
 		}
 	}
@@ -176,6 +348,7 @@
 @titleHeight:55px;
 .graph-wrapper{
   background-color: #fff;
+  margin-bottom: 30px;
   .title{
     height:@titleHeight;
     border-bottom:1px solid #e8e8e8;
@@ -218,11 +391,20 @@
   .graph-content{
     padding:20px;
     .graph-title{
-      height:50px;
+      height:30px;
+      line-height: 30px;
+      color:rgba(0,0,0,0.65);
     }
     .graph-body{
       margin-top: 20px;
       min-height:400px;
+    }
+    .graph-body-empty{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color:rgba(0,0,0,0.35);
+      font-size: 18px;
     }
   }
 

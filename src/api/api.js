@@ -70,6 +70,7 @@ export default {
 
   //图表页面
   getGraphYearList:'/graph/getYearList',
-  searchGraphRecord:'/graph/searchGraphRecord'
+  searchGraphRecord:'/graph/searchGraphRecord',
+  getLatestYearRecord:'/graph/getLatestYearRecord'
 
 }
