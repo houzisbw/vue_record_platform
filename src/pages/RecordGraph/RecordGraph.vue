@@ -57,17 +57,13 @@
       <!--图表标题-->
       <div class="title">
         <div class="title-text">
-          个人/本组平均 每月历史错误记录数量对比折线图
+          个人/本组平均 近一年每月历史错误记录数量对比折线图
         </div>
       </div>
       <!--图表区域-->
       <div class="graph-content" >
         <div class="graph-body" id="historyGraphBody" >
         </div>
-        <!--<div class="graph-body graph-body-empty"  v-show="isBarGraphEmpty">-->
-          <!--<i class="iconfont icon-frown" style="margin-right: 10px;font-size: 18px;"></i>-->
-          <!--<span>数据空空如也</span>-->
-        <!--</div>-->
       </div>
     </div>
   </div>
@@ -139,16 +135,29 @@
           forceFit: true, //自适应容器宽度,
         });
         // 载入数据源
-        this.lineChart.source(this.lineGraphData);
+        this.lineChart.source(this.lineGraphData,{
+        	'month':{
+        		alias:'年月'
+          },
+          'num':{
+        		alias:'错误记录数量'
+          },
+        });
         this.lineChart.tooltip({
           crosshairs: {
             type: 'line'
           }
         });
-        this.lineChart.line().position('month*temperature').color('city');
-        this.lineChart.point().position('month*temperature').color('city').size(4).shape('circle').style({
+        this.lineChart.line().position('month*num').color('type').tooltip('num');
+        this.lineChart.point().position('month*num').color('type').size(4).shape('circle').style({
           stroke: '#fff',
           lineWidth: 1
+        }).tooltip('num');;
+        this.lineChart.legend({
+          // 格式化图例为中文
+          itemFormatter:(item)=>{
+          	return this.lineGraphLegendMap[item]
+          }
         });
         this.lineChart.render();
       },
@@ -205,8 +214,19 @@
       	this.yearValue = date.getFullYear().toString();
         let month = date.getMonth()+1;
         this.monthValue = month<10?('0'+month):month.toString();
-        //请求数据
+        //请求柱状图数据
         this.fetchRecordData();
+        //请求折线图数据
+        this.fetchLineGraphData();
+      },
+      //请求折线图数据
+      fetchLineGraphData: function(){
+      	this.axios.get(api.getLatestYearRecord).then((resp)=>{
+      		if(resp.data.status === 1){
+            this.lineGraphData = resp.data.data;
+            this.lineChart.changeData(this.lineGraphData);
+          }
+        })
       },
       //请求记录数据
       fetchRecordData: function(){
@@ -278,41 +298,11 @@
 			return {
 				/* 折线图数据 */
 				lineChart:null,
-        lineGraphData:[
-          {
-            "month": "Jan",
-            "city": "Tokyo",
-            "temperature": 7
-          }, {
-            "month": "Jan",
-            "city": "London",
-            "temperature": 3.9
-          }, {
-            "month": "Feb",
-            "city": "Tokyo",
-            "temperature": 6.9
-          }, {
-            "month": "Feb",
-            "city": "London",
-            "temperature": 4.2
-          }, {
-            "month": "Mar",
-            "city": "Tokyo",
-            "temperature": 9.5
-          }, {
-            "month": "Mar",
-            "city": "London",
-            "temperature": 5.7
-          }, {
-            "month": "Apr",
-            "city": "Tokyo",
-            "temperature": 14.5
-          }, {
-            "month": "Apr",
-            "city": "London",
-            "temperature": 8.5
-          },
-        ],
+        lineGraphData:[],
+        lineGraphLegendMap:{
+					'AVG':'本组平均错误数量',
+          'PERSONAL':'个人错误数量'
+        },
 				/* 柱状图数据 */
         barTotal:0,
         barGraphData:[],
