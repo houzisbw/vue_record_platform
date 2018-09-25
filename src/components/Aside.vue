@@ -198,15 +198,15 @@
             ]
           },
           {
-            menuName:'留言板',
+            menuName:'新鲜事',
             iconName:'el-icon-edit',
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
               {
-                index:'5-1',
+                index:'/message',
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
-                subMenuTitle:'留言板'
+                subMenuTitle:'新鲜事'
               }
             ]
           },

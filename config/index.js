@@ -41,6 +41,9 @@ module.exports = {
       '/graph/*':{
         target:'http://localhost:6000'
       },
+      '/message/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

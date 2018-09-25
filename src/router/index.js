@@ -16,6 +16,7 @@ import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
 import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
 import AddRecord from '../pages/AddRecord/AddRecord.vue'
 import RecordGraph from '../pages/RecordGraph/RecordGraph.vue'
+import MessageBoard from '../pages/MessageBoard/MessageBoard.vue'
 
 import config from './../config/config'
 //用户权限
@@ -166,6 +167,16 @@ export default new Router({
           path:'record_graph',
           name:'RecordGraph',
           component:RecordGraph,
+          meta:{
+            //所有人可访问
+            role:authAll
+          },
+        },
+        //留言板页面
+        {
+          path:'message',
+          name:'MessageBoard',
+          component:MessageBoard,
           meta:{
             //所有人可访问
             role:authAll
