@@ -17,6 +17,7 @@ var workshop = require('./routes/workshop')
 var recordType = require('./routes/record_types')
 var record = require('./routes/record')
 var graph = require('./routes/graph')
+var message = require('./routes/message')
 
 //util
 var util = require('./utils');
@@ -74,9 +75,10 @@ app.use('/', index);
 app.use('/users',users);
 app.use('/modifyUser',modifyUser);
 app.use('/modifyWorkshop',workshop);
-app.use('/modifyRecordTypes',recordType)
-app.use('/searchRecord',record)
-app.use('/graph',graph)
+app.use('/modifyRecordTypes',recordType);
+app.use('/searchRecord',record);
+app.use('/graph',graph);
+app.use('/message',message);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

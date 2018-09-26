@@ -2,9 +2,11 @@
 <template>
   <div class="wrapper">
     <div class="emoji-content-wrapper">
-      <li v-for="(item,index) in currentPageEmotionList">
-        <i class="em em-ab"></i>
-      </li>
+      <button v-for="(item,index) in currentPageEmotionList"
+              class="emotion-btn"
+              @click="addEmotion(item)">
+        <i :class="['em',item]"></i>
+      </button>
     </div>
     <div class="pagination">
       <div class="pagination-inner">
@@ -19,17 +21,11 @@
 </template>
 
 <script>
+  import api from '@/api/api'
 	export default {
 		name: 'EmotionSelect',
     mounted:function(){
-			//注意表情不能一次全部请求，得分页请求
-
-
-			this.emotionList = Array(55).fill(0);
-			this.pageNum = Math.ceil(this.emotionList.length/this.pageCapacity);
-			let startIndex = this.activeIndex*this.pageCapacity,
-          endIndex = startIndex+this.pageCapacity;
-			this.currentPageEmotionList = this.emotionList.slice(startIndex,endIndex);
+      this.fetchEmotionNameList();
     },
 		data () {
 			return {
@@ -46,12 +42,35 @@
 			}
 		},
     methods:{
+    	//向后台请求表情名称
+      fetchEmotionNameList: function(){
+        this.axios.get(api.fetchEmotionList).then((resp)=>{
+        	if(resp.data.status === 1){
+        		let total = resp.data.total,
+                emotionList = resp.data.emotions;
+            this.emotionList = emotionList;
+            this.pageNum = Math.ceil(total/this.pageCapacity);
+            let startIndex = this.activeIndex*this.pageCapacity,
+              endIndex = startIndex+this.pageCapacity;
+            this.currentPageEmotionList = this.emotionList.slice(startIndex,endIndex);
+          }else{
+            this.$message({
+              type:'error',
+              message:'表情加载失败!'
+            })
+          }
+        })
+      },
     	//改变页码
       changePage:function(index){
       	this.activeIndex = index;
         let startIndex = index*this.pageCapacity,
             endIndex = startIndex+this.pageCapacity;
         this.currentPageEmotionList = this.emotionList.slice(startIndex,endIndex);
+      },
+      //添加表情,发送给父组件
+      addEmotion: function(emotionName){
+      	this.$emit('choose',emotionName)
       }
     }
 	}
@@ -68,10 +87,14 @@
       width:100%;
       max-width: 100%;
       justify-content: flex-start;
-      li{
+      .emotion-btn{
         padding:5px;
-        list-style: none;
+        outline:none;
+        border:none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
         cursor: pointer;
+        background-color: #fff;
         &:hover{
           transform: scale(1.1);
         }

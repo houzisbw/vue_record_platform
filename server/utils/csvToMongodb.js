@@ -11,7 +11,7 @@
 var mongoose = require('mongoose');
 //注意用v1版本，升级后原来的api失效
 var csvtojson = require('csvtojson/v1');
-var Record = require('../model/record')
+var Emotion = require('../model/emotions')
 //连接mongodb
 mongoose.connect('mongodb://127.0.0.1:27017/record_platform')
 //监听:成功
@@ -23,7 +23,7 @@ mongoose.connection.on("error",function(){
 	console.log('csv mongodb connection fail');
 });
 
-var csvFilePath = './csv/record.csv';
+var csvFilePath = './csv/emotion.csv';
 //trim去掉内容的左右空格，ignoreEmpty忽略空的单元格(important)
 //默认csv第一行是表头，不算做数据
 var options = {
@@ -39,24 +39,8 @@ csvtojson(options).fromFile(csvFilePath).on('json',(jsonObj)=>{
 
 	//存数据库
 	resultArray.forEach(function(value,index){
-		let recordObj = new Record({
-      workshop:value.workshop,
-      //是否重要
-      isImportant:value.isImportant,
-      //用户名
-      username:value.username,
-      //类型
-      type:value.type,
-      //月份
-      monthDate:value.monthDate,
-      //是否确认
-      isConfirm:value.isConfirm,
-      //图片链接
-      imageUrl:value.imageUrl,
-      //错误说明
-      error:value.error,
-      //记录日期
-      date:value.date,
+		let recordObj = new Emotion({
+      emotionName:value.name.replace('?',''),
 		});
     recordObj.save();
 	})

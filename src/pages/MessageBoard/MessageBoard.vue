@@ -27,12 +27,11 @@
             width="280"
             trigger="click">
             <!--匿名slot内容:表情选择组件-->
-            <emotion-select></emotion-select>
+            <emotion-select @choose="handleEmotionChoose"></emotion-select>
             <!--具名slot-->
             <!--只有button能够正常工作:插入内容到光标处,div不行-->
             <button class="box"
                     slot="reference"
-                    @click="addEmotion"
                     ref="box">
               <i class="iconfont icon-smile"></i>
               <span>表情</span>
@@ -44,7 +43,6 @@
           <span class="tip">Ctrl or ⌘ + Enter</span>
           <el-button size="small"
                      :disabled="isSubmitBtnDisabled"
-                     @click="show"
                      type="primary">
             发布
           </el-button>
@@ -73,13 +71,15 @@
       }
     },
     methods:{
-			show:function(){
-				this.data = this.$refs.textArea.innerHTML;
-      },
-			//添加表情
-      addEmotion:function(){
-//        this.$refs.textArea.focus();
-//        this.pasteHtmlAtCaret(this.emotionUrl)
+      //表情选择组件的选择事件
+      handleEmotionChoose: function(emotionName){
+				// 表情替代符
+				let emotionReplacer = '[:'+emotionName+']';
+				// 输入框获得焦点,然后插入表情
+        this.$refs.textArea.focus();
+				this.pasteHtmlAtCaret(emotionReplacer);
+        // 更新字符数
+        this.handleInput();
       },
       //在光标指定位置插入内容
       pasteHtmlAtCaret: function(content){
@@ -119,19 +119,15 @@
       //处理输入情况
       handleInput: function(e){
       	let innerHtml = this.$refs.textArea.innerHTML;
-      	this.data = innerHtml;
-        this.currentWordLength = innerHtml.length;
+      	//正则匹配表情字符串，只算一个字符,注意是非贪婪全局匹配(?)
+        let emotionRegExp = /\[:.+?\]/g;
+        this.currentWordLength = innerHtml.replace(emotionRegExp,'_').length;
         this.textAreaContent = innerHtml;
       	innerHtml===''?this.isEmpty=true:this.isEmpty=false;
       },
-
     },
 		data () {
 			return {
-				//表情url
-        emotionUrl:'<img class="emoji" draggable="false" alt="☁" src="https://gold-cdn.xitu.io/asset/twemoji/2.6.0/svg/2601.svg">',
-				//测试
-        data:'',
         // 输入框是否获得焦点
         isTextareaFocus:false,
         //输入框是否为空

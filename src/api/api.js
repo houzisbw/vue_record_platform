@@ -71,6 +71,9 @@ export default {
   //图表页面
   getGraphYearList:'/graph/getYearList',
   searchGraphRecord:'/graph/searchGraphRecord',
-  getLatestYearRecord:'/graph/getLatestYearRecord'
+  getLatestYearRecord:'/graph/getLatestYearRecord',
+
+  //留言版块页面
+  fetchEmotionList:'/message/getEmotionList'
 
 }
