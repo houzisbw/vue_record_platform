@@ -4,6 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var Emotion = require('./../model/emotions')
+var Message = require('./../model/message')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
 
@@ -24,6 +25,13 @@ router.get('/getEmotionList',function(req,res){
       })
     }
   })
+});
+
+//保存新鲜事
+router.post('/saveMessage',function(req,res){
+  let data = req.body.data;
+  //计算当前时间
+  
 });
 
 module.exports = router

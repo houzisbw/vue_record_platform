@@ -74,6 +74,7 @@ export default {
   getLatestYearRecord:'/graph/getLatestYearRecord',
 
   //留言版块页面
-  fetchEmotionList:'/message/getEmotionList'
+  fetchEmotionList:'/message/getEmotionList',
+  saveMessage:'/message/saveMessage' //发布新鲜事
 
 }
