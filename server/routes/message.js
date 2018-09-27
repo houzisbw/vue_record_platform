@@ -31,7 +31,23 @@ router.get('/getEmotionList',function(req,res){
 router.post('/saveMessage',function(req,res){
   let data = req.body.data;
   //计算当前时间
-  
+  let timeNow = (+new Date()).toString();
+  //6位随机值
+  let randStr = '';
+  for(let i=0;i<6;i++){
+    randStr+=Math.floor(Math.random()*10);
+  }
+  //唯一id
+  let uniqueId = timeNow+randStr;
+  data.messageId = uniqueId;
+  data.time = timeNow;
+  //保存
+  let message = new Message(data);
+  message.save();
+  res.json({
+    status:returnedCodes.CODE_SUCCESS
+  })
+
 });
 
 module.exports = router

@@ -3,6 +3,7 @@
   <div class="wrapper">
     <!--编辑留言的版块-->
     <div class="edit-message-wrapper"
+         v-if="hackReset"
          element-loading-background="rgba(0, 0, 0, 0.6)"
          element-loading-text="提交中..."
          element-loading-spinner=""
@@ -94,6 +95,20 @@
       }
     },
     methods:{
+			//重置组件数据
+      resetAfterSubmit: function(){
+        this.hackReset = false;
+        this.currentWordLength = 0;
+        this.textAreaContent = '';
+        this.canAddImage = true;
+        this.imageListToUpload = [];
+        this.isEmpty = true;
+        this.$nextTick(()=>{
+          this.hackReset = true;
+        })
+      },
+
+
 			//提交新鲜事，包含图片和文字
       submit: function(){
       	this.isSubmitting = true;
@@ -116,7 +131,13 @@
           };
           //把图片url和文字提交到后台数据库
           this.axios.post(api.saveMessage,{data:messageData}).then((resp)=>{
-
+            if(resp.data.status === 1){
+              this.$message({
+                type:'success',
+                message:'新鲜事发布成功!'
+              });
+              this.resetAfterSubmit();
+            }
           })
 
         },()=>{
@@ -241,6 +262,8 @@
     },
 		data () {
 			return {
+				//重置图片上传组件
+        hackReset:true,
         // 输入框是否获得焦点
         isTextareaFocus:false,
         //输入框是否为空
