@@ -42,12 +42,15 @@
 			inputId:{
 				type:String,
         required:true
+      },
+      //最大图片上传数
+      maxImageNum:{
+				type:Number,
+        required:true
       }
     },
 		data () {
 			return {
-				//最大图片数
-        maxImageNum:9,
         //最大文件尺寸(byte)
         maxImageSize:4*1024*1024,
         //存储文件对象的数组

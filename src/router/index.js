@@ -17,6 +17,8 @@ import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
 import AddRecord from '../pages/AddRecord/AddRecord.vue'
 import RecordGraph from '../pages/RecordGraph/RecordGraph.vue'
 import MessageBoard from '../pages/MessageBoard/MessageBoard.vue'
+import MessageRecommend from '../components/MessageSubView/Recommend.vue'
+import MessageSuscribe from '../components/MessageSubView/Subscribe.vue'
 
 import config from './../config/config'
 //用户权限
@@ -177,10 +179,29 @@ export default new Router({
           path:'message',
           name:'MessageBoard',
           component:MessageBoard,
+          redirect:'/message/subscribe',
           meta:{
             //所有人可访问
             role:authAll
           },
+          children:[
+            {
+              path:'recommend',
+              component:MessageRecommend,
+              meta:{
+                //所有人可访问
+                role:authAll
+              }
+            },
+            {
+              path:'subscribe',
+              component:MessageSuscribe,
+              meta:{
+                //所有人可访问
+                role:authAll
+              }
+            },
+          ]
         },
       ]
     },
