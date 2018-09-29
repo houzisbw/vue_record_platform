@@ -87,6 +87,7 @@
         //图片数组测试
         imageList:[
         	'https://i.loli.net/2018/09/29/5baf48d28713b.jpg',
+          'https://i.loli.net/2018/09/29/5baf2af773fdf.jpg'
 
         ]
 			}

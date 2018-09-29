@@ -7,7 +7,7 @@
       <img class="img"
            ref="img"
            v-show="currentImageLoaded"
-           :src="imageList[currentImageIndex]"/>
+           :src="imageList[innerImageIndex]"/>
       <!--loading图-->
       <div class="loading-img" v-show="!currentImageLoaded">
         <bar-loading></bar-loading>
@@ -17,11 +17,15 @@
     <div class="close-btn" @click="close" v-show="!isInZoomState">
     </div>
     <!--下一张图的按钮-->
-    <div class="next-btn" v-show="!isInZoomState">
+    <div class="next-btn"
+         @click="handleSwitchImage(1)"
+         v-show="!isInZoomState && innerImageIndex < imageList.length-1">
       <i class="iconfont icon-right"></i>
     </div>
     <!--上一张图的按钮-->
-    <div class="prev-btn" v-show="!isInZoomState">
+    <div class="prev-btn"
+         @click="handleSwitchImage(-1)"
+         v-show="!isInZoomState && innerImageIndex !== 0">
       <i class="iconfont icon-left"></i>
     </div>
   </div>
@@ -35,12 +39,20 @@
       BarLoading
     },
     props:{
+			//图片数组
 			imageList:{
 				type:Array,
         required:true
+      },
+      //当前图片的index
+      currentImageIndex:{
+				type:Number,
+        default:0
       }
     },
     mounted:function(){
+			//初始化组件内的图片index，防止修改prop
+			this.innerImageIndex = this.currentImageIndex;
 			this.currentImg = this.$refs.img;
 			let self = this;
       this.currentImg.onload = function(){
@@ -55,6 +67,23 @@
     computed:{
     },
     methods:{
+    	//处理图片切换,dir为1是下一张，-1是上一张
+      handleSwitchImage: function(dir){
+        let len = this.imageList.length;
+      	if(dir === 1){
+      		//下一张
+          if(this.innerImageIndex === len - 1){
+            return
+          }
+          this.innerImageIndex = this.innerImageIndex+1;
+        }else{
+      		//上一张
+          if(this.innerImageIndex === 0){
+          	return
+          }
+          this.innerImageIndex = this.innerImageIndex-1;
+        }
+      },
     	//切换大图缩放
       toggleZoomImage: function(){
         this.isInZoomState = !this.isInZoomState;
@@ -72,8 +101,6 @@
     },
 		data () {
 			return {
-        //当前图片index
-        currentImageIndex:0,
         //当前图片是否加载完成
         currentImageLoaded:false,
         //当前图片
@@ -83,7 +110,9 @@
         //图片为长图的阈值
         longImageRatio:1.8,
         //是否处于图片zoom的状态
-        isInZoomState:false
+        isInZoomState:false,
+        //组件内的当前图片index
+        innerImageIndex:0
 			}
 		}
 	}

@@ -43,6 +43,7 @@
             <!--控制图片的高度和宽度一样，padding-top基于父元素的宽度-->
             <div class="ratio-holder" style="padding-top: 100%">
             </div>
+            <span class="long-image" v-show="isLongImageList[index]">长图</span>
           </div>
         </div>
       </template>
@@ -59,14 +60,14 @@
           <i class="iconfont icon-zoomin icon-pos"></i>
           <span>查看大图</span>
         </div>
-        <div class="panel-item">
+        <div class="panel-item" @click="handleImageRotate(-1)">
           <!--inline-block才能旋转，inline不行-->
           <i class="iconfont icon-reload icon-pos"
              style="transform: rotateY(-180deg);display:inline-block;">
           </i>
           <span>向左旋转</span>
         </div>
-        <div class="panel-item">
+        <div class="panel-item" @click="handleImageRotate(1)">
           <i class="iconfont icon-reload icon-pos"></i>
           <span>向右旋转</span>
         </div>
@@ -81,11 +82,12 @@
         <img src=""
              ref="detailImage"
              v-show="isDetailImageLoaded"
-             :style="{width:detailImageWidth+'px',height:detailImageHeight+'px'}"
+             :style="detailImageStyle"
              class="detail-img">
         <!--全屏大图组件-->
         <full-screen-viewer
           :imageList="imageList"
+          :currentImageIndex="currentImageIndex"
           @close="handleFullScreenViewerClose"
           v-if="isShowFullScreenViewer">
         </full-screen-viewer>
@@ -111,6 +113,17 @@
       }
     },
     computed:{
+			//大图的style,注意旋转的时候必须重设宽高和translate值
+      detailImageStyle:function(){
+        return {
+          width:this.detailImageWidth+'px',
+          height:this.detailImageHeight+'px',
+          //注意顺序:先移动再旋转
+          transform:'rotate('+this.detailRotateAngel+'deg)' +' '
+                    +'translate('+this.detailImageTranslateX+','+this.detailImageTranslateY+')'
+
+        }
+      },
 			//单张图的高度计算
       calcSingleImgHeight: function(){
       	let self = this;
@@ -172,6 +185,51 @@
       }
     },
     methods:{
+			//处理图片旋转
+      handleImageRotate: function(dir){
+        // 注意旋转中心是图片的左上角(transform-origin:top left)
+        let angleDelta = dir === 1?90:-90;
+        //向右顺时针旋转
+        this.detailRotateAngel = (this.detailRotateAngel + angleDelta)%360;
+        //修正translate的值
+        let currentIndex;
+        this.detailImageTranslateArray.forEach((item,index)=>{
+          //找到当前的tranlate值
+          if(item[0]===this.detailImageTranslateX && item[1]===this.detailImageTranslateY){
+            currentIndex = index;
+          }
+        });
+        //取下一个值
+        let nextIndex = currentIndex+dir;
+        if(nextIndex === this.detailImageTranslateArray.length){
+          nextIndex = 0;
+        }else if(nextIndex === -1){
+          nextIndex = this.detailImageTranslateArray.length - 1;
+        }
+        //更新tranlate的值
+        this.detailImageTranslateX = this.detailImageTranslateArray[nextIndex][0];
+        this.detailImageTranslateY = this.detailImageTranslateArray[nextIndex][1];
+
+        //修正外层div的高度
+
+      },
+
+			//计算每张图是否是长图
+      calcImageIsLongImage: function(){
+        let self = this;
+        //计算每张图是否是长图
+        this.imageList.forEach((item,index)=>{
+          let image = new Image();
+          image.onload = function(){
+            let ratio = image.naturalHeight / image.naturalWidth;
+            if(ratio > self.longImageLimitRatio){
+            	//通过$set方法修改数组中的值
+              self.$set(self.isLongImageList,index,true)
+            }
+          };
+          image.src = item;
+        })
+      },
 			//关闭全屏大图组件
       handleFullScreenViewerClose: function(){
         this.isShowFullScreenViewer = false;
@@ -184,6 +242,8 @@
       //展示详情大图
       showDetailImage: function(imgUrl){
       	let self = this;
+      	//设置index
+        this.currentImageIndex = this.imageList.indexOf(imgUrl);
       	//改变状态为大图加载中
       	this.isDetailImageLoaded = false;
       	//计算大图的原始尺寸
@@ -198,12 +258,21 @@
       },
       //隐藏详情大图
       hideDetailImage: function(){
+      	//旋转角度重置为0
+      	this.detailRotateAngel = 0;
+      	//重置translate
+        this.detailImageTranslateX = '-50%';
+        this.detailImageTranslateY = '0';
         this.isDetailImageLoaded = false;
         this.isShowDetail = false;
       },
     },
+    created:function(){
+			//初始化是否是长图的数组
+      this.isLongImageList = Array(this.imageList.length).fill(false);
+    },
     mounted:function(){
-
+      this.calcImageIsLongImage();
     },
 		data () {
 			return {
@@ -220,6 +289,8 @@
         singleImageNaturalHeight:0,
         //单图是否是长图
         isLongImage:false,
+        //多图情况下是否是长图的数组
+        isLongImageList:[],
 
         /* 大图数据结构 */
         //大图加载时的默认高度px
@@ -229,9 +300,17 @@
         //大图的原始尺寸
         detailImageNaturalWidth:0,
         detailImageNaturalHeight:0,
-
+        //大图的旋转角度
+        detailRotateAngel:0,
+        //大图的translate的x值和y值
+        detailImageTranslateX:'-50%',
+        detailImageTranslateY:'0',
+        //旋转情况下大图的translate的可能值数组,从左向右是顺时针旋转
+        detailImageTranslateArray:[['-50%','0'],['0','-50%'],['-50%','-100%'],['-100%','-50%']],
         //是否展示大图全屏组件
-        isShowFullScreenViewer:false
+        isShowFullScreenViewer:false,
+        //大图全屏组件的当前图片的index
+        currentImageIndex:0,
 			}
 		}
 	}
@@ -257,11 +336,27 @@
         flex-wrap: wrap;
         margin-top: 4px;
         margin-right: 4px;
+        position: relative;
         background-repeat: no-repeat;
         background-position: 50%;
         background-size: cover;
         cursor:zoom-in;
       }
+    }
+    .long-image{
+      position: absolute;
+      right:10px;
+      bottom:10px;
+      padding: 3px 6px;
+      font-size: 12px;
+      color: #fff;
+      background-color: rgba(0,0,0,.49);
+      border: 1px solid #fff;
+      border-radius: 2px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     .col-3{
       width:75%
@@ -281,22 +376,8 @@
       cursor:zoom-in;
       position: relative;
       background-color: #f4f5f7;
-      .long-image{
-        position: absolute;
-        right:10px;
-        bottom:10px;
-        padding: 3px 6px;
-        font-size: 12px;
-        color: #fff;
-        background-color: rgba(0,0,0,.49);
-        border: 1px solid #fff;
-        border-radius: 2px;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
     }
+
   }
   .detail-view-wrapper{
     width:100%;
@@ -337,7 +418,7 @@
         position: absolute;
         left:50%;
         top:0;
-        transform:translate(-50%,0);
+        transform-origin: top left;
       }
     }
   }
