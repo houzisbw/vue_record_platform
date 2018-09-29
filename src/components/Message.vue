@@ -36,7 +36,7 @@
     <!--中间图片部分-->
     <div class="img-wrapper">
       <!--图片展示组件-->
-      <message-image-viewer :imageList="imageList">
+      <message-image-viewer :imageList="imageList" v-if="imageList.length>0">
       </message-image-viewer>
     </div>
     <!--底部按钮部分-->
@@ -86,7 +86,7 @@
         messageContent:'sdf 水电费\n为 而[:em-boy]\nwerewolf[:em-cactus]',
         //图片数组测试
         imageList:[
-        	'https://i.loli.net/2018/09/28/5bae30537a09c.jpg',
+        	'https://i.loli.net/2018/09/29/5baf48d28713b.jpg',
 
         ]
 			}
