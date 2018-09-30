@@ -40,14 +40,42 @@ router.post('/saveMessage',function(req,res){
   //唯一id
   let uniqueId = timeNow+randStr;
   data.messageId = uniqueId;
-  data.time = timeNow;
+  data.publishTime = timeNow;
   //保存
   let message = new Message(data);
   message.save();
   res.json({
     status:returnedCodes.CODE_SUCCESS
   })
-
 });
+
+//获取本组所有人的新鲜事
+router.post('/getSubscribeMessage',function(req,res){
+  let group = req.group,
+      user = req.user;
+  let condition = {
+    userGroup:group,
+    //后期加上数量限制
+  };
+  Message.find(condition,function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      let ret = docs;
+      //时间由大到小排列
+      ret.sort(function(a,b){
+        return parseInt(b.publishTime,10) - parseInt(a.publishTime,10)
+      });
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        messageList:ret
+      })
+    }
+  })
+});
+
+
 
 module.exports = router

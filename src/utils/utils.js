@@ -56,10 +56,62 @@ function dataURLtoBlob(dataurl) {
   return new Blob([u8arr], {type:mime});
 }
 
-module.exports = {
+//时间转化函数,参数是毫秒
+function timeConvertToChinese(timestamp){
+  /*
+   * 策略:
+   * (1)5分钟内显示 刚刚
+   * (2)5分钟-1小时内显示 x分钟
+   * (3)大于1小时小于1天，显示x小时
+   * (4)大于1天小于1个月，显示x天
+   * (5)大于一个月小于一年,显示x月
+   * (6)大于一年，显示x年
+   *
+   * */
+  //一秒钟
+  let second = 1000;
+  let timeMap = {
+    //刚刚
+    [0]:function(){
+      return '刚刚'
+    },
+    //5分-1小时
+    [5*60*second]:function(){
+      return parseInt(timestamp/(60*second),10)+'分钟前'
+    },
+    //1小时-1天
+    [60*60*second]:function(){
+      return parseInt(timestamp/(60*60*second),10)+'小时前'
+    },
+    //1天-一个月
+    [60*60*second*24]:function(){
+      return parseInt(timestamp/(60*60*second*24),10)+'天前'
+    },
+    //一个月-一年
+    [60*60*second*24*30]:function(){
+      return parseInt(timestamp/(60*60*second*24*30),10)+'个月前'
+    },
+    //一年-无穷
+    [60*60*second*24*365]:function(){
+      return parseInt(timestamp/(60*60*second*24*365),10)+'年前'
+    }
+  };
+  let timeArray = [0,5*60*second,60*60*second,60*60*second*24,60*60*second*24*30,60*60*second*24*365,Infinity];
+  let index = 0;
+  for(var i=0;i<timeArray.length-1;i++){
+    if(timestamp < timeArray[i+1]){
+      index = i;
+      break;
+    }
+  }
+  return timeMap[timeArray[index]]()
+}
+
+export default {
   getOffsetX,
   getOffsetY,
   throttle,
   isIE,
-  dataURLtoBlob
-}
+  dataURLtoBlob,
+  timeConvertToChinese
+};

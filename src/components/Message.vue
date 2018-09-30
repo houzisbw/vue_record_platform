@@ -9,12 +9,12 @@
       <!--信息部分-->
       <div class="info">
         <div class="name">
-          孙博伟
+          {{messageInfo.nickname || messageInfo.username}}
         </div>
         <div class="time">
-          <span>准备组</span>
+          <span>{{messageInfo.userGroup || '无组别'}}</span>
           <span>&nbsp;·&nbsp;</span>
-          <span>2个月前</span>
+          <span>{{messageInfo.publishTime | timeFormatter}}</span>
         </div>
       </div>
       <!--更多部分-->
@@ -32,11 +32,11 @@
       </div>
     </div>
     <!--中部内容部分-->
-    <div class="content" v-html="messageContent"></div>
+    <div class="content" v-html="messageHtmlContent"></div>
     <!--中间图片部分-->
     <div class="img-wrapper">
       <!--图片展示组件-->
-      <message-image-viewer :imageList="imageList" v-if="imageList.length>0">
+      <message-image-viewer :imageList="messageInfo.imageList" v-if="messageInfo.imageList.length>0">
       </message-image-viewer>
     </div>
     <!--底部按钮部分-->
@@ -59,38 +59,46 @@
 </template>
 
 <script>
+  import util from '@/utils/utils'
   import MessageImageViewer from '@/components/MessageImageViewer.vue'
 	export default {
 		name: 'Message',
+    props:{
+			//新鲜事的信息对象
+			messageInfo:{
+				type:Object,
+      }
+    },
     components:{
       MessageImageViewer
     },
-    mounted:function(){
-      this.formatContent()
-    },
-    methods:{
-    	//格式化内容，主要处理表情
-    	formatContent:function(){
-    		//捕获表情字符串
-    		let emotionReg = /\[:(.+?)\]/g;
-    		//构造html字符串
-    		this.messageContent = this.messageContent.replace(emotionReg,function(match){
+    mounted:function(){},
+    computed:{
+      //新鲜事文本内容
+      messageHtmlContent:function(){
+        //捕获表情字符串
+        let emotionReg = /\[:(.+?)\]/g;
+        //构造html字符串
+        let newValue = this.messageInfo.content ? this.messageInfo.content.replace(emotionReg,function(match){
           let emotionStr = match.slice(2,-1);
           return '<i class="em '+emotionStr+'"></i>'
-        })
+        }):'';
+        return newValue
       }
     },
-		data () {
-			return {
-        //新鲜事内容测试
-        messageContent:'sdf 水电费\n为 而[:em-boy]\nwerewolf[:em-cactus]',
-        //图片数组测试
-        imageList:[
-        	'https://i.loli.net/2018/09/29/5baf48d28713b.jpg',
-          'https://i.loli.net/2018/09/29/5baf2af773fdf.jpg'
+    filters:{
+    	//时间过滤器
+      timeFormatter: function(value){
+      	let now = +new Date();
+      	let delta = util.timeConvertToChinese(now-value);
+      	return delta;
+      }
+    },
+    methods:{
 
-        ]
-			}
+    },
+		data () {
+			return {}
 		}
 	}
 </script>
@@ -100,6 +108,8 @@
 .wrapper{
   width:100%;
   box-shadow:0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  margin-bottom: 15px;
   .header{
     display: flex;
     align-items: center;

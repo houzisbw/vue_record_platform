@@ -75,6 +75,7 @@ export default {
 
   //留言版块页面
   fetchEmotionList:'/message/getEmotionList',
-  saveMessage:'/message/saveMessage' //发布新鲜事
+  saveMessage:'/message/saveMessage', //发布新鲜事
+  getSubscribeMessage:'/message/getSubscribeMessage'//获取订阅的新鲜事
 
 }

@@ -80,6 +80,8 @@
   import EmotionSelect from '@/components/EmotionSelect.vue'
   import MessageImageUploader from '@/components/MessageImageUploader.vue'
   import api from '@/api/api'
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
   export default {
     name: 'MessageBoardEditBox',
     props:{
@@ -169,9 +171,11 @@
                 message:'新鲜事发布成功!'
               });
               this.resetAfterSubmit();
+              //通知外层的组件进行更新操作
+              eventBus.$emit(eventName.updateMessageList);
+
             }
           })
-
         },()=>{
           //上传图片出错
           this.$message({

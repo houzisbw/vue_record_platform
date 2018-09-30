@@ -18,7 +18,7 @@
 -->
 
 <template>
-  <div class="wrapper">
+  <div class="wrapper" ref="wrapper">
     <!--缩略图的div-->
     <div class="brief-view-wrapper" v-show="!isShowDetail" ref="outerWrapper">
       <!--如果是单张图-->
@@ -49,7 +49,7 @@
       </template>
     </div>
     <!--详情图的div-->
-    <div class="detail-view-wrapper" v-show="isShowDetail">
+    <div class="detail-view-wrapper" v-show="isShowDetail" ref="detailViewWrapper">
       <!--顶部操作栏-->
       <div class="top-panel">
         <div class="panel-item" @click="hideDetailImage">
@@ -73,7 +73,7 @@
         </div>
       </div>
       <!--中间图片展示栏,注意需要设置高度，因为里面的img是绝对定位-->
-      <div class="detail-img-wrapper" :style="{height:detailImageHeight+'px'}">
+      <div class="detail-img-wrapper" :style="{height:outerDivHeight+'px'}">
         <!--加载的logo-->
         <div class="detail-img-loading">
           <circle-loading fillColor="#9C9C9C" v-if="!isDetailImageLoaded">
@@ -84,6 +84,14 @@
              v-show="isDetailImageLoaded"
              :style="detailImageStyle"
              class="detail-img">
+        <!--点击隐藏详情图的div-->
+        <div class="toggle-zoomout" @click="hideDetailImage">
+        </div>
+        <!--上一张图片的div-->
+        <div class="prev-img" @click="switchImage(-1)" v-if="currentImageIndex > 0">
+        </div>
+        <div class="next-img" @click="switchImage(1)" v-if="currentImageIndex<imageList.length-1">
+        </div>
         <!--全屏大图组件-->
         <full-screen-viewer
           :imageList="imageList"
@@ -91,6 +99,15 @@
           @close="handleFullScreenViewerClose"
           v-if="isShowFullScreenViewer">
         </full-screen-viewer>
+      </div>
+      <!--缩略图展示栏-->
+      <div class="small-img-wrapper">
+        <div class="small-img-container"
+             @click="switchSmallImage(index)"
+             :class="{'small-img-active':currentImageIndex === index}"
+             :style="{backgroundImage:'url('+item+')'}"
+             v-for="(item,index) in imageList">
+        </div>
       </div>
     </div>
   </div>
@@ -165,28 +182,107 @@
           //加载时高度固定
         	return this.loadingDefaultHeight
         }else{
-        	//加载完成时高度为图片的高度
-          let ratio = this.detailImageNaturalHeight / this.detailImageNaturalWidth;
-          let imageHeight = ratio * this.detailImageWidth;
-          return imageHeight
+          return this.processImageScaleInRotate().height
         }
       },
       //详情大图的宽度
       detailImageWidth:function(){
-        //外层div的宽度
-        let outerDiv = this.$refs.outerWrapper;
-        let clientWidth = outerDiv?outerDiv.clientWidth:1;
-        //计算大图的宽度是否大于最外层div的宽度
-        if(clientWidth < this.detailImageNaturalWidth){
-        	return clientWidth
+        if(!this.isDetailImageLoaded){
+          //外层div的宽度
+          let outerDiv = this.$refs.wrapper;
+          let clientWidth = outerDiv?outerDiv.clientWidth:1;
+          return clientWidth
         }else{
-        	return this.detailImageNaturalWidth
+          return this.processImageScaleInRotate().width
+        }
+      },
+      //外层div的高度(随着图片旋转而变化)
+      outerDivHeight: function(){
+        //根据旋转角度来计算该图是初始状态还是旋转过90度横竖交换的情况
+        let angel = this.detailRotateAngel;
+        if(angel === 90 || angel === 270 || angel === -90 || angel === -270) {
+          //由初始状态旋转一次的情况
+        	return this.detailImageWidth
+        }else{
+        	//初始状态
+          return this.detailImageHeight
         }
       }
     },
     methods:{
+			//下方缩略图的图片切换
+      switchSmallImage: function(index){
+      	this.currentImageIndex = index;
+      	//切换图片
+        this.showDetailImage(this.imageList[index]);
+        //重置数据
+        this.resetDetailImageParams();
+      },
+			//详情图的图片前后切换
+      switchImage: function(dir){
+      	if(dir === 1){
+      		//下一张
+          let nextIndex = this.currentImageIndex + 1;
+          if(nextIndex === this.imageList.length){
+            return
+          }
+          this.currentImageIndex = nextIndex;
+          this.showDetailImage(this.imageList[nextIndex]);
+        }else{
+          //上一张
+          let prevIndex = this.currentImageIndex - 1;
+          if(prevIndex === -1){
+            return
+          }
+          this.currentImageIndex = prevIndex;
+          this.showDetailImage(this.imageList[prevIndex]);
+        }
+        //重置参数
+        this.resetDetailImageParams();
+      },
+			//图片旋转时重新计算详情图片的宽高
+      processImageScaleInRotate:function(){
+        let nw = this.detailImageNaturalWidth,
+            nh = this.detailImageNaturalHeight;
+        //根据旋转角度来计算该图是初始状态还是旋转过90度横竖交换的情况
+        let angel = this.detailRotateAngel;
+        //图片旋转后的宽高
+        let imageRotatedWidth,imageRotatedHeight;
+        let clientWidth = this.$refs.wrapper.clientWidth;
+        let ratio = nh / nw;
+        //是否是初始状态
+        let isInitialState = true;
+        if(angel === 90 || angel === 270 || angel === -90 || angel === -270){
+          isInitialState = false;
+        	//由初始状态旋转一次的情况
+        	if(nh > clientWidth){
+            imageRotatedWidth = clientWidth;
+            imageRotatedHeight = imageRotatedWidth / ratio;
+          }else{
+            imageRotatedWidth = nh;
+            imageRotatedHeight = imageRotatedWidth / ratio;
+          }
+        }else{
+          //旋转一次变为初始状态的情况
+          isInitialState = true;
+          if(nw > clientWidth){
+            imageRotatedWidth = clientWidth;
+            imageRotatedHeight = imageRotatedWidth * ratio;
+          }else{
+            imageRotatedWidth = nw;
+            imageRotatedHeight = imageRotatedWidth * ratio;
+          }
+        }
+        //注意这里的判断,width和height在旋转状态下容易弄反
+        return {
+        	width:isInitialState?imageRotatedWidth:imageRotatedHeight,
+          height:isInitialState?imageRotatedHeight:imageRotatedWidth
+        }
+      },
 			//处理图片旋转
       handleImageRotate: function(dir){
+      	//图片加载完成才能旋转
+      	if(!this.isDetailImageLoaded)return
         // 注意旋转中心是图片的左上角(transform-origin:top left)
         let angleDelta = dir === 1?90:-90;
         //向右顺时针旋转
@@ -211,7 +307,7 @@
         this.detailImageTranslateY = this.detailImageTranslateArray[nextIndex][1];
 
         //修正外层div的高度
-
+        this.processImageScaleInRotate();
       },
 
 			//计算每张图是否是长图
@@ -236,6 +332,8 @@
       },
 			//显示全屏大图组件
       showFullScreenViewer: function(){
+        //图片加载完成才能显示全屏大图组件
+        if(!this.isDetailImageLoaded)return
       	this.isShowFullScreenViewer = true;
       },
 
@@ -258,14 +356,18 @@
       },
       //隐藏详情大图
       hideDetailImage: function(){
-      	//旋转角度重置为0
-      	this.detailRotateAngel = 0;
-      	//重置translate
+      	this.resetDetailImageParams();
+        this.isShowDetail = false;
+      },
+      //重置详情图的参数
+      resetDetailImageParams: function(){
+        //旋转角度重置为0
+        this.detailRotateAngel = 0;
+        //重置translate
         this.detailImageTranslateX = '-50%';
         this.detailImageTranslateY = '0';
         this.isDetailImageLoaded = false;
-        this.isShowDetail = false;
-      },
+      }
     },
     created:function(){
 			//初始化是否是长图的数组
@@ -340,6 +442,8 @@
         background-repeat: no-repeat;
         background-position: 50%;
         background-size: cover;
+        /*设置背景颜色作为loading时的占位图*/
+        background-color: #d7d8da;
         cursor:zoom-in;
       }
     }
@@ -375,7 +479,7 @@
       background-size: cover;
       cursor:zoom-in;
       position: relative;
-      background-color: #f4f5f7;
+      background-color: #d7d8da;
     }
 
   }
@@ -406,7 +510,7 @@
       background-color: #f4f5f7;
       width:100%;
       /*高度渐变的动画效果,必须加overflow:hidden*/
-      transition: height 0.5s ease;
+      transition: height 0.2s ease;
       overflow: hidden;
       .detail-img-loading{
         position: absolute;
@@ -420,6 +524,64 @@
         top:0;
         transform-origin: top left;
       }
+      .toggle-zoomout{
+        position: absolute;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        cursor: zoom-out;
+      }
+      .prev-img{
+        position: absolute;
+        left:0;
+        width:30%;
+        top:0;
+        height:100%;
+        /*base64格式的鼠标指针图*/
+        cursor:url(data:application/octet-stream;base64,AAABAAEAEBwAAAEAIACYBwAAFgAAACgAAAAQAAAAOAAAAAEAIAAAAAAAAAcAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAK9fX1gfn5+YUAAAAGAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1g///////////+fn5ggAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1hP////////////////39/YIAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1hf////////////////v7+4IAAAADAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2h/////////////////v7+4AAAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2iP////////////////v7+38AAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2if////////////////v7+34AAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2i/////////////////v7+3wAAAADAAAAAgAAAAEAAAABAAAAAQAAAAMAAAAFAAAABwAAAAkAAAAL9vb2jP////////////////v7+3sAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAFAAAABwAAAAkAAAAL9vb2jf////////////////v7+3oAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAABgAAAAkAAAAL9vb2j/////////////////v7+3gAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAcAAAAK9vb2kP////////////////n5+XgAAAAEAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAH+Pj4kP////////////////T09HkAAAAHAAAABAAAAAIAAAABAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAA+/v7j/////////////////Ly8nkAAAAKAAAACAAAAAUAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAPv7+3T////////////////29vaKAAAACwAAAAkAAAAHAAAABQAAAAMAAAACAAAAAQAAAAEAAAABAAAAAAAAAAAAAAAD+/v7d/////////////////b29ogAAAALAAAACQAAAAcAAAAFAAAAAwAAAAIAAAABAAAAAQAAAAEAAAAAAAAAAgAAAAP7+/t6////////////////9fX1hQAAAAsAAAAJAAAABwAAAAUAAAADAAAAAgAAAAEAAAABAAAAAQAAAAEAAAACAAAAA/v7+33////////////////19fWCAAAACwAAAAkAAAAHAAAABQAAAAMAAAACAAAAAQAAAAEAAAABAAAAAQAAAAIAAAAD+/v7gP////////////////X19X8AAAALAAAACQAAAAcAAAAFAAAAAwAAAAIAAAABAAAAAQAAAAEAAAABAAAAAgAAAAP7+/uD////////////////9fX1fAAAAAsAAAAJAAAABwAAAAUAAAADAAAAAgAAAAAAAAABAAAAAQAAAAEAAAACAAAAA/v7+4b////////////////09PR5AAAACwAAAAkAAAAHAAAABQAAAAMAAAAAAAAAAAAAAAEAAAABAAAAAQAAAAIAAAAD+/v7if////////////////Ly8ncAAAAKAAAACQAAAAYAAAAEAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAP7+/uM////////////////8vLydQAAAAoAAAAIAAAABQAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAEAAAACAAAAA/v7+47////////////////09PRxAAAACAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAQAAAAIAAAAD+/v7kf////////////////b29m0AAAAFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAP9/f2T///////////////++vr6aQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAEAAAACAAAAA/39/Zb//////////v39/WkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAQAAAAGAgIAC////lv39/WgAAAAC8AAAAOAAAADAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAMAAAAHAAAADwAAAA8AAAAHAAAAAwAAAAEAAAAAAAAAAAAAAAAAAAAAAACAAAAAwAAAAOAAAADwAAAA+AAAAPwAAAD+AAAA/wAAAA==),auto;
+      }
+      .next-img{
+        position: absolute;
+        right:0;
+        width:30%;
+        top:0;
+        height:100%;
+        cursor:url(data:application/octet-stream;base64,AAABAAEAEBwAAAEAIACYBwAAFgAAACgAAAAQAAAAOAAAAAEAIAAAAAAAAAcAABILAAASCwAAAAAAAAAAAAAAAAAG+fn5hfX19YEAAAAKAAAACQAAAAcAAAAFAAAAAwAAAAIAAAABAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAA+fn5gv//////////9fX1gwAAAAsAAAAJAAAABwAAAAUAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAP39/YL////////////////19fWEAAAACwAAAAkAAAAHAAAABQAAAAMAAAACAAAAAQAAAAEAAAABAAAAAAAAAAAAAAAD+/v7gv////////////////X19YUAAAALAAAACQAAAAcAAAAFAAAAAwAAAAIAAAABAAAAAQAAAAEAAAAAAAAAAgAAAAP7+/uA////////////////9vb2hwAAAAsAAAAJAAAABwAAAAUAAAADAAAAAgAAAAEAAAABAAAAAQAAAAEAAAACAAAAA/v7+3/////////////////29vaIAAAACwAAAAkAAAAHAAAABQAAAAMAAAACAAAAAQAAAAEAAAABAAAAAQAAAAIAAAAD+/v7fv////////////////b29okAAAALAAAACQAAAAcAAAAFAAAAAwAAAAIAAAABAAAAAQAAAAEAAAABAAAAAgAAAAP7+/t8////////////////9vb2iwAAAAsAAAAJAAAABwAAAAUAAAADAAAAAgAAAAAAAAABAAAAAQAAAAEAAAACAAAAA/v7+3v////////////////29vaMAAAACwAAAAkAAAAHAAAABQAAAAMAAAAAAAAAAAAAAAEAAAABAAAAAQAAAAIAAAAD+/v7ev////////////////b29o0AAAALAAAACQAAAAcAAAAFAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAP7+/t4////////////////9vb2jwAAAAsAAAAJAAAABgAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAEAAAACAAAABPn5+Xj////////////////29vaQAAAACgAAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAQAAAAH9PT0ef////////////////j4+JAAAAAHAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAACAAAAAry8vJ5////////////////+/v7jwAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2iv////////////////v7+3QAAAAAAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9vb2iP////////////////v7+3cAAAADAAAAAQAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1hf////////////////v7+3oAAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1gv////////////////v7+30AAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1f/////////////////v7+4AAAAADAAAAAgAAAAEAAAABAAAAAgAAAAMAAAAFAAAABwAAAAkAAAAL9fX1fP////////////////v7+4MAAAADAAAAAgAAAAEAAAABAAAAAQAAAAMAAAAFAAAABwAAAAkAAAAL9PT0ef////////////////v7+4YAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAEAAAABgAAAAkAAAAK8vLyd/////////////////v7+4kAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAABQAAAAgAAAAK8vLydf////////////////v7+4sAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAYAAAAI9PT0cf////////////////v7+44AAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAF9vb2bf////////////////v7+5EAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA+vr6af////7///////////39/ZMAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP39/Wr////+//////39/ZYAAAADAAAAAgAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC/f39aP///5aAgIACAAAAAQAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8AAAAHAAAAAwAAAAEAAAAAAAAAAAAAAAAAAAAAAACAAAAAwAAAAOAAAADwAAAA8AAAAOAAAADAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAMAAAAHAAAADwAAAB8AAAA/AAAAfwAAAP8AAA==),auto;
+      }
+    }
+    .small-img-wrapper{
+      margin-top: 8px;
+      .small-img-active{
+        opacity: 1!important;
+        border: 2px solid #027fff!important;
+      }
+      .small-img-container{
+        width:10%;
+        display: inline-block;
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border: 2px solid transparent;
+        box-sizing: border-box;
+        opacity: 0.6;
+        cursor: pointer;
+        transition: all 0.2s;
+        /*撑开高度同宽度一样*/
+        &:after{
+          content:'';
+          display: block;
+          padding-top: 100%;
+        }
+        &:not(:last-child){
+          margin-right: 1%;
+        }
+        &:hover{
+          opacity: 1;
+          border: 2px solid #027fff;
+        }
+      }
+
     }
   }
 
