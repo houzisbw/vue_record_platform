@@ -4,7 +4,7 @@
     <!--头部信息部分-->
     <div class="header">
       <!--头像部分-->
-      <div class="avatar-wrapper" :style="{backgroundImage:'url('+'https://i.loli.net/2018/09/28/5badcaad5c804.jpg'+')'}">
+      <div class="avatar-wrapper" :style="{backgroundImage:'url('+messageInfo.profileImgUrl+')'}">
       </div>
       <!--信息部分-->
       <div class="info">
@@ -14,7 +14,10 @@
         <div class="time">
           <span>{{messageInfo.userGroup || '无组别'}}</span>
           <span>&nbsp;·&nbsp;</span>
-          <span>{{messageInfo.publishTime | timeFormatter}}</span>
+          <span class="timestamp"
+                :title="messageInfo.publishTime | detailTimeStr">
+            {{messageInfo.publishTime | timeFormatter}}
+          </span>
         </div>
       </div>
       <!--更多部分-->
@@ -42,9 +45,11 @@
     <!--底部按钮部分-->
     <div class="footer">
       <!--点赞-->
-      <div class="action-wrapper">
-        <i class="iconfont icon-like"></i>
-        <span class='action-text'>赞</span>
+      <div class="action-wrapper" @click="toggleMessageLikes(messageInfo.messageId)">
+        <i class="iconfont" :class="[isCurrentMessageLiked?'icon-like-fill active':'icon-like']"></i>
+        <span class='action-text' :class="{'active':isCurrentMessageLiked}">
+          {{messageLikeNum>0?messageLikeNum:'赞'}}
+        </span>
       </div>
       <div class="action-wrapper">
         <i class="iconfont icon-message"></i>
@@ -59,6 +64,8 @@
 </template>
 
 <script>
+  import api from '@/api/api'
+  import config from '@/config/config'
   import util from '@/utils/utils'
   import MessageImageViewer from '@/components/MessageImageViewer.vue'
 	export default {
@@ -67,13 +74,19 @@
 			//新鲜事的信息对象
 			messageInfo:{
 				type:Object,
-      }
+      },
     },
     components:{
       MessageImageViewer
     },
-    mounted:function(){},
+    mounted:function(){
+			this.messageLikeNum = this.messageInfo.likes;
+    },
     computed:{
+    	//用户是否已赞该新鲜事,通过vuex来判断
+      isCurrentMessageLiked:function(){
+      	return this.$store.getters.getLikedMessageList.includes(this.messageInfo.messageId)
+      },
       //新鲜事文本内容
       messageHtmlContent:function(){
         //捕获表情字符串
@@ -92,13 +105,51 @@
       	let now = +new Date();
       	let delta = util.timeConvertToChinese(now-value);
       	return delta;
+      },
+      //时间详情表示
+      detailTimeStr: function(value){
+      	let date = new Date();
+        date.setTime(parseInt(value,10));
+        return date.toLocaleString()
       }
     },
     methods:{
-
+      //处理用户新鲜事点赞
+      toggleMessageLikes: function(messageId){
+      	if(this.isfetchingLikes)return
+      	this.isfetchingLikes = true;
+        this.axios.post(api.toggleThumbLike,{
+          likeTargetId:messageId,
+          type:config.likeType.MESSAGE
+        }).then((resp)=>{
+        	if(resp.data.status === 1){
+        		this.messageLikeNum = resp.data.likeNum;
+            let oldLikesList = this.$store.getters.getLikedMessageList;
+            let status = resp.data.likeStatus;
+            if(status===1){
+            	//是点赞
+              oldLikesList.push(messageId);
+            }else{
+            	//取消赞
+              let index = oldLikesList.indexOf(messageId);
+              oldLikesList.splice(index,1)
+            }
+            //更新vuex
+            this.$store.commit('updateLikedMessageList',oldLikesList)
+          }
+          this.isfetchingLikes = false;
+        })
+      }
     },
 		data () {
-			return {}
+			return {
+				//新鲜事赞数,内部变量，用于及时改变赞数
+        messageLikeNum:0,
+        //用户点赞过的新鲜事列表
+        likedMessageList:[],
+        //是否正在点赞中
+        isfetchingLikes:false
+      }
 		}
 	}
 </script>
@@ -136,6 +187,9 @@
         color:#8a9aa9;
         font-size: 13px;
         margin-top: 10px;
+        .timestamp{
+          cursor: pointer;
+        }
       }
     }
     .more-btn{
@@ -160,6 +214,7 @@
     /*关键:保留换行和空格*/
     white-space: pre-wrap;
     color: #17181a;
+    word-break: break-all;
   }
   .img-wrapper{
     margin: @commonMargin;
@@ -185,6 +240,9 @@
       }
       .action-text{
         margin-left: 3px;
+      }
+      .active{
+        color:#6cbd45;
       }
     }
     /*除最后一个div有border*/

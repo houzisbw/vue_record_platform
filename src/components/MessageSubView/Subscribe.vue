@@ -2,7 +2,7 @@
 <template>
   <div class="wrapper">
     <!--新鲜事为空的提示信息-->
-    <div class="message-empty" v-if="messageList.length===0">
+    <div class="message-empty" v-if="messageList.length===0 && !isLoading">
       <span class="empty-text">暂时没有新鲜事~快去发布吧!</span>
     </div>
     <!--loading的图就是2个骨架图-->
@@ -37,6 +37,8 @@
           this.isLoading = false;
           if(resp.data.status === 1){
             this.messageList = resp.data.messageList;
+            //更新用户点赞的新鲜事列表
+            this.$store.commit('updateLikedMessageList',resp.data.likedList)
           }else{
             this.$message({
               type:'error',

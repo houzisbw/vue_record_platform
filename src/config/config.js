@@ -44,6 +44,12 @@ var config = {
   authList:['0','1','2'],
   //用户默认头像
   defaultUserAvatarUrl:require('./../assets/images/icon/avatar_default_big.png'),
+  //点赞类型
+  likeType:{
+    'MESSAGE':1,
+    'COMMENT_FIRST':2,
+    'COMMENT-SECOND':3
+  }
 }
 
 export default config

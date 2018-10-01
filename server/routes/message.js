@@ -5,8 +5,10 @@ var express = require('express');
 var router = express.Router();
 var Emotion = require('./../model/emotions')
 var Message = require('./../model/message')
+var ThumbLike = require('./../model/ThumbLike')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
+var likeType = require('./../config').likeType;
 
 //获取表情名数组
 router.get('/getEmotionList',function(req,res){
@@ -68,10 +70,89 @@ router.post('/getSubscribeMessage',function(req,res){
       ret.sort(function(a,b){
         return parseInt(b.publishTime,10) - parseInt(a.publishTime,10)
       });
-      res.json({
-        status:returnedCodes.CODE_SUCCESS,
-        messageList:ret
+
+      //获取该用户赞过的新鲜事的列表
+      let likedMessageList = [];
+      ThumbLike.find({userId:user,type:likeType.MESSAGE},function(err1,docs1){
+        if(err1){
+          res.json({
+            status:returnedCodes.CODE_ERROR
+          })
+        }else{
+          docs1.forEach((item)=>{
+            likedMessageList.push(item.typeId)
+          });
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            messageList:ret,
+            likedList:likedMessageList
+          })
+        }
+      });
+    }
+  })
+});
+
+//用户点赞处理
+router.post('/toggleThumbLike',function(req,res){
+  let username = req.user;
+  let likeTargetId = req.body.likeTargetId;
+  let type = req.body.type;
+  //搜索条件
+  let condition = {
+    typeId:likeTargetId,
+    type:type,
+    userId:username
+  };
+
+  //策略类，处理不同类型的点赞操作
+  let strategy = {
+    //新鲜事
+    '1':function(likeNum){
+      let condition = {
+        messageId:likeTargetId
+      };
+      Message.findOne(condition,function(err,doc){
+        if(err) {
+          res.json({
+            status: returnedCodes.CODE_ERROR
+          })
+        }else{
+          doc.likes = doc.likes + likeNum;
+          doc.save();
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            likeNum:doc.likes,
+            likeStatus:likeNum
+          })
+        }
       })
+    },
+    //一级评论
+    //todo
+
+    //二级评论
+    //todo
+  };
+
+  ThumbLike.findOne(condition,function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      if(doc){
+        //用户已经点赞了，则取消点赞,删除该记录
+        doc.remove();
+        //给对应的赞数-1
+        strategy[type] && strategy[type](-1);
+      }else{
+        //用户未点赞，增加点赞
+        let like = new ThumbLike(condition);
+        like.save();
+        //给对应的赞数+1
+        strategy[type] && strategy[type](1);
+      }
     }
   })
 });

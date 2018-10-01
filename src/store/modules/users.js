@@ -14,7 +14,10 @@ const state = {
   //用户签名
   signature:'',
   //用户组别
-  group:''
+  group:'',
+
+  //用户点赞的新鲜事列表
+  likedMessageList:[]
 }
 
 //getter,用户获取state
@@ -30,7 +33,10 @@ const getters = {
   //获取用户签名
   getUserSignature:state=>state.signature,
   //获取用户组别
-  getUserGroup:state=>state.group
+  getUserGroup:state=>state.group,
+
+  //获取点赞的新鲜事列表
+  getLikedMessageList:state=>state.likedMessageList
 }
 
 //mutations,用于改变state,注意要存到localStorage中避免刷新页面数据丢失
@@ -80,6 +86,11 @@ const mutations = {
     window.localStorage.removeItem('auth')
     window.localStorage.removeItem('signature')
     window.localStorage.removeItem('group')
+  },
+
+  //点赞的新鲜事列表
+  updateLikedMessageList:function(state,list){
+    state.likedMessageList = list
   }
 };
 

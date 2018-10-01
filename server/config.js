@@ -24,5 +24,11 @@ module.exports =  {
     CODE_WORKSHOP_EXIST:4,
     //记录名已存在
     CODE_RECORDTYPE_EXIST:5
+  },
+  //点赞类型
+  likeType:{
+    'MESSAGE':1,
+    'COMMENT_FIRST':2,
+    'COMMENT-SECOND':3
   }
 }

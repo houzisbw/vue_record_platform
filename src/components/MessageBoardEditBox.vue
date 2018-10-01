@@ -117,7 +117,9 @@
       },
       // 提交按钮是否禁用
       isSubmitBtnDisabled:function(){
-        let len = this.textAreaContent.length;
+        //这里需要对表情进行处理
+        let emotionRegExp = /\[:.+?\]/g;
+        let len = this.textAreaContent.replace(emotionRegExp,'_').length;
         return !(len>0 && len<=this.maxWordLimit)
       }
     },
