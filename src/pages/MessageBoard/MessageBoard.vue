@@ -2,12 +2,15 @@
 <template>
   <div class="wrapper">
     <!--编辑留言的版块-->
-    <message-board-edit-box
-      editBoxMinHeight="75px"
-      placeholder="发布新鲜事~"
-      input-id="messageImageInput"
-      :maxImageNum="9">
-    </message-board-edit-box>
+    <div class="edit-box-wrapper">
+      <message-board-edit-box
+        edit-box-min-height="75px"
+        placeholder="发布新鲜事~"
+        input-id="messageImageInput"
+        :hide-action="false"
+        :maxImageNum="9">
+      </message-board-edit-box>
+    </div>
     <!--推荐和动态tab栏-->
     <div class="tab">
       <router-link to="/message/recommend"
@@ -55,6 +58,11 @@
 .wrapper{
   width:640px;
   margin:0 auto;
+  .edit-box-wrapper{
+    padding:20px 20px 10px 20px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
   .tab{
     margin:8px 0;
     display: flex;

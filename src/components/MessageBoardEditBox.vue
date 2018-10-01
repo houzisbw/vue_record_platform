@@ -4,11 +4,14 @@
     <!--编辑留言的版块-->
     <div class="edit-message-wrapper"
          v-if="hackReset"
+         :style="{backgroundColor:panelBgColor}"
          element-loading-background="rgba(0, 0, 0, 0.6)"
          element-loading-text="提交中..."
          element-loading-spinner=""
          v-loading="isSubmitting">
-      <div class="edit-dialog-wrapper" :class="{'active':isTextareaFocus}">
+      <div class="edit-dialog-wrapper"
+           :style="{backgroundColor : !isTextareaFocus?bgColorBlur:'#fff'}"
+           :class="{'active':isTextareaFocus}">
         <!--编辑框,注意展现文本时要用white-space: pre-wrap保留空格和换行-->
         <div class="edit-dialog"
              id="textAreaDiv"
@@ -33,7 +36,8 @@
         <!--剩余字符数-->
         <span class="max-limit" :class="{'exceeded':isInputExceeded}">{{maxWordLimit-currentWordLength}}</span>
       </div>
-      <div class="edit-bottom">
+      <div class="edit-bottom"
+           v-show="isShowActionPanel">
         <!--左侧功能列表-->
         <div class="left">
           <el-popover
@@ -45,6 +49,7 @@
             <!--具名slot-->
             <!--只有button能够正常工作:插入内容到光标处,div不行-->
             <button class="box"
+                    :style="{backgroundColor:panelBgColor}"
                     slot="reference"
                     ref="box">
               <i class="iconfont icon-smile"></i>
@@ -54,6 +59,7 @@
           <!--图片上传组件的label,for中的id和input联系-->
           <label :for="inputId"
                  class="box"
+                 :style="{backgroundColor:panelBgColor}"
                  @click="handleImageUpload"
                  :class="{'disabled-add':!canAddImage}"
                  style="margin-left:10px;">
@@ -68,7 +74,7 @@
                      :disabled="isSubmitBtnDisabled"
                      @click="submit"
                      type="primary">
-            发布
+            {{submitButtonText}}
           </el-button>
         </div>
       </div>
@@ -104,7 +110,33 @@
       inputId:{
       	type:String,
         required:true
+      },
+      //输入框失去焦点时是否隐藏操作栏
+      hideAction:{
+      	type:Boolean,
+        default:false
+      },
+      //最大输入字符数
+      maxWordLimit:{
+      	type:Number,
+        default:200
+      },
+      //提交按钮文字
+      submitButtonText:{
+      	type:String,
+        default:'发布'
+      },
+      //输入框失去焦点时的背景色
+      bgColorBlur:{
+      	type:String,
+        default:'rgba(226,230,235,.2)'
+      },
+      //外框背景色
+      panelBgColor:{
+        type:String,
+        default:'#fff'
       }
+
     },
     components:{
       EmotionSelect,
@@ -121,6 +153,10 @@
         let emotionRegExp = /\[:.+?\]/g;
         let len = this.textAreaContent.replace(emotionRegExp,'_').length;
         return !(len>0 && len<=this.maxWordLimit)
+      },
+      //是否显示操作栏
+      isShowActionPanel:function(){
+      	return this.hideAction?this.isTextareaFocus:true;
       }
     },
     methods:{
@@ -306,8 +342,6 @@
         isTextareaFocus:false,
         //输入框是否为空
         isEmpty:true,
-        //最大输入字符数
-        maxWordLimit:200,
         currentWordLength:0,
         //输入框内容
         textAreaContent:'',
@@ -326,14 +360,12 @@
 <style scoped type="text/less" lang="less">
   .wrapper{
     width:100%;
+    padding-bottom: 0;
     .edit-message-wrapper{
-      padding:20px 20px 10px 20px;
       box-sizing: border-box;
       background-color: #fff;
-      box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
       .active{
         border:1px solid #007fff!important;
-        background-color: #fff!important;
       }
       .edit-dialog-wrapper{
         border:1px solid hsla(0,0%,59%,.2);

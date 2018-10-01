@@ -51,7 +51,7 @@
           {{messageLikeNum>0?messageLikeNum:'赞'}}
         </span>
       </div>
-      <div class="action-wrapper">
+      <div class="action-wrapper" @click="toggleComment">
         <i class="iconfont icon-message"></i>
         <span class='action-text'>评论</span>
       </div>
@@ -60,6 +60,10 @@
         <span class='action-text'>分享</span>
       </div>
     </div>
+    <!--评论模块-->
+    <message-comment v-if="isShowComment">
+    </message-comment>
+
   </div>
 </template>
 
@@ -68,6 +72,7 @@
   import config from '@/config/config'
   import util from '@/utils/utils'
   import MessageImageViewer from '@/components/MessageImageViewer.vue'
+  import MessageComment from '@/components/Comment/MessageComment'
 	export default {
 		name: 'Message',
     props:{
@@ -77,7 +82,8 @@
       },
     },
     components:{
-      MessageImageViewer
+      MessageImageViewer,
+      MessageComment
     },
     mounted:function(){
 			this.messageLikeNum = this.messageInfo.likes;
@@ -114,6 +120,10 @@
       }
     },
     methods:{
+    	//切换评论模块显示
+      toggleComment: function(){
+      	this.isShowComment = !this.isShowComment;
+      },
       //处理用户新鲜事点赞
       toggleMessageLikes: function(messageId){
       	if(this.isfetchingLikes)return
@@ -136,6 +146,11 @@
             }
             //更新vuex
             this.$store.commit('updateLikedMessageList',oldLikesList)
+          }else{
+            this.$message({
+              type:'error',
+              message:'该新鲜事已删除~'
+            })
           }
           this.isfetchingLikes = false;
         })
@@ -148,7 +163,9 @@
         //用户点赞过的新鲜事列表
         likedMessageList:[],
         //是否正在点赞中
-        isfetchingLikes:false
+        isfetchingLikes:false,
+        //是否显示评论组件
+        isShowComment:false
       }
 		}
 	}
@@ -257,6 +274,7 @@
       background-color: #ebebeb;
     }
   }
+
 }
 </style>
 <style lang="less" type="text/less">

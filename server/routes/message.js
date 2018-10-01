@@ -99,7 +99,7 @@ router.post('/toggleThumbLike',function(req,res){
   let likeTargetId = req.body.likeTargetId;
   let type = req.body.type;
   //搜索条件
-  let condition = {
+  let likeCondition = {
     typeId:likeTargetId,
     type:type,
     userId:username
@@ -118,13 +118,28 @@ router.post('/toggleThumbLike',function(req,res){
             status: returnedCodes.CODE_ERROR
           })
         }else{
-          doc.likes = doc.likes + likeNum;
-          doc.save();
-          res.json({
-            status:returnedCodes.CODE_SUCCESS,
-            likeNum:doc.likes,
-            likeStatus:likeNum
-          })
+          //如果该新鲜事存在(判断不能少)
+          if(doc){
+            if(likeNum === 1){
+              //用户未点赞，增加点赞记录
+              let like = new ThumbLike(likeCondition);
+              like.save();
+            }
+            doc.likes = doc.likes + likeNum;
+            doc.save();
+            res.json({
+              status:returnedCodes.CODE_SUCCESS,
+              likeNum:doc.likes,
+              likeStatus:likeNum
+            })
+          }else{
+            //如果该新鲜事已删除
+            res.json({
+              status:returnedCodes.CODE_ERROR,
+              message:'该新鲜事已删除!'
+            })
+          }
+
         }
       })
     },
@@ -135,7 +150,7 @@ router.post('/toggleThumbLike',function(req,res){
     //todo
   };
 
-  ThumbLike.findOne(condition,function(err,doc){
+  ThumbLike.findOne(likeCondition,function(err,doc){
     if(err){
       res.json({
         status:returnedCodes.CODE_ERROR
@@ -147,9 +162,6 @@ router.post('/toggleThumbLike',function(req,res){
         //给对应的赞数-1
         strategy[type] && strategy[type](-1);
       }else{
-        //用户未点赞，增加点赞
-        let like = new ThumbLike(condition);
-        like.save();
         //给对应的赞数+1
         strategy[type] && strategy[type](1);
       }
