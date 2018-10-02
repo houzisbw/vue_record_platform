@@ -1,6 +1,6 @@
 <!--表情选择组件-->
 <template>
-  <div class="wrapper">
+  <div class="emoji-wrapper">
     <div class="emoji-content-wrapper">
       <button v-for="(item,index) in currentPageEmotionList"
               class="emotion-btn"
@@ -78,7 +78,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped type="text/less" lang="less">
-  .wrapper{
+  .emoji-wrapper{
     width:100%;
     max-width: 100%;
     .emoji-content-wrapper{

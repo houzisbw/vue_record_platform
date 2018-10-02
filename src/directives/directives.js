@@ -15,8 +15,7 @@ let directives = {
         }
       })
     },
-
-  }
+  },
 }
 
 export default directives

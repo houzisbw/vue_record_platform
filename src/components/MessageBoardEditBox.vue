@@ -2,8 +2,10 @@
 <template>
   <div class="wrapper">
     <!--编辑留言的版块-->
+    <!--注意v-clickoutside的参数,class为该参数的dom元素点击后不执行回调-->
     <div class="edit-message-wrapper"
          v-if="hackReset"
+         v-clickoutside:emoji-selector="hideActionPanel"
          :style="{backgroundColor:panelBgColor}"
          element-loading-background="rgba(0, 0, 0, 0.6)"
          element-loading-text="提交中..."
@@ -37,12 +39,14 @@
         <span class="max-limit" :class="{'exceeded':isInputExceeded}">{{maxWordLimit-currentWordLength}}</span>
       </div>
       <div class="edit-bottom"
-           v-show="isShowActionPanel">
+           v-show="showActionPanel">
         <!--左侧功能列表-->
         <div class="left">
+          <!--注意要给popover加一个popper-class用于判断点击点是否在该dom内-->
           <el-popover
             placement="bottom-start"
             width="280"
+            popper-class="emoji-selector"
             trigger="click">
             <!--匿名slot内容:表情选择组件-->
             <emotion-select @choose="handleEmotionChoose"></emotion-select>
@@ -88,8 +92,13 @@
   import api from '@/api/api'
   import eventBus from '@/eventBus/eventBus'
   import eventName from '@/eventBus/eventName'
+  import clickoutside from '@/directives/clickoutside'
   export default {
     name: 'MessageBoardEditBox',
+    directives:{
+    	//点击点在目标元素范围外的指令
+      clickoutside
+    },
     props:{
       //最大图片上传数
       maxImageNum:{
@@ -155,11 +164,15 @@
         return !(len>0 && len<=this.maxWordLimit)
       },
       //是否显示操作栏
-      isShowActionPanel:function(){
-      	return this.hideAction?this.isTextareaFocus:true;
+      showActionPanel:function(){
+      	return this.hideAction?this.isShowActionPanel:true;
       }
     },
     methods:{
+    	//隐藏操作面板
+      hideActionPanel: function(){
+      	this.isShowActionPanel = false
+      },
       //按键触发提交新鲜事
       keyupSubmit:function(){
         if(!this.isSubmitBtnDisabled){
@@ -319,6 +332,7 @@
         }
       },
       editFocus: function(){
+      	this.isShowActionPanel = true;
         this.isTextareaFocus = true;
       },
       editBlur: function(){
@@ -350,7 +364,9 @@
         //要上传的图片列表
         imageListToUpload:[],
         //是否正在提交中
-        isSubmitting:false
+        isSubmitting:false,
+        //是否显示操作面板
+        isShowActionPanel:false
       }
     }
   }

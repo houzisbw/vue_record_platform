@@ -74,6 +74,8 @@
     }
     .input{
       flex:1;
+      /*必须加，否则不换行*/
+      word-break: break-all;
     }
   }
 }
