@@ -4,9 +4,12 @@
     <!--编辑留言的版块-->
     <div class="edit-box-wrapper">
       <message-board-edit-box
+        ref="editBox"
+        @submit="handleSubmit"
         edit-box-min-height="75px"
         placeholder="发布新鲜事~"
         input-id="messageImageInput"
+        :isSubmitting="isSubmitting"
         :hide-action="false"
         :maxImageNum="9">
       </message-board-edit-box>
@@ -35,6 +38,9 @@
 </template>
 
 <script>
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
+  import api from '@/api/api'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox.vue'
 	export default {
 		name: 'MessageBoard',
@@ -43,11 +49,97 @@
     },
     computed:{},
     methods:{
+			//处理editBox的提交
+      handleSubmit: function(imgList,text){
+        this.isSubmitting = true;
+        this.uploadImageToPictureBed(imgList).then((imgUrlList)=>{
+          this.isSubmitting = false;
+          //要保存的新鲜事数据
+          let messageData = {
+            //唯一id:后台统一添加
+            messageId:'',
+            imageList:imgUrlList,
+            likes:0,
+            content:text,
+            commentNumber:0,
+            //发布时间:后台统一添加
+            publishTime:'',
+            username:this.$store.getters.getUserName,
+            profileImgUrl:this.$store.getters.getUserProfileImg,
+            nickname:this.$store.getters.getUserNickname,
+            userGroup:this.$store.getters.getUserGroup
+          };
+          //把图片url和文字提交到后台数据库
+          this.axios.post(api.saveMessage,{data:messageData}).then((resp)=>{
+            if(resp.data.status === 1){
+              this.$message({
+                type:'success',
+                message:'新鲜事发布成功!'
+              });
+              //清空editBox的数据
+              this.$refs.editBox.resetAfterSubmit();
+              //通知外层的组件进行更新操作
+              eventBus.$emit(eventName.updateMessageList);
+            }
+          })
+        },()=>{
+          //上传图片出错
+          this.$message({
+            type:'error',
+            message:'上传图片出错啦'
+          })
+        }).catch(()=>{
+          //上传图片出错
+          this.$message({
+            type:'error',
+            message:'上传图片出错啦'
+          })
+        });
+      },
+      //上传图片到第三方网站
+      uploadImageToPictureBed: function(imgList){
+        return new Promise((res,rej)=>{
+          let promises = [];
+          //如果没有上传图片
+          if(imgList.length === 0){
+            res([])
+          }
+          imgList.forEach((item)=>{
+            let formData = new FormData();
+            formData.append('smfile',item);
+            let promise = new Promise((resolve,reject)=>{
+              //生产环境改为正常的url
+              this.axios.post('/avatarUpload',formData).then((resp)=>{
+                let imgUrl = resp.data.data.url;
+                if(resp.data.code === 'success'){
+                  resolve(imgUrl)
+                }else{
+                  reject();
+                }
+              }).catch(()=>{
+                reject()
+              })
+            });
+            promises.push(promise);
+          });
+          Promise.all(promises).then((results)=>{
+            res(results)
+          }).catch((err)=>{
+            //失败
+            rej();
+          })
+        });
+      },
 
     },
 		data () {
 			return {
-
+        //是否正在提交中
+        isSubmitting:false,
+        //上传图片的列表
+        imgListToUpload:[],
+        //上传的内容
+        textContent:''
 			}
 		}
 	}

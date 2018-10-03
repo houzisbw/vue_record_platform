@@ -37,7 +37,7 @@ function createDocumentHandler(el, binding, vnode) {
       });
       let isContain = false;
       classList.forEach((item)=>{
-        //必须获取所有的值
+        //必须获取所有的值,注意类名要加点符号
         let targetList = document.querySelectorAll('.'+item);
         targetList.forEach((innerItem)=>{
           //必须判断target存在与否
@@ -89,6 +89,7 @@ export default {
     el[ctx].documentHandler = createDocumentHandler(el, binding, vnode);
     el[ctx].methodName = binding.expression;
     el[ctx].bindingFn = binding.value;
+    el[ctx].extraDomClass = binding.arg;
   },
 
   unbind(el) {

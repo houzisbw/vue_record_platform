@@ -61,7 +61,8 @@
       </div>
     </div>
     <!--评论模块-->
-    <message-comment v-if="isShowComment">
+    <message-comment v-if="isShowComment"
+                     :comment-avatar="messageInfo.profileImgUrl">
     </message-comment>
 
   </div>

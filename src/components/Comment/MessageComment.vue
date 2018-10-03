@@ -7,7 +7,7 @@
     <!--输入框部分-->
     <div class="reply-input-wrapper">
       <!--头像-->
-      <div class="avatar">
+      <div class="avatar" :style="{backgroundImage:'url('+commentAvatar+')'}">
       </div>
       <!--输入框-->
       <div class="input">
@@ -23,15 +23,28 @@
         </message-board-edit-box>
       </div>
     </div>
+    <!--一级评论展示列表-->
+    <div class="comment-list">
+      <primary-comment-list></primary-comment-list>
+    </div>
   </div>
 </template>
 
 <script>
+  import PrimaryCommentList from '@/components/Comment/PrimaryCommentList'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
 	export default {
 		name: 'MessageComment',
+    props:{
+			//评论者头像
+      commentAvatar:{
+      	type:String,
+        default:''
+      }
+    },
     components:{
-      MessageBoardEditBox
+      MessageBoardEditBox,
+      PrimaryCommentList
     },
 		data () {
 			return {
@@ -68,15 +81,21 @@
     .avatar{
       width:32px;
       height:32px;
-      background-color: red;
       border-radius: 50%;
       margin-right: 12px;
+      background-position: 50%;
+      background-size: cover;
+      background-repeat: no-repeat;
     }
     .input{
       flex:1;
       /*必须加，否则不换行*/
       word-break: break-all;
     }
+  }
+  .comment-list{
+    margin:10px 20px 10px 80px;
+    height:200px;
   }
 }
 </style>

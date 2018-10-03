@@ -144,6 +144,11 @@
       panelBgColor:{
         type:String,
         default:'#fff'
+      },
+      //是否正在提交中
+      isSubmitting:{
+      	type:Boolean,
+        default:false
       }
 
     },
@@ -192,89 +197,10 @@
           this.hackReset = true;
         })
       },
-
-
       //提交新鲜事，包含图片和文字
       submit: function(){
-        this.isSubmitting = true;
-        this.uploadImageToPictureBed().then((imgUrlList)=>{
-          this.isSubmitting = false;
-          //要保存的新鲜事数据
-          let messageData = {
-            //唯一id:后台统一添加
-            messageId:'',
-            imageList:imgUrlList,
-            likes:0,
-            content:this.textAreaContent,
-            commentNumber:0,
-            //发布时间:后台统一添加
-            publishTime:'',
-            username:this.$store.getters.getUserName,
-            profileImgUrl:this.$store.getters.getUserProfileImg,
-            nickname:this.$store.getters.getUserNickname,
-            userGroup:this.$store.getters.getUserGroup
-          };
-          //把图片url和文字提交到后台数据库
-          this.axios.post(api.saveMessage,{data:messageData}).then((resp)=>{
-            if(resp.data.status === 1){
-              this.$message({
-                type:'success',
-                message:'新鲜事发布成功!'
-              });
-              this.resetAfterSubmit();
-              //通知外层的组件进行更新操作
-              eventBus.$emit(eventName.updateMessageList);
-
-            }
-          })
-        },()=>{
-          //上传图片出错
-          this.$message({
-            type:'error',
-            message:'上传图片出错啦'
-          })
-        }).catch(()=>{
-          //上传图片出错
-          this.$message({
-            type:'error',
-            message:'上传图片出错啦'
-          })
-        });
-      },
-
-      //上传图片到第三方网站
-      uploadImageToPictureBed: function(){
-        return new Promise((res,rej)=>{
-          let promises = [];
-          //如果没有上传图片
-          if(this.imageListToUpload.length === 0){
-            res([])
-          }
-          this.imageListToUpload.forEach((item)=>{
-            let formData = new FormData();
-            formData.append('smfile',item);
-            let promise = new Promise((resolve,reject)=>{
-              //生产环境改为正常的url
-              this.axios.post('/avatarUpload',formData).then((resp)=>{
-                let imgUrl = resp.data.data.url;
-                if(resp.data.code === 'success'){
-                  resolve(imgUrl)
-                }else{
-                  reject();
-                }
-              }).catch(()=>{
-                reject()
-              })
-            });
-            promises.push(promise);
-          });
-          Promise.all(promises).then((results)=>{
-            res(results)
-          }).catch((err)=>{
-            //失败
-            rej();
-          })
-        });
+      	//将图片和文字内容传递给父组件进行处理
+        this.$emit('submit',this.imageListToUpload,this.textAreaContent);
       },
 
       //图片上传组件的图片列表变动
@@ -363,8 +289,6 @@
         canAddImage:true,
         //要上传的图片列表
         imageListToUpload:[],
-        //是否正在提交中
-        isSubmitting:false,
         //是否显示操作面板
         isShowActionPanel:false
       }
