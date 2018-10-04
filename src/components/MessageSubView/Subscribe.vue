@@ -36,7 +36,12 @@
         this.axios.post(api.getSubscribeMessage,{}).then((resp)=>{
           this.isLoading = false;
           if(resp.data.status === 1){
-            this.messageList = resp.data.messageList;
+          	//合并处理
+            let messageList = resp.data.messageList;
+            resp.data.userInfoList.forEach((item,index)=>{
+              Object.assign(messageList[index],item);
+            });
+            this.messageList = messageList;
             //更新用户点赞的新鲜事列表
             this.$store.commit('updateLikedMessageList',resp.data.likedList)
           }else{

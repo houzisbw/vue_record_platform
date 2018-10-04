@@ -16,12 +16,18 @@ var messageSchema = new mongoose.Schema({
   commentNumber:Number,
   //新鲜事发布时间
   publishTime:String,
+
+  //如果用户修改了个人信息，那么这里面所有的东西都得改,因此只存用户名，其他的数据库查询即可
+
   //新鲜事用户名
   username:String,
+
   //新鲜事用户头像
-  profileImgUrl:String,
+  //profileImgUrl:String,
   //新鲜事用户昵称
-  nickname:String,
+  //nickname:String,
+
+
   //新鲜事用户组名
   userGroup:String
 });

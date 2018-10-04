@@ -2,26 +2,29 @@
 <template>
   <div class="primary-comment-wrapper">
     <!--头像-->
-    <div class="avatar">
+    <div class="avatar" :style="{backgroundImage:'url('+commentData.profileImgUrl+')'}">
     </div>
     <!--内容部分-->
     <div class="content">
       <!--评论用户信息-->
       <div class="comment-user-info">
-        <span class="username">超级索尼子</span>
-        <span class="usergroup">准备组</span>
+        <span class="username">{{commentData.nickname || commentData.userId}}</span>
+        <span class="usergroup">{{commentData.userGroup}}</span>
       </div>
       <!--评论文本内容-->
-      <div class="comment-text">是的范德萨冯绍峰发的郭德纲地方官而dfdsfsdfddddddddddddddddddddddddd第三方但是但是</div>
+      <div class="comment-text" v-html="commentHtmlContent"></div>
       <!--评论图片部分-->
       <div class="comment-img"
+           v-if="commentData.imgList.length>0"
            @click="showDetailImage"
-           :style="{backgroundImage:'url('+'https://i.loli.net/2018/09/29/5baf48d28713b.jpg'+')'}">
+           :style="{backgroundImage:'url('+commentData.imgList[0]+')'}">
       </div>
       <!--底部操作栏-->
-      <div class="bottom-bar">
+      <div class="bottom-bar divider-line">
         <div class="left">
-          <span>刚刚</span>
+          <span :title="commentData.time | detailTimeStr" class="time">
+            {{ commentData.time | timeFormatter}}
+          </span>
           <span class="dot delete">·</span>
           <span class="delete">删除</span>
         </div>
@@ -39,6 +42,7 @@
     <!--全屏大图查看组件,动画过渡效果-->
     <transition name="fade">
       <comment-image-viewer @close="closeViewer"
+                            :img-src="commentData.imgList[0]"
                             v-if="isShowViewer">
       </comment-image-viewer>
     </transition>
@@ -46,12 +50,48 @@
 </template>
 
 <script>
+  import utils from '@/utils/utils'
   import CommentImageViewer from '@/components/Comment/CommentImageViewer'
 	export default {
 		name: 'PrimaryComment',
+    props:{
+			// 评论数据对象
+      commentData:{
+      	type:Object,
+        default:{}
+      }
+    },
     components:{
       CommentImageViewer
     },
+    computed:{
+      //评论文本内容
+      commentHtmlContent:function(){
+        //捕获表情字符串
+        let emotionReg = /\[:(.+?)\]/g;
+        //构造html字符串
+        let newValue = this.commentData.content ? this.commentData.content.replace(emotionReg,function(match){
+          let emotionStr = match.slice(2,-1);
+          return '<i class="em '+emotionStr+'"></i>'
+        }):'';
+        return newValue
+      }
+    },
+    filters:{
+      //时间过滤器
+      timeFormatter: function(value){
+        let now = +new Date();
+        let delta = utils.timeConvertToChinese(now-value);
+        return delta;
+      },
+      //时间详情表示
+      detailTimeStr: function(value){
+        let date = new Date();
+        date.setTime(parseInt(value,10));
+        return date.toLocaleString()
+      }
+    },
+
 		data () {
 			return {
         isShowViewer:false
@@ -74,6 +114,7 @@
 <style scoped type="text/less" lang="less">
 .primary-comment-wrapper{
   display: flex;
+  margin-top: 10px;
   .avatar{
     width:32px;
     height:32px;
@@ -84,11 +125,17 @@
     background-repeat: no-repeat;
     margin-right: 10px;
   }
+  &:not(:last-child) .divider-line{
+    border-bottom: 1px solid #f1f1f1;
+  }
   .content{
     flex:1;
     white-space: nowrap;
     overflow: hidden;
     word-break: break-all;
+    .time{
+      cursor: default;
+    }
     .delete{
       display: none;
     }
@@ -138,7 +185,6 @@
       justify-content: space-between;
       font-size: 12px;
       padding-bottom: 10px;
-      border-bottom: 1px solid #f1f1f1;
       .left{
         color:#8a9aa9;
         .dot{
@@ -153,6 +199,16 @@
         .comment-action{
           display: flex;
           align-items: center;
+          cursor: pointer;
+          &:hover{
+            color: #a3b3c2;
+          }
+        }
+        .like-action{
+          cursor: pointer;
+          &:hover{
+            color: #a3b3c2;
+          }
         }
       }
     }

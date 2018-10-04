@@ -12,46 +12,164 @@
       <!--输入框-->
       <div class="input">
         <message-board-edit-box
+          ref="commentBox"
+          @submit="handleSubmit"
           edit-box-min-height="15px"
           placeholder="输入评论~"
-          input-id="messageReplyInput"
+          input-id="messageCommentInput"
           :hide-action="true"
           panel-bg-color="#fafbfc"
           bg-color-blur="#fff"
           submit-button-text="评论"
+          :is-submitting="isSubmittingComment"
           :maxImageNum="1">
         </message-board-edit-box>
       </div>
     </div>
     <!--一级评论展示列表-->
-    <div class="comment-list">
-      <primary-comment-list></primary-comment-list>
+    <div class="comment-list" v-if="commentList.length>0">
+      <primary-comment-list v-for="item in commentList"
+                            :comment-data="item">
+      </primary-comment-list>
+    </div>
+    <!--查看更多按钮-->
+    <div class="show-more-comment"
+         @click="showMoreComment"
+         v-if="isShowLoadMoreComment">
+      查看更多 >
     </div>
   </div>
 </template>
 
 <script>
+  import api from '@/api/api'
+  import utils from '@/utils/utils'
   import PrimaryCommentList from '@/components/Comment/PrimaryCommentList'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
 	export default {
-		name: 'MessageComment',
-    props:{
-			//评论者头像
-      commentAvatar:{
-      	type:String,
-        default:''
+    name: 'MessageComment',
+    props: {
+      //评论者头像
+      commentAvatar: {
+        type: String,
+        default: ''
+      },
+      //评论所属的新鲜事的id
+      messageId: {
+        type: String,
+        default: ''
       }
     },
-    components:{
+    components: {
       MessageBoardEditBox,
       PrimaryCommentList
     },
-		data () {
-			return {
+    mounted: function () {
+      // 请求最新评论
+      this.fetchComments();
+    },
+    methods: {
+    	//查看更多评论
+      showMoreComment: function(){
+      	//当前页数+1
+        this.currentPage = this.currentPage+1;
+        this.fetchComments();
+      },
+    	// 请求最新评论
+      fetchComments: function(){
+      	// (1)最多取6条，超过6条下方显示查看更多按钮，一次加载6条
+        // (2)评论按时间先后排列
+        let data = {
+        	//新鲜事id
+          messageId:this.messageId
+        };
+        let param = {
+          currentPage:this.currentPage,
+          pageCapacity:this.maxCommentLoadNumEachTime
+        };
+        this.axios.post(api.fetchMessageComment,{data:data,param:param}).then((resp)=>{
+          if(resp.data.status === 1){
+          	let commentList = resp.data.commentList;
+          	resp.data.userInfoList.forEach((item,index)=>{
+              Object.assign(commentList[index],item);
+            });
+          	//追加评论列表，不是覆盖
+            this.commentList = this.commentList.concat(commentList);
+            this.isShowLoadMoreComment = resp.data.hasMore;
+          }else{
+            this.$message({
+              type: 'error',
+              message: '评论获取失败'
+            })
+          }
+        })
+      },
+      // 提交评论
+      handleSubmit: function (imgList, content) {
+      	this.isSubmittingComment = true;
 
-			}
-		}
-	}
+        // 存入数据库
+        utils.uploadImageToPictureBed(this.axios, imgList).then((imgUrlList) => {
+          let data = {
+            messageId: this.messageId,
+            content: content,
+            imgList: imgUrlList,
+            likes: 0,
+            userId: this.$store.getters.getUserName,
+            //服务端写入时间
+            time: ''
+          };
+          this.axios.post(api.saveMessageComment, {data:data}).then((resp) => {
+            this.isSubmittingComment = false;
+            this.$refs.commentBox.resetAfterSubmit();
+
+            //重置页数为1
+            this.currentPage = 1;
+            this.commentList = [];
+            //刷新评论列表
+            this.fetchComments();
+          },()=>{
+            this.isSubmittingComment = false;
+            //上传图片出错
+            this.$message({
+              type: 'error',
+              message: '保存数据出错'
+            })
+          })
+        }, () => {
+          this.isSubmittingComment = false;
+          //上传图片出错
+          this.$message({
+            type: 'error',
+            message: '上传图片出错啦'
+          })
+        }).catch(() => {
+          this.isSubmittingComment = false;
+          //上传图片出错
+          this.$message({
+            type: 'error',
+            message: '上传图片出错啦'
+          })
+        })
+      },
+
+    },
+    data () {
+      return {
+        //是否在提交评论中
+        isSubmittingComment:false,
+        //评论数据列表
+        commentList:[],
+        //一次最多加载的评论条数
+        maxCommentLoadNumEachTime:6,
+        //当前已加载的页数(每页maxCommentLoadNumEachTime条)
+        currentPage:1,
+        //是否显示加载更多按钮
+        isShowLoadMoreComment:false
+
+      }
+    }
+  }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -60,7 +178,6 @@
   position: relative;
   border-top:1px solid #ebebeb;
   background-color: #fff;
-  padding-bottom: 20px;
   .top-triangle{
     position: absolute;
     left:50%;
@@ -95,7 +212,16 @@
   }
   .comment-list{
     margin:10px 20px 10px 80px;
-    height:200px;
+  }
+  .show-more-comment{
+    height:45px;
+    line-height: 45px;
+    border-top:1px solid #ebebeb;
+    color:#406599;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: center;
+    user-select: none;
   }
 }
 </style>

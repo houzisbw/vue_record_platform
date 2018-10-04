@@ -15,14 +15,18 @@ var commentSchema = new mongoose.Schema({
   //评论的赞数
   likes:Number,
 
-  /* 存储用户信息是为了防止多次查询db */
+  /* 存储用户信息是为了防止多次查询db,有问题，如果修改了用户信息，那么这里面的所有信息也得修改,这里不存储用户信息，只存用户名 */
 
   //评论的用户id
   userId:String,
+
+  //评论用户的昵称
+  //userNickname:String,
   //评论的用户头像url
-  userAvatarUrl:String,
+  //userAvatarUrl:String,
   //评论的用户组别
-  userGroup:String,
+  //userGroup:String,
+
   //评论的时间
   time:String
 });

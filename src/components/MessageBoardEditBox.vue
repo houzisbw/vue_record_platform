@@ -6,11 +6,7 @@
     <div class="edit-message-wrapper"
          v-if="hackReset"
          v-clickoutside:emoji-selector="hideActionPanel"
-         :style="{backgroundColor:panelBgColor}"
-         element-loading-background="rgba(0, 0, 0, 0.6)"
-         element-loading-text="提交中..."
-         element-loading-spinner=""
-         v-loading="isSubmitting">
+         :style="{backgroundColor:panelBgColor}">
       <div class="edit-dialog-wrapper"
            :style="{backgroundColor : !isTextareaFocus?bgColorBlur:'#fff'}"
            :class="{'active':isTextareaFocus}">
@@ -78,9 +74,12 @@
                      :disabled="isSubmitBtnDisabled"
                      @click="submit"
                      type="primary">
-            {{submitButtonText}}
+            {{isSubmitting?buttonTextInSubmitting:submitButtonText}}
           </el-button>
         </div>
+      </div>
+      <!--loading时的遮罩-->
+      <div class="overlay-loading" v-if="isSubmitting">
       </div>
     </div>
   </div>
@@ -149,6 +148,11 @@
       isSubmitting:{
       	type:Boolean,
         default:false
+      },
+      //提交中的按钮文本
+      buttonTextInSubmitting:{
+      	type:String,
+        default:'提交中'
       }
 
     },
@@ -304,6 +308,14 @@
     .edit-message-wrapper{
       box-sizing: border-box;
       background-color: #fff;
+      position: relative;
+      .overlay-loading{
+        position: absolute;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+      }
       .active{
         border:1px solid #007fff!important;
       }

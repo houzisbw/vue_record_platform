@@ -107,11 +107,49 @@ function timeConvertToChinese(timestamp){
   return timeMap[timeArray[index]]()
 }
 
+//第三方图床网站图片上传
+const uploadImageToPictureBed = (axios,imgList)=>{
+  return new Promise((res,rej)=>{
+    let promises = [];
+    //如果没有上传图片
+    if(imgList.length === 0){
+      res([])
+    }
+    imgList.forEach((item)=>{
+      let formData = new FormData();
+      formData.append('smfile',item);
+      let promise = new Promise((resolve,reject)=>{
+
+        /*   生产环境改为正常的url  */
+
+        axios.post('/avatarUpload',formData).then((resp)=>{
+          let imgUrl = resp.data.data.url;
+          if(resp.data.code === 'success'){
+            resolve(imgUrl)
+          }else{
+            reject();
+          }
+        }).catch(()=>{
+          reject()
+        })
+      });
+      promises.push(promise);
+    });
+    Promise.all(promises).then((results)=>{
+      res(results)
+    }).catch((err)=>{
+      //失败
+      rej();
+    })
+  });
+}
+
 export default {
   getOffsetX,
   getOffsetY,
   throttle,
   isIE,
   dataURLtoBlob,
-  timeConvertToChinese
+  timeConvertToChinese,
+  uploadImageToPictureBed
 };

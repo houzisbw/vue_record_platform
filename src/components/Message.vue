@@ -62,6 +62,7 @@
     </div>
     <!--评论模块-->
     <message-comment v-if="isShowComment"
+                     :message-id="messageInfo.messageId"
                      :comment-avatar="messageInfo.profileImgUrl">
     </message-comment>
 
@@ -253,6 +254,7 @@
       font-size: 13px;
       color:#8a93a0;
       cursor:pointer;
+      user-select: none;
       &:hover{
         color: #a5afbc;
       }

@@ -77,6 +77,8 @@ export default {
   fetchEmotionList:'/message/getEmotionList',
   saveMessage:'/message/saveMessage', //发布新鲜事
   getSubscribeMessage:'/message/getSubscribeMessage',//获取订阅的新鲜事
-  toggleThumbLike:'/message/toggleThumbLike'//用户点赞操作
+  toggleThumbLike:'/message/toggleThumbLike',//用户点赞操作
+  saveMessageComment:'/message/saveMessageComment',//保存用户评论
+  fetchMessageComment:'/message/fetchMessageComment',//获取用户评论
 
 }

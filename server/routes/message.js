@@ -6,6 +6,8 @@ var router = express.Router();
 var Emotion = require('./../model/emotions')
 var Message = require('./../model/message')
 var ThumbLike = require('./../model/ThumbLike')
+var Comment = require('./../model/message_comment')
+var User = require('./../model/user')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
 var likeType = require('./../config').likeType;
@@ -70,24 +72,46 @@ router.post('/getSubscribeMessage',function(req,res){
       ret.sort(function(a,b){
         return parseInt(b.publishTime,10) - parseInt(a.publishTime,10)
       });
+      //遍历每条新鲜事，获取其用户信息
+      let promises = [];
+      ret.forEach((item)=>{
+        let promise = new Promise((resolve,reject)=>{
+          User.findOne({username:item.username},function(err2,doc2){
+            if(err2){
+              reject()
+            }else{
+              resolve({
+                nickname:doc2.nickname,
+                userGroup:doc2.group,
+                profileImgUrl:doc2.profileImgUrl
+              })
+            }
+          })
+        });
+        promises.push(promise)
+      });
+      Promise.all(promises).then((results)=>{
+        //获取该用户赞过的新鲜事的列表
+        let likedMessageList = [];
+        ThumbLike.find({userId:user,type:likeType.MESSAGE},function(err1,docs1){
+          if(err1){
+            res.json({
+              status:returnedCodes.CODE_ERROR
+            })
+          }else{
+            docs1.forEach((item)=>{
+              likedMessageList.push(item.typeId)
+            });
 
-      //获取该用户赞过的新鲜事的列表
-      let likedMessageList = [];
-      ThumbLike.find({userId:user,type:likeType.MESSAGE},function(err1,docs1){
-        if(err1){
-          res.json({
-            status:returnedCodes.CODE_ERROR
-          })
-        }else{
-          docs1.forEach((item)=>{
-            likedMessageList.push(item.typeId)
-          });
-          res.json({
-            status:returnedCodes.CODE_SUCCESS,
-            messageList:ret,
-            likedList:likedMessageList
-          })
-        }
+            res.json({
+              status:returnedCodes.CODE_SUCCESS,
+              messageList:ret,
+              //这里无法将用户信息合并到ret中，所以传递到前端进行操作
+              userInfoList:results,
+              likedList:likedMessageList
+            })
+          }
+        });
       });
     }
   })
@@ -167,6 +191,75 @@ router.post('/toggleThumbLike',function(req,res){
       }
     }
   })
+});
+
+
+//保存评论
+router.post('/saveMessageComment',function(req,res){
+  let data = req.body.data;
+  //获取服务器时间
+  let timeNow = + new Date();
+  data.time = timeNow.toString();
+  //保存
+  let comment = new Comment(data);
+  comment.save();
+  res.json({
+    status:returnedCodes.CODE_SUCCESS
+  })
+});
+
+//获取新鲜事的评论
+router.post('/fetchMessageComment',function(req,res){
+  let data = req.body.data;
+  //获取参数
+  let currentPage = req.body.param.currentPage,
+      capacity = req.body.param.pageCapacity;
+  //是否还有剩余评论
+  let hasMore = false;
+
+  console.log(currentPage)
+  //根据新鲜事id查找评论表中的对应新鲜事的评论
+  Comment.find(data).sort({time:-1}).skip((currentPage-1)*capacity).limit(capacity).exec(function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      //针对每条评论进行查询用户的相关信息
+      let promises = [];
+      docs.forEach((item)=>{
+        let promise = new Promise((resolve,reject)=>{
+          User.findOne({username:item.userId},function(err2,doc2){
+            if(err2){
+              reject()
+            }else{
+              resolve({
+                nickname:doc2.nickname,
+                userGroup:doc2.group,
+                profileImgUrl:doc2.profileImgUrl
+              })
+            }
+          })
+        });
+        promises.push(promise)
+      });
+
+      Promise.all(promises).then((results)=>{
+        //查询记录总数
+        Comment.count(data,function(err,count){
+          if(currentPage*capacity < count){
+            hasMore = true
+          }
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            commentList:docs,
+            hasMore:hasMore,
+            userInfoList:results
+          })
+        });
+      })
+    }
+  });
 });
 
 

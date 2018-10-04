@@ -41,6 +41,7 @@
   import eventBus from '@/eventBus/eventBus'
   import eventName from '@/eventBus/eventName'
   import api from '@/api/api'
+  import utils from '@/utils/utils'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox.vue'
 	export default {
 		name: 'MessageBoard',
@@ -52,7 +53,7 @@
 			//处理editBox的提交
       handleSubmit: function(imgList,text){
         this.isSubmitting = true;
-        this.uploadImageToPictureBed(imgList).then((imgUrlList)=>{
+        utils.uploadImageToPictureBed(this.axios,imgList).then((imgUrlList)=>{
           this.isSubmitting = false;
           //要保存的新鲜事数据
           let messageData = {
@@ -96,41 +97,6 @@
           })
         });
       },
-      //上传图片到第三方网站
-      uploadImageToPictureBed: function(imgList){
-        return new Promise((res,rej)=>{
-          let promises = [];
-          //如果没有上传图片
-          if(imgList.length === 0){
-            res([])
-          }
-          imgList.forEach((item)=>{
-            let formData = new FormData();
-            formData.append('smfile',item);
-            let promise = new Promise((resolve,reject)=>{
-              //生产环境改为正常的url
-              this.axios.post('/avatarUpload',formData).then((resp)=>{
-                let imgUrl = resp.data.data.url;
-                if(resp.data.code === 'success'){
-                  resolve(imgUrl)
-                }else{
-                  reject();
-                }
-              }).catch(()=>{
-                reject()
-              })
-            });
-            promises.push(promise);
-          });
-          Promise.all(promises).then((results)=>{
-            res(results)
-          }).catch((err)=>{
-            //失败
-            rej();
-          })
-        });
-      },
-
     },
 		data () {
 			return {
