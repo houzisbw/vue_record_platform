@@ -49,6 +49,13 @@ var config = {
     'MESSAGE':1,
     'COMMENT_FIRST':2,
     'COMMENT-SECOND':3
+  },
+  //新鲜事回复的类型
+  replyType:{
+    //针对评论的回复
+    COMMENT_REPLY:1,
+    //针对回复的回复
+    REPLY_REPLY:2
   }
 }
 

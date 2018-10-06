@@ -192,6 +192,7 @@
   position: relative;
   border-top:1px solid #ebebeb;
   background-color: #fff;
+  padding-bottom: 20px;
   .top-triangle{
     position: absolute;
     left:50%;

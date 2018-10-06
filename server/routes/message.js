@@ -7,6 +7,7 @@ var Emotion = require('./../model/emotions')
 var Message = require('./../model/message')
 var ThumbLike = require('./../model/ThumbLike')
 var Comment = require('./../model/message_comment')
+var CommentReply = require('./../model/message_comment_reply')
 var User = require('./../model/user')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
@@ -200,7 +201,7 @@ router.post('/saveMessageComment',function(req,res){
   //获取服务器时间
   let timeNow = + new Date();
   data.time = timeNow.toString();
-  //对应的新鲜事的评论数+1
+  //对应的新鲜事的评论数+1,注意评论数包含一级评论和二级评论
   Message.findOne({messageId:data.messageId},function(err,doc){
     if(err){
       res.json({
@@ -262,7 +263,7 @@ router.post('/fetchMessageComment',function(req,res){
       });
 
       Promise.all(promises).then((results)=>{
-        //查询记录总数
+        //查询记录总数,这里要查询2级评论的数量
         Comment.count(data,function(err,count){
           if(currentPage*capacity < count){
             hasMore = true
@@ -277,6 +278,22 @@ router.post('/fetchMessageComment',function(req,res){
       })
     }
   });
+});
+
+
+//保存评论的回复
+router.post('/saveCommentReply',function(req,res){
+  let data = req.body.data;
+  //获取服务器时间
+  let timeNow = + new Date();
+  data.time = timeNow.toString();
+  console.log(data)
+  //回复
+  let commentReply = new CommentReply(data);
+  commentReply.save();
+  res.json({
+    status:returnedCodes.CODE_SUCCESS
+  })
 });
 
 

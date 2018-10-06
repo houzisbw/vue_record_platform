@@ -75,7 +75,9 @@
 </template>
 
 <script>
+  import api from '@/api/api'
   import utils from '@/utils/utils'
+  import config from '@/config/config'
   import clickoutside from '@/directives/clickoutside'
   import CommentImageViewer from '@/components/Comment/CommentImageViewer'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
@@ -152,16 +154,71 @@
       hideEditBox: function(){
         this.isShowCommentReplyBox = false;
       },
-      // 提交
-      handleSubmit: function(){
-
-      }
+      // 提交回复
+      handleSubmit: function(imgList,content){
+        this.isSubmittingReply = true;
+        // 上传图片
+        utils.uploadImageToPictureBed(this.axios, imgList).then((imgUrlList) => {
+          let data = {
+          	//评论id
+            commentId: this.commentData._id,
+            //回复内容
+            replyText: content,
+            //回复图片数组
+            replyImgList: imgUrlList,
+            //回复id
+            replyId:this.commentData._id,
+            //回复类型
+            replyType:config.replyType.COMMENT_REPLY,
+            //赞数
+            likes: 0,
+            //服务端写入时间
+            time: '',
+            //回复的用户名
+            fromUserId:this.$store.getters.getUserNickname || this.$store.getters.getUserName
+          };
+          this.axios.post(api.saveCommentReply, {data:data}).then((resp) => {
+            if(resp.data.status === 1){
+              this.isSubmittingReply = false;
+              //todo
+            }else{
+              this.$message({
+                type: 'error',
+                message: '保存数据出错'
+              })
+            }
+          },()=>{
+            this.isSubmittingReply = false;
+            //上传图片出错
+            this.$message({
+              type: 'error',
+              message: '保存数据出错'
+            })
+          })
+        }, () => {
+          this.isSubmittingReply = false;
+          //上传图片出错
+          this.$message({
+            type: 'error',
+            message: '上传图片出错啦'
+          })
+        }).catch(() => {
+          this.isSubmittingReply = false;
+          //上传图片出错
+          this.$message({
+            type: 'error',
+            message: '上传图片出错啦'
+          })
+        })
+      },
     }
 	}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped type="text/less" lang="less">
+//引入动画css
+@import './../../assets/css/animation.css';
 .primary-comment-wrapper{
   display: flex;
   margin-top: 10px;
@@ -278,11 +335,4 @@
   }
 }
 
-//图片查看组件动画过渡效果
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
 </style>

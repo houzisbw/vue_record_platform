@@ -13,10 +13,24 @@
           <span class="usergroup">准备组</span>
         </div>
         <!--评论文本内容-->
-        <div class="comment-text" >是打发第三方是的额333333333333333333333333333333333333333333333333333333</div>
-
+        <div class="comment-text" >是打发第三方</div>
         <!--图片部分-->
-
+        <span class="comment-img"
+              @mouseleave="showImageBox(false)"
+              @mouseenter="showImageBox(true)">
+          [图片]
+          <comment-brief-image-viewer
+            @show="handleShowImageBox"
+            v-show="isShowImageBox">
+          </comment-brief-image-viewer>
+          <!--大图展示组件-->
+          <transition name="fade">
+            <comment-image-viewer v-show="isShowDetailImage"
+                                  @close="hideDetailImage"
+                                  img-src="https://i.loli.net/2018/10/06/5bb8a066b6962.jpg">
+            </comment-image-viewer>
+          </transition>
+        </span>
         <!--底部操作栏-->
         <div class="bottom-bar">
           <div class="left">
@@ -62,10 +76,14 @@
 <script>
   import clickoutside from '@/directives/clickoutside'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
+  import CommentBriefImageViewer from '@/components/Comment/CommentBriefImageViewer'
+  import CommentImageViewer from '@/components/Comment/CommentImageViewer'
 	export default {
 		name: 'CommentReply',
     components:{
-      MessageBoardEditBox
+      MessageBoardEditBox,
+      CommentBriefImageViewer,
+      CommentImageViewer
     },
     directives:{
       clickoutside
@@ -88,6 +106,18 @@
       //点击其他地方隐藏回复框
       hideEditBox: function(){
       	this.isShowReplyInput = false;
+      },
+      //处理显图片框与否
+      showImageBox: function(isShow){
+      	this.isShowImageBox = isShow;
+      },
+      //图片大图显示
+      handleShowImageBox: function(){
+      	this.isShowDetailImage = true;
+      },
+      //隐藏大图显示
+      hideDetailImage: function(){
+        this.isShowDetailImage = false;
       }
     },
 		data () {
@@ -95,7 +125,11 @@
         //是否显示输入框
         isShowReplyInput:false,
         //是否正在回复中
-        isSubmittingReply:false
+        isSubmittingReply:false,
+        //是否显示图片框
+        isShowImageBox:false,
+        //是否显示大图
+        isShowDetailImage:false
 			}
 		}
 	}
@@ -103,6 +137,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped type="text/less" lang="less">
+@import './../../assets/css/animation.css';
 .comment-reply-wrapper{
   display: flex;
   background-color: #fafbfc;
@@ -123,7 +158,6 @@
   }
   .content{
     flex:1;
-    overflow: hidden;
     word-break: break-all;
     .time{
       cursor: default;
@@ -159,16 +193,15 @@
       font-size: 13px;
       white-space: pre-wrap;
       word-break: break-all;
+      display: inline-block;
     }
     .comment-img{
-      margin-top: 10px;
-      width:80px;
-      height:80px;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: 50%;
-      cursor: zoom-in;
-      background-color: #cbcbcb;
+      color:#406599;
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 13px;
+      position: relative;
+      display: inline-block;
     }
     .bottom-bar{
       margin-top: 7px;
@@ -216,4 +249,5 @@
     }
   }
 }
+
 </style>

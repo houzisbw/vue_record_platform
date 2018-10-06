@@ -30,5 +30,5 @@ module.exports =  {
     'MESSAGE':1,
     'COMMENT_FIRST':2,
     'COMMENT-SECOND':3
-  }
+  },
 }

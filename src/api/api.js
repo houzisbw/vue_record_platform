@@ -80,5 +80,6 @@ export default {
   toggleThumbLike:'/message/toggleThumbLike',//用户点赞操作
   saveMessageComment:'/message/saveMessageComment',//保存用户评论
   fetchMessageComment:'/message/fetchMessageComment',//获取用户评论
+  saveCommentReply:'/message/saveCommentReply',//保存评论的回复
 
 }

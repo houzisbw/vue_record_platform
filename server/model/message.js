@@ -12,7 +12,7 @@ var messageSchema = new mongoose.Schema({
   imageList:Array,
   //新鲜事点赞数
   likes:Number,
-  //新鲜事评论数量
+  //新鲜事评论数量(包含一级二级评论)
   commentNumber:Number,
   //新鲜事发布时间
   publishTime:String,
