@@ -200,12 +200,31 @@ router.post('/saveMessageComment',function(req,res){
   //获取服务器时间
   let timeNow = + new Date();
   data.time = timeNow.toString();
-  //保存
-  let comment = new Comment(data);
-  comment.save();
-  res.json({
-    status:returnedCodes.CODE_SUCCESS
-  })
+  //对应的新鲜事的评论数+1
+  Message.findOne({messageId:data.messageId},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      if(doc){
+        doc.commentNumber = doc.commentNumber+1;
+        doc.save();
+        //保存
+        let comment = new Comment(data);
+        comment.save();
+        res.json({
+          status:returnedCodes.CODE_SUCCESS,
+          commentNum:doc.commentNumber
+        })
+      }else{
+        res.json({
+          status:returnedCodes.CODE_ERROR
+        })
+      }
+    }
+  });
+
 });
 
 //获取新鲜事的评论
@@ -216,8 +235,6 @@ router.post('/fetchMessageComment',function(req,res){
       capacity = req.body.param.pageCapacity;
   //是否还有剩余评论
   let hasMore = false;
-
-  console.log(currentPage)
   //根据新鲜事id查找评论表中的对应新鲜事的评论
   Comment.find(data).sort({time:-1}).skip((currentPage-1)*capacity).limit(capacity).exec(function(err,docs){
     if(err){

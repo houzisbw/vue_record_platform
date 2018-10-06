@@ -8,9 +8,10 @@
     <!--loading的图就是2个骨架图-->
     <message-skeleton-loading v-if="isLoading">
     </message-skeleton-loading>
-    <!--新鲜事组件-->
+    <!--新鲜事组件,sync修饰符用于子组件动态修改prop的值-->
     <message v-for="(item,index) in messageList"
              :key="item.messageId"
+             :comment-num.sync="item.commentNumber"
              :message-info="item">
     </message>
   </div>

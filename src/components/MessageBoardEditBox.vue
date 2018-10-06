@@ -153,8 +153,7 @@
       buttonTextInSubmitting:{
       	type:String,
         default:'提交中'
-      }
-
+      },
     },
     components:{
       EmotionSelect,
@@ -178,6 +177,11 @@
       }
     },
     methods:{
+    	//使得输入框获得焦点
+      focusInput:function(){
+      	this.$refs.textArea.focus();
+        this.isTextareaFocus = true;
+      },
     	//隐藏操作面板
       hideActionPanel: function(){
       	this.isShowActionPanel = false
@@ -350,6 +354,7 @@
           font-size: 14px;
           /*防止复制粘贴出现富文本*/
           -webkit-user-modify: read-write-plaintext-only;
+          word-break: break-all;
           /*用伪元素模拟placeholder*/
           &:after{
             content:attr(placeholder);

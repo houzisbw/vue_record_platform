@@ -53,7 +53,7 @@
       </div>
       <div class="action-wrapper" @click="toggleComment">
         <i class="iconfont icon-message"></i>
-        <span class='action-text'>评论</span>
+        <span class='action-text'>{{commentNum===0?'评论':commentNum}}</span>
       </div>
       <div class="action-wrapper">
         <i class="iconfont icon-export" style="transform: rotate(-90deg);"></i>
@@ -62,6 +62,7 @@
     </div>
     <!--评论模块-->
     <message-comment v-if="isShowComment"
+                     @modify-comment-num="handleModifyCommentNum"
                      :message-id="messageInfo.messageId"
                      :comment-avatar="messageInfo.profileImgUrl">
     </message-comment>
@@ -82,6 +83,11 @@
 			messageInfo:{
 				type:Object,
       },
+      //新鲜事的评论数
+      commentNum:{
+				type:Number,
+        default:0
+      }
     },
     components:{
       MessageImageViewer,
@@ -122,6 +128,11 @@
       }
     },
     methods:{
+    	//修改评论数
+      handleModifyCommentNum: function(num){
+      	//修改父组件的prop:评论数,注意父组件的prop使用了sync修饰符
+        this.$emit('update:commentNum',num)
+      },
     	//切换评论模块显示
       toggleComment: function(){
       	this.isShowComment = !this.isShowComment;
@@ -160,6 +171,8 @@
     },
 		data () {
 			return {
+				//新鲜事评论数量，用于及时改变评论数
+        messageCommentNum:0,
 				//新鲜事赞数,内部变量，用于及时改变赞数
         messageLikeNum:0,
         //用户点赞过的新鲜事列表

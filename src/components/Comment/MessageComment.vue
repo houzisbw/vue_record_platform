@@ -5,7 +5,7 @@
     <div class="top-triangle">
     </div>
     <!--输入框部分-->
-    <div class="reply-input-wrapper">
+    <div class="message-comment-reply-input-wrapper">
       <!--头像-->
       <div class="avatar" :style="{backgroundImage:'url('+commentAvatar+')'}">
       </div>
@@ -28,7 +28,9 @@
     </div>
     <!--一级评论展示列表-->
     <div class="comment-list" v-if="commentList.length>0">
+      <!--用数据库的主键来做key值-->
       <primary-comment-list v-for="item in commentList"
+                            :key="item._id"
                             :comment-data="item">
       </primary-comment-list>
     </div>
@@ -71,12 +73,14 @@
     methods: {
     	//查看更多评论
       showMoreComment: function(){
+      	if(this.isFetchingComment)return
       	//当前页数+1
         this.currentPage = this.currentPage+1;
         this.fetchComments();
       },
     	// 请求最新评论
       fetchComments: function(){
+      	this.isFetchingComment = true;
       	// (1)最多取6条，超过6条下方显示查看更多按钮，一次加载6条
         // (2)评论按时间先后排列
         let data = {
@@ -102,12 +106,12 @@
               message: '评论获取失败'
             })
           }
+          this.isFetchingComment = false;
         })
       },
       // 提交评论
       handleSubmit: function (imgList, content) {
       	this.isSubmittingComment = true;
-
         // 存入数据库
         utils.uploadImageToPictureBed(this.axios, imgList).then((imgUrlList) => {
           let data = {
@@ -120,14 +124,22 @@
             time: ''
           };
           this.axios.post(api.saveMessageComment, {data:data}).then((resp) => {
-            this.isSubmittingComment = false;
-            this.$refs.commentBox.resetAfterSubmit();
-
-            //重置页数为1
-            this.currentPage = 1;
-            this.commentList = [];
-            //刷新评论列表
-            this.fetchComments();
+          	if(resp.data.status === 1){
+              this.isSubmittingComment = false;
+              this.$refs.commentBox.resetAfterSubmit();
+              //重置页数为1
+              this.currentPage = 1;
+              this.commentList = [];
+              //刷新评论列表
+              this.fetchComments();
+              //修改父组件上的评论数(+1)
+              this.$emit('modify-comment-num',resp.data.commentNum);
+            }else{
+              this.$message({
+                type: 'error',
+                message: '保存数据出错'
+              })
+            }
           },()=>{
             this.isSubmittingComment = false;
             //上传图片出错
@@ -165,7 +177,9 @@
         //当前已加载的页数(每页maxCommentLoadNumEachTime条)
         currentPage:1,
         //是否显示加载更多按钮
-        isShowLoadMoreComment:false
+        isShowLoadMoreComment:false,
+        //是否正在获取评论
+        isFetchingComment:false
 
       }
     }
@@ -189,7 +203,7 @@
     border-top:1px solid #ebebeb;
     background-color: #fff;
   }
-  .reply-input-wrapper{
+  .message-comment-reply-input-wrapper{
     background-color: #fafbfc;
     margin:16px 20px;
     display: flex;

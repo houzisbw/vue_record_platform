@@ -20,7 +20,7 @@
            :style="{backgroundImage:'url('+commentData.imgList[0]+')'}">
       </div>
       <!--底部操作栏-->
-      <div class="bottom-bar divider-line">
+      <div class="bottom-bar">
         <div class="left">
           <span :title="commentData.time | detailTimeStr" class="time">
             {{ commentData.time | timeFormatter}}
@@ -32,11 +32,36 @@
           <div class="like-action">
             <i class="iconfont icon-like"></i>
           </div>
-          <div class="comment-action">
+          <div class="comment-action" @click="toggleCommentReplyBox">
             <i class="iconfont icon-message"></i>
             <span style="margin-left: 5px;">回复</span>
           </div>
         </div>
+      </div>
+      <!--回复框部分-->
+      <div class="comment-box-wrapper" v-if="isShowCommentReplyBox">
+        <message-board-edit-box
+          v-clickoutside:emoji-selector="hideEditBox"
+          ref="replyBox"
+          @submit="handleSubmit"
+          edit-box-min-height="15px"
+          placeholder="输入回复~"
+          input-id="messageCommentReplyInput"
+          :hide-action="false"
+          panel-bg-color="#fafbfc"
+          bg-color-blur="#fff"
+          submit-button-text="回复"
+          :is-submitting="isSubmittingReply"
+          :maxImageNum="1">
+        </message-board-edit-box>
+      </div>
+      <!--二级评论组件-->
+      <div class="reply-wrapper">
+        <comment-reply></comment-reply>
+        <comment-reply></comment-reply>
+      </div>
+      <!--分割线-->
+      <div class="divider-line">
       </div>
     </div>
     <!--全屏大图查看组件,动画过渡效果-->
@@ -51,7 +76,10 @@
 
 <script>
   import utils from '@/utils/utils'
+  import clickoutside from '@/directives/clickoutside'
   import CommentImageViewer from '@/components/Comment/CommentImageViewer'
+  import MessageBoardEditBox from '@/components/MessageBoardEditBox'
+  import CommentReply from '@/components/Comment/CommentReply'
 	export default {
 		name: 'PrimaryComment',
     props:{
@@ -62,7 +90,12 @@
       }
     },
     components:{
-      CommentImageViewer
+      CommentImageViewer,
+      CommentReply,
+      MessageBoardEditBox
+    },
+    directives:{
+      clickoutside
     },
     computed:{
       //评论文本内容
@@ -94,7 +127,12 @@
 
 		data () {
 			return {
-        isShowViewer:false
+				//是否显示全屏查看大图组件
+        isShowViewer:false,
+        //是否显示评论回复框
+        isShowCommentReplyBox:false,
+        //是否正在提交回复
+        isSubmittingReply:false
 			}
 		},
     methods:{
@@ -105,6 +143,18 @@
       // 关闭全屏查看组件
       closeViewer:function(){
       	this.isShowViewer = false;
+      },
+      // 是否显示评论回复框
+      toggleCommentReplyBox: function(){
+      	this.isShowCommentReplyBox = !this.isShowCommentReplyBox;
+      },
+      // 隐藏输入框
+      hideEditBox: function(){
+        this.isShowCommentReplyBox = false;
+      },
+      // 提交
+      handleSubmit: function(){
+
       }
     }
 	}
@@ -119,7 +169,7 @@
     width:32px;
     height:32px;
     border-radius: 50%;
-    background-color: red;
+    background-color: #cbcbcb;
     background-position: 50%;
     background-size: cover;
     background-repeat: no-repeat;
@@ -127,11 +177,12 @@
   }
   &:not(:last-child) .divider-line{
     border-bottom: 1px solid #f1f1f1;
+    margin-top: 10px;
   }
   .content{
+    /*white-space: nowrap;*/
+    /*overflow: hidden;*/
     flex:1;
-    white-space: nowrap;
-    overflow: hidden;
     word-break: break-all;
     .time{
       cursor: default;
@@ -178,6 +229,17 @@
       cursor: zoom-in;
       background-color: #cbcbcb;
     }
+    .comment-box-wrapper{
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      padding: 12px;
+      background-color:#fafbfc;
+    }
+    .reply-wrapper{
+      word-break: break-all;
+      width:100%;
+      max-width: 100%;
+    }
     .bottom-bar{
       margin-top: 7px;
       display: flex;
@@ -200,6 +262,7 @@
           display: flex;
           align-items: center;
           cursor: pointer;
+          user-select: none;
           &:hover{
             color: #a3b3c2;
           }
