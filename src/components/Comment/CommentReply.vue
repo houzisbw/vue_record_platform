@@ -3,23 +3,25 @@
 <template>
   <div class="comment-reply-wrapper">
       <!--头像-->
-      <div class="avatar">
+      <div class="avatar" :style="{backgroundImage:'url('+replyData.fromUserAvatar+')'}">
       </div>
       <!--内容部分-->
       <div class="content">
         <!--评论用户信息-->
         <div class="comment-user-info">
-          <span class="username">罗秋雨</span>
-          <span class="usergroup">准备组</span>
+          <span class="username">{{replyData.fromUserNickname || replyData.fromUserId}}</span>
+          <span class="usergroup">{{replyData.fromUserGroup}}</span>
         </div>
         <!--评论文本内容-->
-        <div class="comment-text" >是打发第三方</div>
+        <div class="comment-text" >{{replyData.replyText}}</div>
         <!--图片部分-->
         <span class="comment-img"
+              v-if="replyData.replyImgList.length>0"
               @mouseleave="showImageBox(false)"
               @mouseenter="showImageBox(true)">
           [图片]
           <comment-brief-image-viewer
+            :img-src="replyData.replyImgList[0]"
             @show="handleShowImageBox"
             v-show="isShowImageBox">
           </comment-brief-image-viewer>
@@ -27,22 +29,22 @@
           <transition name="fade">
             <comment-image-viewer v-show="isShowDetailImage"
                                   @close="hideDetailImage"
-                                  img-src="https://i.loli.net/2018/10/06/5bb8a066b6962.jpg">
+                                  :img-src="replyData.replyImgList[0]">
             </comment-image-viewer>
           </transition>
         </span>
         <!--底部操作栏-->
         <div class="bottom-bar">
           <div class="left">
-            <span class="time">
-              刚刚
+            <span class="time" :title="replyData.time | detailTimeStr">
+              {{replyData.time | timeFormatter}}
             </span>
             <span class="dot delete">·</span>
             <span class="delete">删除</span>
           </div>
           <div class="right">
             <div class="like-action">
-              <i class="iconfont icon-like"></i>
+              <i class="iconfont icon-like">{{replyData.likes>0?replyData.likes:''}}</i>
             </div>
             <div class="comment-action" @click="toggleReplyInput" >
               <i class="iconfont icon-message"></i>
@@ -51,8 +53,6 @@
           </div>
         </div>
         <!--输入框部分-->
-
-        <!--bug:文字无法自动换行-->
         <div class="reply-input" v-show="isShowReplyInput">
           <message-board-edit-box
             v-clickoutside:emoji-selector="hideEditBox"
@@ -74,6 +74,7 @@
 </template>
 
 <script>
+  import utils from '@/utils/utils'
   import clickoutside from '@/directives/clickoutside'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
   import CommentBriefImageViewer from '@/components/Comment/CommentBriefImageViewer'
@@ -85,8 +86,28 @@
       CommentBriefImageViewer,
       CommentImageViewer
     },
+    props:{
+			replyData:{
+				type:Object,
+        required:true
+      }
+    },
     directives:{
       clickoutside
+    },
+    filters:{
+      //时间过滤器
+      timeFormatter: function(value){
+        let now = +new Date();
+        let delta = utils.timeConvertToChinese(now-value);
+        return delta;
+      },
+      //时间详情表示
+      detailTimeStr: function(value){
+        let date = new Date();
+        date.setTime(parseInt(value,10));
+        return date.toLocaleString()
+      }
     },
     methods:{
 			// 切换回复框

@@ -81,5 +81,6 @@ export default {
   saveMessageComment:'/message/saveMessageComment',//保存用户评论
   fetchMessageComment:'/message/fetchMessageComment',//获取用户评论
   saveCommentReply:'/message/saveCommentReply',//保存评论的回复
+  fetchReplyOfComment:'/message/fetchReplyOfComment',//获取评论的回复
 
 }

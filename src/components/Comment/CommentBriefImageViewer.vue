@@ -3,7 +3,7 @@
   <div class="wrapper">
     <div class="img-inner-box"
          @click="showDetailImage"
-         :style="{backgroundImage:'url('+'https://i.loli.net/2018/10/06/5bb8a066b6962.jpg'+')'}">
+         :style="{backgroundImage:'url('+imgSrc+')'}">
     </div>
     <!--三角形箭头-->
     <div class="triangle">
@@ -15,9 +15,14 @@
 </template>
 
 <script>
-
 	export default {
 		name: 'CommentBriefImageViewer',
+    props:{
+			imgSrc:{
+				type:String,
+        default:''
+      }
+    },
     methods:{
 			// 显示大图
       showDetailImage: function(){

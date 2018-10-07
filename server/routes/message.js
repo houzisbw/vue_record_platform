@@ -275,6 +275,10 @@ router.post('/fetchMessageComment',function(req,res){
             userInfoList:results
           })
         });
+      }).catch(()=>{
+        res.json({
+          status:returnedCodes.CODE_ERROR,
+        })
       })
     }
   });
@@ -287,13 +291,71 @@ router.post('/saveCommentReply',function(req,res){
   //获取服务器时间
   let timeNow = + new Date();
   data.time = timeNow.toString();
-  console.log(data)
   //回复
   let commentReply = new CommentReply(data);
   commentReply.save();
   res.json({
     status:returnedCodes.CODE_SUCCESS
   })
+});
+
+//获取评论的回复
+router.post('/fetchReplyOfComment',function(req,res){
+  //该回复所属评论的id
+  let commentId = req.body.data.commentId,
+      pageSize = req.body.data.pageSize,
+      pageNum = req.body.data.pageNum,
+      offset = req.body.data.offset;
+  //注意回复顺序是按时间先后，不是倒序
+  CommentReply.find({commentId:commentId})
+              .sort({time:1})
+              .skip(offset - pageSize)
+              .limit(pageSize)
+              .exec(function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      //这里需要对每一个docs进行获取其用户的资料
+      let promises = [];
+      docs.forEach((item)=>{
+        let promise = new Promise((resolve,reject)=>{
+          User.findOne({username:item.fromUserId},function(err2,doc2){
+            if(err2){
+              reject()
+            }else{
+              resolve({
+                fromUserNickname:doc2.nickname,
+                fromUserGroup:doc2.group,
+                fromUserAvatar:doc2.profileImgUrl
+              })
+            }
+          })
+        });
+        promises.push(promise)
+      });
+      //res
+      Promise.all(promises).then((results)=>{
+        //计算回复总数
+        CommentReply.count({commentId},function(err,count){
+          //是否隐藏加载更多按钮
+          let isFetchMore = offset<count;
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            replyList:docs,
+            fromUserInfoList:results,
+            isFetchMore:isFetchMore
+          })
+        });
+      }).catch(()=>{
+        res.json({
+          status:returnedCodes.CODE_ERROR,
+        })
+      })
+    }
+
+  });
 });
 
 

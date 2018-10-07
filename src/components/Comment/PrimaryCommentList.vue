@@ -56,9 +56,22 @@
         </message-board-edit-box>
       </div>
       <!--二级评论组件-->
-      <div class="reply-wrapper">
-        <comment-reply></comment-reply>
-        <comment-reply></comment-reply>
+      <div class="reply-wrapper" v-if="replyList.length>0">
+        <comment-reply v-for="item in replyList"
+                       :key="item._id"
+                       :reply-data="item">
+        </comment-reply>
+        <!--加载更多-->
+        <div class="fetch-more" v-if="isShowLoadMore">
+          <span class="fetch-more-text"
+                v-if="!isFetchingReply"
+                @click="fetchMoreReply">
+            加载更多
+          </span>
+          <span v-else >
+            加载中...
+          </span>
+        </div>
       </div>
       <!--分割线-->
       <div class="divider-line">
@@ -99,6 +112,9 @@
     directives:{
       clickoutside
     },
+    mounted:function(){
+      this.fetchReply();
+    },
     computed:{
       //评论文本内容
       commentHtmlContent:function(){
@@ -133,11 +149,67 @@
         isShowViewer:false,
         //是否显示评论回复框
         isShowCommentReplyBox:false,
+        //是否显示加载更多
+        isShowLoadMore:false,
         //是否正在提交回复
-        isSubmittingReply:false
+        isSubmittingReply:false,
+        //是否正在获取回复
+        isFetchingReply:false,
+        //回复数量初始加载数量
+        replyInitialShowNum:2,
+        //点击加载更多后加载的回复数量
+        replyNumOfPageSize:4,
+        //回复列表
+        replyList:[],
+        //回复列表显示的当前页数
+        replyListCurrentPage:1,
+        //是否是首次加载回复(只加载2条)
+        isFirstLoadReply:true
 			}
 		},
     methods:{
+			// 获取该评论的回复
+      fetchReply: function(){
+      	this.isFetchingReply = true;
+        // 该评论的id
+        let commentId = this.commentData._id;
+        let data = {
+          commentId,
+          pageNum:this.replyListCurrentPage,
+          pageSize:this.replyNumOfPageSize,
+          //回复数偏移量
+          offset:this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize
+        };
+        //如果是首次加载,只加载2条
+        if(this.isFirstLoadReply){
+          data.pageSize = this.replyInitialShowNum;
+        }
+        this.axios.post(api.fetchReplyOfComment,{data:data}).then((resp)=>{
+        	if(resp.data.status === 1){
+        		let replyList = resp.data.replyList;
+        		let fromUserInfoList = resp.data.fromUserInfoList;
+            fromUserInfoList.forEach((item,index)=>{
+            	Object.assign(replyList[index],item)
+            });
+            this.replyList = this.replyList.concat(replyList);
+            this.isShowLoadMore = resp.data.isFetchMore;
+            this.isFirstLoadReply = false;
+            //页数+1
+            this.replyListCurrentPage = this.replyListCurrentPage+1;
+          }else{
+            this.$message({
+              type: 'error',
+              message: '读取回复失败~'
+            })
+          }
+          this.isFetchingReply = false;
+        })
+      },
+			// 拉取更多回复
+      fetchMoreReply: function(){
+      	if(this.isFetchingReply) return;
+        this.fetchReply();
+      },
 			// 显示大图
       showDetailImage:function(){
         this.isShowViewer = true;
@@ -181,6 +253,13 @@
             if(resp.data.status === 1){
               this.isSubmittingReply = false;
               //todo
+              //这里提交回复后，直接展示全部评论，然后刷新所有数据
+
+              this.$refs.replyBox.resetAfterSubmit();
+              this.$message({
+                type: 'success',
+                message: '评论成功~'
+              })
             }else{
               this.$message({
                 type: 'error',
@@ -296,6 +375,16 @@
       word-break: break-all;
       width:100%;
       max-width: 100%;
+      .fetch-more{
+        font-size: 13px;
+        line-height: 40px;
+        text-align: center;
+        background-color: #fafbfc;
+        .fetch-more-text{
+          color:#406599;
+          cursor: pointer;
+        }
+      }
     }
     .bottom-bar{
       margin-top: 7px;
