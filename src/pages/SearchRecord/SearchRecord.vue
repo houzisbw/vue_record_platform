@@ -1,6 +1,6 @@
 <!--管理员查询记录页面-->
 <template>
-  <div class="wrapper" >
+  <div class="search-record-wrapper" >
     <!--搜索模块-->
     <div class="search-wrapper">
       <!--面包屑导航-->
@@ -908,7 +908,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped type="text/less" lang="less">
-  .wrapper{
+  .search-record-wrapper{
     .search-wrapper{
       min-height:100px;
       background-color: #fff;
@@ -1001,71 +1001,73 @@
   }
 </style>
 <style type="text/less" lang="less">
-  .search-wrapper{
-    .el-breadcrumb__inner:not(.is-link){
-      color:rgba(0,0,0,0.45);
-    }
-    .el-select{
-      width:160px;
-    }
-    .el-button+.el-button{
-      margin-left: 5px;
-    }
-  }
-  .record-table .el-table td{
-    padding:6px 0;
-  }
-  .record-table .el-table .warning-row{
-    color: #dd5b57;
-  }
-  .search-dropdown{
-    padding-left:20px;
-    padding-right:20px;
-  }
-  .record-content{
-    .el-button+.el-button{
-      margin-left: 5px;
-    }
-  }
-  .record-content .record-table .el-table__header tr th{
-    background-color: #fafafa!important;
-  }
-  .el-form-item{
-    margin-bottom: 10px;
-  }
-  .no-padding-top .el-form-item__label{
-    line-height: normal!important;
-  }
-  .user-edit-dialog.dialog-footer-no-border .el-dialog__footer{
-    border-top:none;
-  }
-  //对话框自定义类名
-  .user-edit-dialog{
-    width:500px;
-    position: relative;
-    top:50%;
-    transform: translateY(-50%);
-    .el-dialog__header{
-      border-bottom:1px solid #e8e8e8;
-      padding-bottom: 10px;
-      padding-top:10px;
-      .el-dialog__title{
-        font-size: 16px;
+  .search-record-wrapper{
+    .search-wrapper{
+      .el-breadcrumb__inner:not(.is-link){
+        color:rgba(0,0,0,0.45);
       }
-      .el-dialog__headerbtn{
-        top:15px;
+      .el-select{
+        width:160px;
+      }
+      .el-button+.el-button{
+        margin-left: 5px;
       }
     }
-    .el-dialog__footer{
-      border-top:1px solid #e8e8e8;
-      padding-bottom:10px;
+    .record-table .el-table td{
+      padding:6px 0;
     }
-    .user-edit-dialog-form-wrapper{
-      width:70%;
-      margin: 0 auto;
+    .record-table .el-table .warning-row{
+      color: #dd5b57;
     }
-    .el-select--small{
-      width: 140px!important;
+    .search-dropdown{
+      padding-left:20px;
+      padding-right:20px;
+    }
+    .record-content{
+      .el-button+.el-button{
+        margin-left: 5px;
+      }
+    }
+    .record-content .record-table .el-table__header tr th{
+      background-color: #fafafa!important;
+    }
+    .el-form-item{
+      margin-bottom: 10px;
+    }
+    .no-padding-top .el-form-item__label{
+      line-height: normal!important;
+    }
+    .user-edit-dialog.dialog-footer-no-border .el-dialog__footer{
+      border-top:none;
+    }
+    //对话框自定义类名
+    .user-edit-dialog{
+      width:500px;
+      position: relative;
+      top:50%;
+      transform: translateY(-50%);
+      .el-dialog__header{
+        border-bottom:1px solid #e8e8e8;
+        padding-bottom: 10px;
+        padding-top:10px;
+        .el-dialog__title{
+          font-size: 16px;
+        }
+        .el-dialog__headerbtn{
+          top:15px;
+        }
+      }
+      .el-dialog__footer{
+        border-top:1px solid #e8e8e8;
+        padding-bottom:10px;
+      }
+      .user-edit-dialog-form-wrapper{
+        width:70%;
+        margin: 0 auto;
+      }
+      .el-select--small{
+        width: 140px!important;
+      }
     }
   }
 </style>

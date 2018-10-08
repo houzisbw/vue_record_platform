@@ -113,7 +113,7 @@
 			// 切换回复框
       toggleReplyInput:function(){
         this.isShowReplyInput = !this.isShowReplyInput;
-        //必须加nextTick才行
+        //必须加nextTick才行,因为数据变了需要等到dom更新(之前是display:none)
         this.$nextTick(()=>{
           if(this.isShowReplyInput) {
             this.$refs.replyBox.focusInput();

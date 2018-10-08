@@ -113,7 +113,11 @@
       clickoutside
     },
     mounted:function(){
-      this.fetchReply();
+      this.fetchReply(this.replyListCurrentPage,
+                      this.replyNumOfPageSize,
+                      this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
+                      false);
+
     },
     computed:{
       //评论文本内容
@@ -164,21 +168,23 @@
         //回复列表显示的当前页数
         replyListCurrentPage:1,
         //是否是首次加载回复(只加载2条)
-        isFirstLoadReply:true
+        isFirstLoadReply:true,
+        //提交回复后无加载更多下最多显示条数
+        maxReplyNumShownAfterSubmit:10
 			}
 		},
     methods:{
 			// 获取该评论的回复
-      fetchReply: function(){
+      fetchReply: function(pageNum,pageSize,offset,isShowAll){
       	this.isFetchingReply = true;
         // 该评论的id
         let commentId = this.commentData._id;
         let data = {
           commentId,
-          pageNum:this.replyListCurrentPage,
-          pageSize:this.replyNumOfPageSize,
+          pageNum:pageNum,
+          pageSize:pageSize,
           //回复数偏移量
-          offset:this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize
+          offset:offset
         };
         //如果是首次加载,只加载2条
         if(this.isFirstLoadReply){
@@ -191,7 +197,12 @@
             fromUserInfoList.forEach((item,index)=>{
             	Object.assign(replyList[index],item)
             });
-            this.replyList = this.replyList.concat(replyList);
+            //如果不是显示全部回复，则concat即可
+            if(!isShowAll){
+              this.replyList = this.replyList.concat(replyList);
+            }else{
+              this.replyList = replyList;
+            }
             this.isShowLoadMore = resp.data.isFetchMore;
             this.isFirstLoadReply = false;
             //页数+1
@@ -208,7 +219,11 @@
 			// 拉取更多回复
       fetchMoreReply: function(){
       	if(this.isFetchingReply) return;
-        this.fetchReply();
+        this.fetchReply(
+          this.replyListCurrentPage,
+          this.replyNumOfPageSize,
+          this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
+          false);
       },
 			// 显示大图
       showDetailImage:function(){
@@ -246,15 +261,30 @@
             likes: 0,
             //服务端写入时间
             time: '',
-            //回复的用户名
-            fromUserId:this.$store.getters.getUserNickname || this.$store.getters.getUserName
+            //回复的用户名,不能是昵称
+            fromUserId:this.$store.getters.getUserName
           };
-          this.axios.post(api.saveCommentReply, {data:data}).then((resp) => {
+          this.axios.post(api.saveCommentReply, {
+          	data:data,
+            numLimit:this.maxReplyNumShownAfterSubmit
+          }).then((resp) => {
             if(resp.data.status === 1){
               this.isSubmittingReply = false;
-              //todo
-              //这里提交回复后，直接展示全部评论，然后刷新所有数据
-
+              //这里提交回复后，如果回复数量总数小于limit值，直接展示全部评论，然后刷新所有数据
+              //如果回复总数大于limit值，则显示加载更多
+              let isShowAll = resp.data.isShowAll;
+              if(isShowAll){
+                this.fetchReply(1,Infinity,Infinity,true);
+              }else{
+              	//清空相关数据结构
+              	this.replyListCurrentPage = 1;
+                this.isFirstLoadReply = true;
+                this.replyList = [];
+                this.fetchReply(this.replyListCurrentPage,
+                  this.replyNumOfPageSize,
+                  this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
+                  false);
+              }
               this.$refs.replyBox.resetAfterSubmit();
               this.$message({
                 type: 'success',

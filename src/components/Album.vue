@@ -159,7 +159,7 @@
   right:0;
   bottom:0;
   //必须考虑到element的body上的弹出物的index
-  z-index: 2000;
+  z-index: 10000;
   background-color: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;

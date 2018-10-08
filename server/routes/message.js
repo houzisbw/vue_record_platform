@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var router = express.Router();
+var mongoose = require('mongoose');
 var Emotion = require('./../model/emotions')
 var Message = require('./../model/message')
 var ThumbLike = require('./../model/ThumbLike')
@@ -288,21 +289,39 @@ router.post('/fetchMessageComment',function(req,res){
 //保存评论的回复
 router.post('/saveCommentReply',function(req,res){
   let data = req.body.data;
+  let limit = req.body.numLimit;
   //获取服务器时间
   let timeNow = + new Date();
   data.time = timeNow.toString();
-  //回复
-  let commentReply = new CommentReply(data);
-  commentReply.save();
-  res.json({
-    status:returnedCodes.CODE_SUCCESS
-  })
+
+  //查找该评论回复的总数
+  CommentReply.count({commentId:data.commentId},function(err,count){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      let isShowAll = false;
+      if(count<limit){
+        //小于limit，显示所有评论
+        isShowAll = true;
+      }
+      //回复
+      let commentReply = new CommentReply(data);
+      commentReply.save();
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        isShowAll
+      })
+    }
+  });
 });
 
 //获取评论的回复
 router.post('/fetchReplyOfComment',function(req,res){
   //该回复所属评论的id
   let commentId = req.body.data.commentId,
+      //Infinite被转化为null，注意了
       pageSize = req.body.data.pageSize,
       pageNum = req.body.data.pageNum,
       offset = req.body.data.offset;
@@ -340,7 +359,7 @@ router.post('/fetchReplyOfComment',function(req,res){
         //计算回复总数
         CommentReply.count({commentId},function(err,count){
           //是否隐藏加载更多按钮
-          let isFetchMore = offset<count;
+          let isFetchMore = offset<count && pageSize!==null;
           res.json({
             status:returnedCodes.CODE_SUCCESS,
             replyList:docs,
