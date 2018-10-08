@@ -45,6 +45,7 @@ import {
   DatePicker,
   Switch,
   Popover,
+  MessageBox,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -76,8 +77,10 @@ Vue.use(Tooltip)
 Vue.use(DatePicker)
 Vue.use(Switch)
 Vue.use(Popover)
+
 //特殊处理
-Vue.prototype.$message = Message
+Vue.prototype.$message = Message;
+Vue.prototype.$msgbox = MessageBox;
 
 Vue.config.productionTip = false
 

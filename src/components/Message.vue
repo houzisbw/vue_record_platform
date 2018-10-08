@@ -74,6 +74,8 @@
   import api from '@/api/api'
   import config from '@/config/config'
   import util from '@/utils/utils'
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
   import MessageImageViewer from '@/components/MessageImageViewer.vue'
   import MessageComment from '@/components/Comment/MessageComment'
 	export default {
@@ -95,6 +97,11 @@
     },
     mounted:function(){
 			this.messageLikeNum = this.messageInfo.likes;
+			// 更新新鲜事的评论数量(用户回复后)
+      let self = this;
+      eventBus.$on(eventName.updateMessageCommentNum,function(num){
+        self.$emit('update:commentNum',num)
+      });
     },
     computed:{
     	//用户是否已赞该新鲜事,通过vuex来判断

@@ -290,10 +290,10 @@ router.post('/fetchMessageComment',function(req,res){
 router.post('/saveCommentReply',function(req,res){
   let data = req.body.data;
   let limit = req.body.numLimit;
+  let messageId = req.body.messageId;
   //获取服务器时间
   let timeNow = + new Date();
   data.time = timeNow.toString();
-
   //查找该评论回复的总数
   CommentReply.count({commentId:data.commentId},function(err,count){
     if(err){
@@ -309,10 +309,21 @@ router.post('/saveCommentReply',function(req,res){
       //回复
       let commentReply = new CommentReply(data);
       commentReply.save();
-      res.json({
-        status:returnedCodes.CODE_SUCCESS,
-        isShowAll
-      })
+      //给该新鲜事的评论数量+1
+      Message.findOne({messageId},function(err,doc){
+        if(err){
+          res.json({
+            status:returnedCodes.CODE_ERROR,
+          })
+        }else{
+          doc.commentNumber = doc.commentNumber+1;
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            isShowAll,
+            commentNumber:doc.commentNumber
+          })
+        }
+      });
     }
   });
 });
@@ -375,6 +386,30 @@ router.post('/fetchReplyOfComment',function(req,res){
     }
 
   });
+});
+
+//删除回复
+router.post('/deleteReply',function(req,res){
+  let id = req.body.id;
+  CommentReply.findOne({_id:mongoose.Types.ObjectId(id)},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR,
+      })
+    }else{
+      if(doc){
+        doc.remove();
+        res.json({
+          status:returnedCodes.CODE_SUCCESS,
+        })
+      }else{
+        //未找到要删除的回复(已经删除了)
+        res.json({
+          status:returnedCodes.CODE_ERROR,
+        })
+      }
+    }
+  })
 });
 
 

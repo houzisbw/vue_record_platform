@@ -13,7 +13,13 @@
           <span class="usergroup">{{replyData.fromUserGroup}}</span>
         </div>
         <!--评论文本内容-->
-        <div class="comment-text" >{{replyData.replyText}}</div>
+        <div class="comment-text" v-if="replyData.replyType === 1">
+          <span class="comment-text-inner">{{replyData.replyText}}</span>
+        </div>
+        <div class="comment-text" v-else>
+          回复<span class="reply-to-user">{{replyData.toUserId}}: </span>
+          <span class="comment-text-inner">{{replyData.replyText}}</span>
+        </div>
         <!--图片部分-->
         <span class="comment-img"
               v-if="replyData.replyImgList.length>0"
@@ -40,7 +46,7 @@
               {{replyData.time | timeFormatter}}
             </span>
             <span class="dot delete">·</span>
-            <span class="delete">删除</span>
+            <span class="delete" @click="handleDelete">删除</span>
           </div>
           <div class="right">
             <div class="like-action">
@@ -74,7 +80,12 @@
 </template>
 
 <script>
+  import api from '@/api/api'
   import utils from '@/utils/utils'
+  import config from '@/config/config'
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
+  import _ from 'lodash'
   import clickoutside from '@/directives/clickoutside'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
   import CommentBriefImageViewer from '@/components/Comment/CommentBriefImageViewer'
@@ -90,6 +101,9 @@
 			replyData:{
 				type:Object,
         required:true
+      },
+      index:{
+				type:Number
       }
     },
     directives:{
@@ -110,6 +124,49 @@
       }
     },
     methods:{
+			// 删除该回复
+      handleDelete: function(){
+        this.$msgbox.confirm('是否删除该回复?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          //在此进行删除操作,注意去抖操作必须
+          beforeClose: _.debounce((action, instance, done) => {
+          	// 确认按钮按下
+            if (action === 'confirm') {
+              instance.confirmButtonLoading = true;
+              instance.confirmButtonText = '删除中...';
+              //根据数据库的主键找到对应的回复进行删除
+              this.axios.post(api.deleteReply,{id:this.replyData._id}).then((resp)=>{
+              	  let status = resp.data.status;
+                  if(status === 1){
+                  	this.$message({
+                      type:'success',
+                      message:'回复删除成功!'
+                    });
+                    //调用父组件的方法：重新拉取该评论的所有回复
+                    eventBus.$emit(eventName.reFetchReplies);
+                  }else{
+                    this.$message({
+                      type:'error',
+                      message:'回复不存在!'
+                    })
+                  }
+                instance.confirmButtonLoading = false;
+                done();
+              });
+            } else {
+              done();
+            }
+          },400,{leading:true,trailing:false})
+        }).then(()=>{}).catch(()=>{})
+      },
+			// 父组件调用:重置状态
+      reset: function(){
+      	this.isShowReplyInput = false;
+        this.isSubmittingReply = false;
+        this.$refs.replyBox.resetAfterSubmit();
+      },
 			// 切换回复框
       toggleReplyInput:function(){
         this.isShowReplyInput = !this.isShowReplyInput;
@@ -121,8 +178,20 @@
         })
       },
       // 处理回复提交
-      handleSubmit: function(){
-
+      handleSubmit: function(imgList,content){
+        this.isSubmittingReply = true;
+        // 调用父组件的submit方法即可,
+        // 第三个参数是回复的回复,
+        // 第四个参数是回复的目标用户
+        // 第五个是该回复的id
+        // 最后一个是该组件的index
+        this.$emit('submit',
+          imgList,
+          content,
+          config.replyType.REPLY_REPLY,
+          this.replyData.fromUserId,
+          this.replyData._id,
+          this.index);
       },
       //点击其他地方隐藏回复框
       hideEditBox: function(){
@@ -212,9 +281,16 @@
       color:#505050;
       line-height: 22px;
       font-size: 13px;
-      white-space: pre-wrap;
       word-break: break-all;
       display: inline-block;
+      .comment-text-inner{
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .reply-to-user{
+        color:#406599;
+        cursor: pointer;
+      }
     }
     .comment-img{
       color:#406599;

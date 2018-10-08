@@ -82,5 +82,6 @@ export default {
   fetchMessageComment:'/message/fetchMessageComment',//获取用户评论
   saveCommentReply:'/message/saveCommentReply',//保存评论的回复
   fetchReplyOfComment:'/message/fetchReplyOfComment',//获取评论的回复
+  deleteReply:'/message/deleteReply',//删除评论的回复
 
 }

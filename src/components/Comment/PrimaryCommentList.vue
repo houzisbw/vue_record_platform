@@ -57,7 +57,10 @@
       </div>
       <!--二级评论组件-->
       <div class="reply-wrapper" v-if="replyList.length>0">
-        <comment-reply v-for="item in replyList"
+        <comment-reply v-for="(item,index) in replyList"
+                       ref="replyComp"
+                       @submit="handleChildSubmitReply"
+                       :index="index"
                        :key="item._id"
                        :reply-data="item">
         </comment-reply>
@@ -91,6 +94,8 @@
   import api from '@/api/api'
   import utils from '@/utils/utils'
   import config from '@/config/config'
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
   import clickoutside from '@/directives/clickoutside'
   import CommentImageViewer from '@/components/Comment/CommentImageViewer'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
@@ -102,6 +107,11 @@
       commentData:{
       	type:Object,
         default:{}
+      },
+      // 新鲜事id
+      messageId:{
+      	type:String,
+        required:true
       }
     },
     components:{
@@ -113,11 +123,11 @@
       clickoutside
     },
     mounted:function(){
-      this.fetchReply(this.replyListCurrentPage,
-                      this.replyNumOfPageSize,
-                      this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
-                      false);
-
+      this.fetchReplyFirstTime();
+      // 监听子组件的回复删除成功事件
+      eventBus.$on('reFetchReplies',()=>{
+        this.fetchReplyFirstTime();
+      })
     },
     computed:{
       //评论文本内容
@@ -170,10 +180,37 @@
         //是否是首次加载回复(只加载2条)
         isFirstLoadReply:true,
         //提交回复后无加载更多下最多显示条数
-        maxReplyNumShownAfterSubmit:10
+        maxReplyNumShownAfterSubmit:10,
+        //二级回复组件的index
+        replyComponentIndex:0
 			}
 		},
     methods:{
+    	// 监听子组件的提交回复事件
+      handleChildSubmitReply: function(imgList,content,replyType,toUserId,replyId,index){
+        let data = {
+          //评论id
+          commentId: this.commentData._id,
+          //回复内容
+          replyText: content,
+          //图片数组
+          replyImgList:imgList,
+          //回复id
+          replyId:replyId,
+          //回复类型
+          replyType:replyType,
+          //赞数
+          likes: 0,
+          //服务端写入时间
+          time: '',
+          //回复的用户名,不能是昵称
+          fromUserId:this.$store.getters.getUserName,
+          //回复的目标用户
+          toUserId:toUserId
+        };
+        this.replyComponentIndex = index;
+        this.submit(data,true);
+      },
 			// 获取该评论的回复
       fetchReply: function(pageNum,pageSize,offset,isShowAll){
       	this.isFetchingReply = true;
@@ -216,6 +253,17 @@
           this.isFetchingReply = false;
         })
       },
+      // 首次拉取回复
+      fetchReplyFirstTime: function(){
+        //清空相关数据结构
+        this.replyListCurrentPage = 1;
+        this.isFirstLoadReply = true;
+        this.replyList = [];
+        this.fetchReply(this.replyListCurrentPage,
+          this.replyNumOfPageSize,
+          this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
+          false);
+      },
 			// 拉取更多回复
       fetchMoreReply: function(){
       	if(this.isFetchingReply) return;
@@ -241,32 +289,16 @@
       hideEditBox: function(){
         this.isShowCommentReplyBox = false;
       },
-      // 提交回复
-      handleSubmit: function(imgList,content){
+      // 提交回复,第二个参数是是否是回复的回复
+      submit: function(data,isReplyReply){
         this.isSubmittingReply = true;
         // 上传图片
-        utils.uploadImageToPictureBed(this.axios, imgList).then((imgUrlList) => {
-          let data = {
-          	//评论id
-            commentId: this.commentData._id,
-            //回复内容
-            replyText: content,
-            //回复图片数组
-            replyImgList: imgUrlList,
-            //回复id
-            replyId:this.commentData._id,
-            //回复类型
-            replyType:config.replyType.COMMENT_REPLY,
-            //赞数
-            likes: 0,
-            //服务端写入时间
-            time: '',
-            //回复的用户名,不能是昵称
-            fromUserId:this.$store.getters.getUserName
-          };
+        utils.uploadImageToPictureBed(this.axios, data.replyImgList).then((imgUrlList) => {
+        	data.replyImgList = imgUrlList;
           this.axios.post(api.saveCommentReply, {
-          	data:data,
-            numLimit:this.maxReplyNumShownAfterSubmit
+            data:data,
+            numLimit:this.maxReplyNumShownAfterSubmit,
+            messageId:this.messageId
           }).then((resp) => {
             if(resp.data.status === 1){
               this.isSubmittingReply = false;
@@ -276,20 +308,20 @@
               if(isShowAll){
                 this.fetchReply(1,Infinity,Infinity,true);
               }else{
-              	//清空相关数据结构
-              	this.replyListCurrentPage = 1;
-                this.isFirstLoadReply = true;
-                this.replyList = [];
-                this.fetchReply(this.replyListCurrentPage,
-                  this.replyNumOfPageSize,
-                  this.replyInitialShowNum + (this.replyListCurrentPage-1)*this.replyNumOfPageSize,
-                  false);
-              }
-              this.$refs.replyBox.resetAfterSubmit();
+                this.fetchReplyFirstTime();
+              };
+              //必须判断是否存在，因为v-if控制其显示与否
+              this.$refs.replyBox&&this.$refs.replyBox.resetAfterSubmit();
+              //给新鲜事的评论数+1
+              eventBus.$emit(eventName.updateMessageCommentNum,resp.data.commentNumber);
               this.$message({
                 type: 'success',
                 message: '评论成功~'
-              })
+              });
+              //如果是回复的回复，则重置其输入框,此时replyComp是个数组，因为v-for
+              if(isReplyReply){
+                this.$refs.replyComp[this.replyComponentIndex].reset();
+              }
             }else{
               this.$message({
                 type: 'error',
@@ -319,6 +351,30 @@
             message: '上传图片出错啦'
           })
         })
+      },
+      // 提交回复的绑定事件
+      handleSubmit: function(imgList,content){
+      	//提交的数据
+        let data = {
+          //评论id
+          commentId: this.commentData._id,
+          //回复内容
+          replyText: content,
+          //图片数组
+          replyImgList:imgList,
+          //回复id
+          replyId:this.commentData._id,
+          //回复类型
+          replyType:config.replyType.COMMENT_REPLY,
+          //赞数
+          likes: 0,
+          //服务端写入时间
+          time: '',
+          //回复的用户名,不能是昵称
+          fromUserId:this.$store.getters.getUserName
+        };
+        //提交
+        this.submit(data,false);
       },
     }
 	}

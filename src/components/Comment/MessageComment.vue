@@ -31,6 +31,7 @@
       <!--用数据库的主键来做key值-->
       <primary-comment-list v-for="item in commentList"
                             :key="item._id"
+                            :message-id="messageId"
                             :comment-data="item">
       </primary-comment-list>
     </div>
@@ -46,6 +47,8 @@
 <script>
   import api from '@/api/api'
   import utils from '@/utils/utils'
+  import eventBus from '@/eventBus/eventBus'
+  import eventName from '@/eventBus/eventName'
   import PrimaryCommentList from '@/components/Comment/PrimaryCommentList'
   import MessageBoardEditBox from '@/components/MessageBoardEditBox'
 	export default {
@@ -69,6 +72,7 @@
     mounted: function () {
       // 请求最新评论
       this.fetchComments();
+      //
     },
     methods: {
     	//查看更多评论
