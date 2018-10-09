@@ -26,11 +26,15 @@
             {{ commentData.time | timeFormatter}}
           </span>
           <span class="dot delete">·</span>
-          <span class="delete">删除</span>
+          <span class="delete" @click="handleDelete">删除</span>
         </div>
         <div class="right">
-          <div class="like-action">
-            <i class="iconfont icon-like"></i>
+          <div class="like-action" @click="toggleLikes">
+            <i class="iconfont" :class="[isCurrentCommentLiked?'icon-like-fill active':'icon-like']">
+            </i>
+            <span class='action-text' :class="{'active':isCurrentCommentLiked}" v-if="commentData.likes>0">
+                {{commentData.likes>0?commentData.likes:''}}
+              </span>
           </div>
           <div class="comment-action" @click="toggleCommentReplyBox">
             <i class="iconfont icon-message"></i>
@@ -60,6 +64,7 @@
         <comment-reply v-for="(item,index) in replyList"
                        ref="replyComp"
                        @submit="handleChildSubmitReply"
+                       :likes.sync="item.likes"
                        :index="index"
                        :key="item._id"
                        :reply-data="item">
@@ -130,7 +135,11 @@
       })
     },
     computed:{
-      //评论文本内容
+      //用户是否已赞该评论,通过vuex来判断
+      isCurrentCommentLiked:function(){
+        return this.$store.getters.getLikedCommentList.includes(this.commentData._id)
+      },
+      // 评论文本内容
       commentHtmlContent:function(){
         //捕获表情字符串
         let emotionReg = /\[:(.+?)\]/g;
@@ -182,10 +191,74 @@
         //提交回复后无加载更多下最多显示条数
         maxReplyNumShownAfterSubmit:10,
         //二级回复组件的index
-        replyComponentIndex:0
+        replyComponentIndex:0,
+        //是否正在点赞中
+        isFetchingLikes:false,
 			}
 		},
     methods:{
+    	// 删除该评论
+      // 删除该回复
+      handleDelete: function(){
+        this.$msgbox.confirm('是否删除该评论?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          //在此进行删除操作,注意去抖操作必须
+          beforeClose: _.debounce((action, instance, done) => {
+            // 确认按钮按下
+            if (action === 'confirm') {
+              instance.confirmButtonLoading = true;
+              instance.confirmButtonText = '删除中...';
+              //根据数据库的主键找到对应的回复进行删除
+              this.axios.post(api.deleteComment,{id:this.commentData._id}).then((resp)=>{
+                let status = resp.data.status;
+                if(status === 1){
+                  this.$message({
+                    type:'success',
+                    message:'评论删除成功!'
+                  });
+                }else{
+                  this.$message({
+                    type:'error',
+                    message:'评论不存在!'
+                  })
+                }
+                //调用父组件的方法：重新拉取该新鲜事的评论
+                eventBus.$emit(eventName.reFetchComments);
+                instance.confirmButtonLoading = false;
+                done();
+              });
+            } else {
+              done();
+            }
+          },400,{leading:true,trailing:false})
+        }).then(()=>{}).catch(()=>{})
+      },
+    	// 用户对评论点赞
+      toggleLikes: function(){
+        if(this.isFetchingLikes)return;
+        this.isFetchingLikes = true;
+        this.axios.post(api.toggleThumbLike,{
+          likeTargetId:this.commentData._id,
+          type:config.likeType.COMMENT_FIRST
+        }).then((resp)=>{
+          if(resp.data.status === 1){
+            //从后台获取到的该回复的赞数
+            let commentLikedNum = resp.data.likeNum;
+            //更新评论的赞数
+            this.$emit('update:likes',commentLikedNum);
+            // 更新用户已点赞的评论列表
+            this.$store.dispatch('updateLikedCommentList');
+          }else{
+            this.$message({
+              type:'error',
+              message:'该评论已删除~'
+            })
+          }
+          this.isFetchingLikes = false;
+        })
+      },
     	// 监听子组件的提交回复事件
       handleChildSubmitReply: function(imgList,content,replyType,toUserId,replyId,index){
         let data = {
@@ -267,6 +340,8 @@
 			// 拉取更多回复
       fetchMoreReply: function(){
       	if(this.isFetchingReply) return;
+      	// 更新用户点赞过的回复列表
+        this.$store.dispatch('updateLikedReplyList');
         this.fetchReply(
           this.replyListCurrentPage,
           this.replyNumOfPageSize,
@@ -503,6 +578,9 @@
           cursor: pointer;
           &:hover{
             color: #a3b3c2;
+          }
+          .active{
+            color:#6cbd45;
           }
         }
       }

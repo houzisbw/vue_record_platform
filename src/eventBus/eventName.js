@@ -8,6 +8,8 @@ const eventName = {
   //设置新鲜事评论数量
   updateMessageCommentNum:'updateMessageCommentNum',
   //删除回复后重新拉取回复数据
-  reFetchReplies:'reFetchReplies'
+  reFetchReplies:'reFetchReplies',
+  //删除评论后重新拉取评论数据
+  reFetchComments:'reFetchComments'
 };
 export default eventName

@@ -48,7 +48,7 @@ var config = {
   likeType:{
     'MESSAGE':1,
     'COMMENT_FIRST':2,
-    'COMMENT-SECOND':3
+    'REPLY':3
   },
   //新鲜事回复的类型
   replyType:{

@@ -31,6 +31,7 @@
       <!--用数据库的主键来做key值-->
       <primary-comment-list v-for="item in commentList"
                             :key="item._id"
+                            :likes.sync="item.likes"
                             :message-id="messageId"
                             :comment-data="item">
       </primary-comment-list>
@@ -72,7 +73,14 @@
     mounted: function () {
       // 请求最新评论
       this.fetchComments();
-      //
+      // 监听子组件的重新拉取评论的方法
+      eventBus.$on(eventName.reFetchComments,()=>{
+        //重置页数为1
+        this.currentPage = 1;
+        this.commentList = [];
+        //刷新评论列表
+        this.fetchComments();
+      })
     },
     methods: {
     	//查看更多评论

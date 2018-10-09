@@ -18,7 +18,7 @@
         </div>
         <div class="comment-text" v-else>
           回复<span class="reply-to-user">{{replyData.toUserId}}: </span>
-          <span class="comment-text-inner">{{replyData.replyText}}</span>
+          <span class="comment-text-inner" v-html="messageHtmlContent"></span>
         </div>
         <!--图片部分-->
         <span class="comment-img"
@@ -49,8 +49,12 @@
             <span class="delete" @click="handleDelete">删除</span>
           </div>
           <div class="right">
-            <div class="like-action">
-              <i class="iconfont icon-like">{{replyData.likes>0?replyData.likes:''}}</i>
+            <div class="like-action" @click="toggleLikes">
+              <i class="iconfont" :class="[isCurrentReplyLiked?'icon-like-fill active':'icon-like']">
+              </i>
+              <span class='action-text' :class="{'active':isCurrentReplyLiked}" v-if="replyData.likes>0">
+                {{replyData.likes>0?replyData.likes:''}}
+              </span>
             </div>
             <div class="comment-action" @click="toggleReplyInput" >
               <i class="iconfont icon-message"></i>
@@ -123,7 +127,48 @@
         return date.toLocaleString()
       }
     },
+    computed:{
+      //用户是否已赞该评论,通过vuex来判断
+      isCurrentReplyLiked:function(){
+        return this.$store.getters.getLikedReplyList.includes(this.replyData._id)
+      },
+      //新鲜事文本内容
+      messageHtmlContent:function(){
+        //捕获表情字符串
+        let emotionReg = /\[:(.+?)\]/g;
+        //构造html字符串
+        let newValue = this.replyData.replyText ? this.replyData.replyText.replace(emotionReg,function(match){
+          let emotionStr = match.slice(2,-1);
+          return '<i class="em '+emotionStr+'"></i>'
+         }):'';
+         return newValue
+      },
+    },
     methods:{
+			// 用户点赞处理
+      toggleLikes: function(){
+      	if(this.isFetchingLikes)return;
+        this.isFetchingLikes = true;
+        this.axios.post(api.toggleThumbLike,{
+          likeTargetId:this.replyData._id,
+          type:config.likeType.REPLY
+        }).then((resp)=>{
+          if(resp.data.status === 1){
+          	//从后台获取到的该回复的赞数
+          	let replyLikedNum = resp.data.likeNum;
+          	//更新回复的赞数
+            this.$emit('update:likes',replyLikedNum);
+          	// 更新用户已点赞的回复列表
+            this.$store.dispatch('updateLikedReplyList');
+          }else{
+            this.$message({
+              type:'error',
+              message:'该回复已删除~'
+            })
+          }
+          this.isFetchingLikes = false;
+        })
+      },
 			// 删除该回复
       handleDelete: function(){
         this.$msgbox.confirm('是否删除该回复?', '提示', {
@@ -138,20 +183,20 @@
               instance.confirmButtonText = '删除中...';
               //根据数据库的主键找到对应的回复进行删除
               this.axios.post(api.deleteReply,{id:this.replyData._id}).then((resp)=>{
-              	  let status = resp.data.status;
-                  if(status === 1){
-                  	this.$message({
-                      type:'success',
-                      message:'回复删除成功!'
-                    });
-                    //调用父组件的方法：重新拉取该评论的所有回复
-                    eventBus.$emit(eventName.reFetchReplies);
-                  }else{
-                    this.$message({
-                      type:'error',
-                      message:'回复不存在!'
-                    })
-                  }
+                let status = resp.data.status;
+                if(status === 1){
+                  this.$message({
+                    type:'success',
+                    message:'回复删除成功!'
+                  });
+                }else{
+                  this.$message({
+                    type:'error',
+                    message:'回复不存在!'
+                  })
+                }
+                //调用父组件的方法：重新拉取该评论的所有回复
+                eventBus.$emit(eventName.reFetchReplies);
                 instance.confirmButtonLoading = false;
                 done();
               });
@@ -219,7 +264,11 @@
         //是否显示图片框
         isShowImageBox:false,
         //是否显示大图
-        isShowDetailImage:false
+        isShowDetailImage:false,
+        //是否正在点赞中
+        isFetchingLikes:false,
+        //回复赞数
+        replyLikeNum:0
 			}
 		}
 	}
@@ -327,10 +376,18 @@
             color: #a3b3c2;
           }
         }
+        .active{
+          color:#6cbd45;
+        }
         .like-action{
           cursor: pointer;
           &:hover{
             color: #a3b3c2;
+          }
+          .action-text{
+            margin-left: 1px;
+            position:relative;
+            top:-1px;
           }
         }
       }

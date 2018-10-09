@@ -52,10 +52,17 @@
             })
           }
         })
+      },
+      // 获取用户赞过的回复和评论列表
+      fetchUserLikedList: function(){
+        this.$store.dispatch('updateLikedReplyList');
+        this.$store.dispatch('updateLikedCommentList');
       }
     },
     mounted:function(){
 			this.fetchMessages();
+			// 更新用户点赞的回复列表
+			this.fetchUserLikedList();
       //处理兄弟组件来的事件:更新新鲜事
       eventBus.$on(eventName.updateMessageList,()=>{
       	this.fetchMessages();

@@ -131,6 +131,39 @@ router.post('/toggleThumbLike',function(req,res){
     userId:username
   };
 
+  //点赞具体处理
+  const likeHandler = (schema,condition,likeNum,message)=>{
+    schema.findOne(condition,function(err,doc){
+      if(err) {
+        res.json({
+          status: returnedCodes.CODE_ERROR
+        })
+      }else{
+        //如果该新鲜事存在(判断不能少)
+        if(doc){
+          if(likeNum === 1){
+            //用户未点赞，增加点赞记录
+            let like = new ThumbLike(likeCondition);
+            like.save();
+          }
+          doc.likes = doc.likes + likeNum;
+          doc.save();
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            likeNum:doc.likes,
+            likeStatus:likeNum
+          })
+        }else{
+          //如果该新鲜事已删除
+          res.json({
+            status:returnedCodes.CODE_ERROR,
+            message:message
+          })
+        }
+      }
+    })
+  };
+
   //策略类，处理不同类型的点赞操作
   let strategy = {
     //新鲜事
@@ -138,42 +171,23 @@ router.post('/toggleThumbLike',function(req,res){
       let condition = {
         messageId:likeTargetId
       };
-      Message.findOne(condition,function(err,doc){
-        if(err) {
-          res.json({
-            status: returnedCodes.CODE_ERROR
-          })
-        }else{
-          //如果该新鲜事存在(判断不能少)
-          if(doc){
-            if(likeNum === 1){
-              //用户未点赞，增加点赞记录
-              let like = new ThumbLike(likeCondition);
-              like.save();
-            }
-            doc.likes = doc.likes + likeNum;
-            doc.save();
-            res.json({
-              status:returnedCodes.CODE_SUCCESS,
-              likeNum:doc.likes,
-              likeStatus:likeNum
-            })
-          }else{
-            //如果该新鲜事已删除
-            res.json({
-              status:returnedCodes.CODE_ERROR,
-              message:'该新鲜事已删除!'
-            })
-          }
-
-        }
-      })
+      likeHandler(Message,condition,likeNum,'该新鲜事已删除!');
     },
     //一级评论
-    //todo
+    '2':function(likeNum){
+      let condition = {
+        _id:mongoose.Types.ObjectId(likeTargetId)
+      };
+      likeHandler(Comment,condition,likeNum,'');
+    },
 
-    //二级评论
-    //todo
+    //二级评论(回复)
+    '3':function(likeNum){
+      let condition = {
+        _id:mongoose.Types.ObjectId(likeTargetId)
+      };
+      likeHandler(CommentReply,condition,likeNum,'');
+    }
   };
 
   ThumbLike.findOne(likeCondition,function(err,doc){
@@ -184,9 +198,10 @@ router.post('/toggleThumbLike',function(req,res){
     }else{
       if(doc){
         //用户已经点赞了，则取消点赞,删除该记录
-        doc.remove();
-        //给对应的赞数-1
-        strategy[type] && strategy[type](-1);
+        doc.remove(function(){
+          //给对应的赞数-1
+          strategy[type] && strategy[type](-1);
+        });
       }else{
         //给对应的赞数+1
         strategy[type] && strategy[type](1);
@@ -399,15 +414,116 @@ router.post('/deleteReply',function(req,res){
     }else{
       if(doc){
         doc.remove();
-        res.json({
-          status:returnedCodes.CODE_SUCCESS,
-        })
+        //删除该回复在点赞表中的所有记录
+        ThumbLike.remove({typeId:id},function(err,results){
+          if(err){
+            res.json({
+              status:returnedCodes.CODE_ERROR,
+            })
+          }else{
+            res.json({
+              status:returnedCodes.CODE_SUCCESS,
+            })
+          }
+        });
       }else{
         //未找到要删除的回复(已经删除了)
         res.json({
           status:returnedCodes.CODE_ERROR,
         })
       }
+    }
+  })
+});
+
+//删除评论
+router.post('/deleteComment',function(req,res){
+  //评论的数据库主键_id
+  let id = req.body.id;
+  //首先删除评论表中的评论，再删除回复表中的回复，再删除点赞表中的点赞
+  let commentPromise = new Promise((resolve,reject)=>{
+    Comment.remove({_id:mongoose.Types.ObjectId(id)},function(err){
+      if(err){
+        reject()
+      }else{
+        resolve();
+      }
+    })
+  });
+  let replyPromise = new Promise((resolve,reject)=>{
+    //找到该评论下的所有回复
+    CommentReply.find({commentId:id},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        //获取这些回复的_id
+        let ids = [];
+        docs.forEach((item)=>{
+          ids.push(item._id)
+        });
+        //删除这些回复id对应在点赞表里的对应字段
+        ThumbLike.remove({typeId:{$in:ids},type:likeType.REPLY},function(err){
+          if(err){
+            reject();
+          }else{
+            CommentReply.remove({commentId:id},function(err){
+              if(err){
+                reject()
+              }else{
+                resolve();
+              }
+            })
+          }
+        })
+      }
+    });
+  });
+  //删除点赞，注意这里很麻烦，首先删除点赞表里的评论的点赞，然后删除点赞表里的回复的点赞
+  let likesPromise = new Promise((resolve,reject)=>{
+    //删除点赞表中评论的点赞:这里的id是评论的id,需要指定type字段
+    ThumbLike.remove({typeId:id,type:likeType.COMMENT_FIRST},function(err){
+      if(err){
+        reject()
+      }else{
+        resolve();
+      }
+    })
+  });
+
+  let promises = [];
+  promises.concat([commentPromise,replyPromise,likesPromise]);
+  Promise.all(promises).then(()=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR,
+    })
+  })
+});
+
+// 获取用户赞过的评论或者回复列表
+router.post('/fetchUserLikedList',function(req,res){
+  let type = req.body.type;
+  let username = req.user;
+  ThumbLike.find({
+    type:type,
+    userId:username
+  },function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR,
+      })
+    }else{
+      let ret = [];
+      docs.forEach((item)=>{
+        ret.push(item.typeId);
+      });
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        likedList:ret
+      })
     }
   })
 });

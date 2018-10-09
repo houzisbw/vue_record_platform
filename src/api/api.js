@@ -83,5 +83,7 @@ export default {
   saveCommentReply:'/message/saveCommentReply',//保存评论的回复
   fetchReplyOfComment:'/message/fetchReplyOfComment',//获取评论的回复
   deleteReply:'/message/deleteReply',//删除评论的回复
+  fetchUserLikedList:'/message/fetchUserLikedList',//获取用户赞过的回复列表
+  deleteComment:'/message/deleteComment',//删除评论
 
 }
