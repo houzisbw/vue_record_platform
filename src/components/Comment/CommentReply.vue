@@ -108,6 +108,11 @@
       },
       index:{
 				type:Number
+      },
+      //回复所属新鲜事id
+      messageId:{
+				type:String,
+        required:true
       }
     },
     directives:{
@@ -151,6 +156,7 @@
         this.isFetchingLikes = true;
         this.axios.post(api.toggleThumbLike,{
           likeTargetId:this.replyData._id,
+          messageId:this.messageId,
           type:config.likeType.REPLY
         }).then((resp)=>{
           if(resp.data.status === 1){

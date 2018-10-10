@@ -198,6 +198,25 @@
             ]
           },
           {
+            menuName:'考勤系统',
+            iconName:'el-icon-time',
+            role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+            subMenuNameList:[
+              {
+                index:'/attendance/sheet',
+                iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+                subMenuTitle:'当月考勤表'
+              },
+              {
+                index:'/attendance/config',
+                iconName:'',
+                role:[auth.SUPER_ADMIN],
+                subMenuTitle:'考勤管理'
+              }
+            ]
+          },
+          {
             menuName:'新鲜事',
             iconName:'el-icon-edit',
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],

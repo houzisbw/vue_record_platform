@@ -24,12 +24,13 @@
       <div class="more-btn">
         <el-dropdown trigger="click"
                      popper-class='dropdown-self-class'
+                     @command="handleCommand"
                      placement="bottom"
                      size="medium">
           <i class="iconfont icon-ellipsis more-text"></i>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>举报</el-dropdown-item>
-            <el-dropdown-item>删除</el-dropdown-item>
+            <el-dropdown-item v-if="!messageInfo.isOwnMessage">举报</el-dropdown-item>
+            <el-dropdown-item v-if="messageInfo.isOwnMessage" command="delete">删除</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -74,6 +75,7 @@
   import api from '@/api/api'
   import config from '@/config/config'
   import util from '@/utils/utils'
+  import _ from 'lodash'
   import eventBus from '@/eventBus/eventBus'
   import eventName from '@/eventBus/eventName'
   import MessageImageViewer from '@/components/MessageImageViewer.vue'
@@ -135,6 +137,50 @@
       }
     },
     methods:{
+    	//下拉菜单事件处理
+      handleCommand: function(command){
+      	//策略类
+        let strategy = {
+        	//删除新鲜事
+        	'delete':()=>{
+            this.$msgbox.confirm('是否删除该新鲜事?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+              //在此进行删除操作,注意去抖操作必须
+              beforeClose: _.debounce((action, instance, done) => {
+                // 确认按钮按下
+                if (action === 'confirm') {
+                  instance.confirmButtonLoading = true;
+                  instance.confirmButtonText = '删除中...';
+                  //根据数据库的主键找到对应的回复进行删除
+                  this.axios.post(api.deleteMessage,{id:this.messageInfo.messageId}).then((resp)=>{
+                    let status = resp.data.status;
+                    if(status === 1){
+                      this.$message({
+                        type:'success',
+                        message:'新鲜事删除成功!'
+                      });
+                    }else{
+                      this.$message({
+                        type:'error',
+                        message:'新鲜事删除失败!'
+                      })
+                    }
+                    //调用父组件的方法:删除后重新拉取新鲜事数据
+                    eventBus.$emit(eventName.reFetchMessages);
+                    instance.confirmButtonLoading = false;
+                    done();
+                  });
+                } else {
+                  done();
+                }
+              },400,{leading:true,trailing:false})
+            }).then(()=>{}).catch(()=>{})
+          }
+        };
+        strategy[command]&&strategy[command]();
+      },
     	//修改评论数
       handleModifyCommentNum: function(num){
       	//修改父组件的prop:评论数,注意父组件的prop使用了sync修饰符

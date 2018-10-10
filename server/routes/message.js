@@ -59,70 +59,82 @@ router.post('/saveMessage',function(req,res){
 router.post('/getSubscribeMessage',function(req,res){
   let group = req.group,
       user = req.user;
+  let pageSize = req.body.data.pageSize,
+      pageNum = req.body.data.currentPage,
+      sortBy = req.body.data.sortBy;
   let condition = {
     userGroup:group,
-    //后期加上数量限制
   };
-  Message.find(condition,function(err,docs){
-    if(err){
-      res.json({
-        status:returnedCodes.CODE_ERROR
-      })
-    }else{
-      let ret = docs;
-      //时间由大到小排列
-      ret.sort(function(a,b){
-        return parseInt(b.publishTime,10) - parseInt(a.publishTime,10)
-      });
-      //遍历每条新鲜事，获取其用户信息
-      let promises = [];
-      ret.forEach((item)=>{
-        let promise = new Promise((resolve,reject)=>{
-          User.findOne({username:item.username},function(err2,doc2){
-            if(err2){
-              reject()
-            }else{
-              resolve({
-                nickname:doc2.nickname,
-                userGroup:doc2.group,
-                profileImgUrl:doc2.profileImgUrl
-              })
-            }
-          })
-        });
-        promises.push(promise)
-      });
-      Promise.all(promises).then((results)=>{
-        //获取该用户赞过的新鲜事的列表
-        let likedMessageList = [];
-        ThumbLike.find({userId:user,type:likeType.MESSAGE},function(err1,docs1){
-          if(err1){
-            res.json({
-              status:returnedCodes.CODE_ERROR
-            })
-          }else{
-            docs1.forEach((item)=>{
-              likedMessageList.push(item.typeId)
-            });
+  let sortCondition = sortBy === 'time'?{publishTime:-1}:{likes:-1};
+  //是否还有更多新鲜事
+  let hasMore = false;
+  Message.find(condition)
+         .sort(sortCondition)
+         .skip((pageNum-1)*pageSize)
+         .limit(pageSize)
+         .exec(function(err,docs){
 
-            res.json({
-              status:returnedCodes.CODE_SUCCESS,
-              messageList:ret,
-              //这里无法将用户信息合并到ret中，所以传递到前端进行操作
-              userInfoList:results,
-              likedList:likedMessageList
-            })
-          }
-        });
-      });
-    }
-  })
+         if(err){
+           res.json({
+             status:returnedCodes.CODE_ERROR
+           })
+         }else{
+           let ret = docs;
+           //如果查询到的新鲜事条目数小于页面容量，则是最后一页
+           hasMore = !(docs.length < pageSize);
+           //遍历每条新鲜事，获取其用户信息
+           let promises = [];
+           ret.forEach((item)=>{
+             let promise = new Promise((resolve,reject)=>{
+               User.findOne({username:item.username},function(err2,doc2){
+                 if(err2){
+                   reject()
+                 }else{
+                   resolve({
+                     nickname:doc2.nickname,
+                     userGroup:doc2.group,
+                     profileImgUrl:doc2.profileImgUrl,
+                     //是否是自己的新鲜事
+                     isOwnMessage:doc2.username === user
+                   })
+                 }
+               })
+             });
+             promises.push(promise)
+           });
+           Promise.all(promises).then((results)=>{
+             //获取该用户赞过的新鲜事的列表
+             let likedMessageList = [];
+             ThumbLike.find({userId:user,type:likeType.MESSAGE},function(err1,docs1){
+               if(err1){
+                 res.json({
+                   status:returnedCodes.CODE_ERROR
+                 })
+               }else{
+                 docs1.forEach((item)=>{
+                   likedMessageList.push(item.typeId)
+                 });
+                 res.json({
+                   status:returnedCodes.CODE_SUCCESS,
+                   messageList:ret,
+                   //这里无法将用户信息合并到ret中，所以传递到前端进行操作
+                   userInfoList:results,
+                   likedList:likedMessageList,
+                   hasMore
+                 })
+               }
+             });
+           });
+         }
+  });
+
 });
 
 //用户点赞处理
 router.post('/toggleThumbLike',function(req,res){
   let username = req.user;
   let likeTargetId = req.body.likeTargetId;
+  let messageId = req.body.messageId;
   let type = req.body.type;
   //搜索条件
   let likeCondition = {
@@ -131,8 +143,8 @@ router.post('/toggleThumbLike',function(req,res){
     userId:username
   };
 
-  //点赞具体处理
-  const likeHandler = (schema,condition,likeNum,message)=>{
+  //点赞具体处理(最后一个参数是新鲜事的id)
+  const likeHandler = (schema,condition,likeNum,message,messageId)=>{
     schema.findOne(condition,function(err,doc){
       if(err) {
         res.json({
@@ -143,6 +155,7 @@ router.post('/toggleThumbLike',function(req,res){
         if(doc){
           if(likeNum === 1){
             //用户未点赞，增加点赞记录
+            likeCondition.messageId = messageId;
             let like = new ThumbLike(likeCondition);
             like.save();
           }
@@ -171,14 +184,14 @@ router.post('/toggleThumbLike',function(req,res){
       let condition = {
         messageId:likeTargetId
       };
-      likeHandler(Message,condition,likeNum,'该新鲜事已删除!');
+      likeHandler(Message,condition,likeNum,'该新鲜事已删除!',likeTargetId);
     },
     //一级评论
     '2':function(likeNum){
       let condition = {
         _id:mongoose.Types.ObjectId(likeTargetId)
       };
-      likeHandler(Comment,condition,likeNum,'');
+      likeHandler(Comment,condition,likeNum,'',messageId);
     },
 
     //二级评论(回复)
@@ -186,7 +199,7 @@ router.post('/toggleThumbLike',function(req,res){
       let condition = {
         _id:mongoose.Types.ObjectId(likeTargetId)
       };
-      likeHandler(CommentReply,condition,likeNum,'');
+      likeHandler(CommentReply,condition,likeNum,'',messageId);
     }
   };
 
@@ -321,7 +334,8 @@ router.post('/saveCommentReply',function(req,res){
         //小于limit，显示所有评论
         isShowAll = true;
       }
-      //回复
+      //回复(保存新鲜事id)
+      data.messageId = messageId;
       let commentReply = new CommentReply(data);
       commentReply.save();
       //给该新鲜事的评论数量+1
@@ -332,6 +346,8 @@ router.post('/saveCommentReply',function(req,res){
           })
         }else{
           doc.commentNumber = doc.commentNumber+1;
+          //保存
+          doc.save();
           res.json({
             status:returnedCodes.CODE_SUCCESS,
             isShowAll,
@@ -438,6 +454,7 @@ router.post('/deleteReply',function(req,res){
 
 //删除评论
 router.post('/deleteComment',function(req,res){
+  //这里不用做检测要删除的东西存在与否的逻辑，因为remove一个不存在的数据不会报错，不会导致reject
   //评论的数据库主键_id
   let id = req.body.id;
   //首先删除评论表中的评论，再删除回复表中的回复，再删除点赞表中的点赞
@@ -501,6 +518,66 @@ router.post('/deleteComment',function(req,res){
       status:returnedCodes.CODE_ERROR,
     })
   })
+});
+
+//删除新鲜事
+router.post('/deleteMessage',function(req,res){
+  //新鲜事id
+  let messageId = req.body.id;
+  //首先删除新鲜事表中的对应数据，然后删除评论表中的评论，再删除回复表中的回复，再删除点赞表中的点赞
+  //注意：需要在回复表以及点赞表中添加新鲜事id，便于删除
+  let messagePromise = new Promise((resolve,reject)=>{
+    Message.remove({messageId},function(err){
+      if(err){
+        reject();
+      }else{
+        resolve();
+      }
+    })
+  });
+  //删除评论表中对应新鲜事的评论
+  let commentPromise = new Promise((resolve,reject)=>{
+    Comment.remove({messageId},function(err){
+      if(err){
+        reject()
+      }else{
+        resolve();
+      }
+    })
+  });
+  //删除回复表中的回复
+  let replyPromise = new Promise((resolve,reject)=>{
+    CommentReply.remove({messageId},function(err){
+      if(err){
+        reject()
+      }else{
+        resolve();
+      }
+    })
+  })
+  //删除点赞表中的点赞
+  let likesPromise = new Promise((resolve,reject)=>{
+    //删除点赞表中评论的点赞:这里的id是评论的id,需要指定type字段
+    ThumbLike.remove({messageId},function(err){
+      if(err){
+        reject()
+      }else{
+        resolve();
+      }
+    })
+  });
+
+  let promises = [].concat([messagePromise,commentPromise,replyPromise,likesPromise]);
+  Promise.all(promises).then(()=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR
+    })
+  })
+
 });
 
 // 获取用户赞过的评论或者回复列表

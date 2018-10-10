@@ -89,12 +89,16 @@
             type:'error',
             message:'上传图片出错啦'
           })
+          //重置输入框
+          this.$refs.editBox.resetAfterSubmit();
         }).catch(()=>{
           //上传图片出错
           this.$message({
             type:'error',
             message:'上传图片出错啦'
           })
+          //重置输入框
+          this.$refs.editBox.resetAfterSubmit();
         });
       },
     },

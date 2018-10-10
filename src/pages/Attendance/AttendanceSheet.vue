@@ -1,16 +1,13 @@
-<!--新鲜事推荐模块-->
+<!--考勤表页面-->
 <template>
-  <subscribe sort-by="likes">
-  </subscribe>
+  <div>
+    考勤表
+  </div>
 </template>
 
 <script>
-  import Subscribe from '@/components/MessageSubView/Subscribe'
 	export default {
-		name: 'Recommend',
-    components:{
-      Subscribe
-    },
+		name: '',
 		data () {
 			return {
 

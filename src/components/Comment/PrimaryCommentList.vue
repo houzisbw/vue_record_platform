@@ -64,6 +64,7 @@
         <comment-reply v-for="(item,index) in replyList"
                        ref="replyComp"
                        @submit="handleChildSubmitReply"
+                       :message-id="messageId"
                        :likes.sync="item.likes"
                        :index="index"
                        :key="item._id"
@@ -241,6 +242,7 @@
         this.isFetchingLikes = true;
         this.axios.post(api.toggleThumbLike,{
           likeTargetId:this.commentData._id,
+          messageId:this.messageId,
           type:config.likeType.COMMENT_FIRST
         }).then((resp)=>{
           if(resp.data.status === 1){
@@ -317,6 +319,8 @@
             this.isFirstLoadReply = false;
             //页数+1
             this.replyListCurrentPage = this.replyListCurrentPage+1;
+            //更新新鲜事组件的回复数量
+
           }else{
             this.$message({
               type: 'error',

@@ -85,5 +85,6 @@ export default {
   deleteReply:'/message/deleteReply',//删除评论的回复
   fetchUserLikedList:'/message/fetchUserLikedList',//获取用户赞过的回复列表
   deleteComment:'/message/deleteComment',//删除评论
+  deleteMessage:'/message/deleteMessage',//删除新鲜事
 
 }

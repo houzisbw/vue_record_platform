@@ -10,6 +10,8 @@ const eventName = {
   //删除回复后重新拉取回复数据
   reFetchReplies:'reFetchReplies',
   //删除评论后重新拉取评论数据
-  reFetchComments:'reFetchComments'
+  reFetchComments:'reFetchComments',
+  //删除新鲜事后重新拉取新鲜事
+  reFetchMessages:'reFetchMessages'
 };
 export default eventName

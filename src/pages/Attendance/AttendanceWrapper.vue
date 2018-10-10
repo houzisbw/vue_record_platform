@@ -1,19 +1,16 @@
-<!--新鲜事推荐模块-->
+<!--考勤表的容器-->
 <template>
-  <subscribe sort-by="likes">
-  </subscribe>
+  <div>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-  import Subscribe from '@/components/MessageSubView/Subscribe'
 	export default {
-		name: 'Recommend',
-    components:{
-      Subscribe
-    },
+		name: '',
 		data () {
 			return {
-
+				msg: 'Welcome to Your Vue.js App'
 			}
 		}
 	}

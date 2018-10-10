@@ -72,14 +72,13 @@
     },
     mounted: function () {
       // 请求最新评论
-      this.fetchComments();
+      this.fetchComments(false);
       // 监听子组件的重新拉取评论的方法
       eventBus.$on(eventName.reFetchComments,()=>{
         //重置页数为1
         this.currentPage = 1;
-        this.commentList = [];
         //刷新评论列表
-        this.fetchComments();
+        this.fetchComments(false);
       })
     },
     methods: {
@@ -88,10 +87,10 @@
       	if(this.isFetchingComment)return
       	//当前页数+1
         this.currentPage = this.currentPage+1;
-        this.fetchComments();
+        this.fetchComments(true);
       },
-    	// 请求最新评论
-      fetchComments: function(){
+    	// 请求最新评论,参数是是否添加在已有评论列表后面
+      fetchComments: function(isAppend){
       	this.isFetchingComment = true;
       	// (1)最多取6条，超过6条下方显示查看更多按钮，一次加载6条
         // (2)评论按时间先后排列
@@ -109,8 +108,12 @@
           	resp.data.userInfoList.forEach((item,index)=>{
               Object.assign(commentList[index],item);
             });
-          	//追加评论列表，不是覆盖
-            this.commentList = this.commentList.concat(commentList);
+          	//是追加还是覆盖评论列表，这样做是为了防止页面加载评论时产生闪烁
+            if(isAppend){
+              this.commentList = this.commentList.concat(commentList);
+            }else{
+              this.commentList = commentList;
+            }
             this.isShowLoadMoreComment = resp.data.hasMore;
           }else{
             this.$message({
@@ -141,10 +144,9 @@
               this.$refs.commentBox.resetAfterSubmit();
               //重置页数为1
               this.currentPage = 1;
-              this.commentList = [];
               //刷新评论列表
-              this.fetchComments();
-              //修改父组件上的评论数(+1)
+              this.fetchComments(false);
+              //修改父组件上的评论数
               this.$emit('modify-comment-num',resp.data.commentNum);
             }else{
               this.$message({

@@ -20,6 +20,10 @@ import MessageBoard from '../pages/MessageBoard/MessageBoard.vue'
 import MessageRecommend from '../components/MessageSubView/Recommend.vue'
 import MessageSuscribe from '../components/MessageSubView/Subscribe.vue'
 
+import AttendanceWrapper from '@/pages/Attendance/AttendanceWrapper'
+import AttendanceSheet from '@/pages/Attendance/AttendanceSheet'
+import AttendancePanel from '@/pages/Attendance/AttendanceConfigPanel'
+
 import config from './../config/config'
 //用户权限
 let userAuth = config.auth;
@@ -203,6 +207,35 @@ export default new Router({
             },
           ]
         },
+        //考勤页面
+        {
+          path:'attendance',
+          name:'Attendance',
+          component:AttendanceWrapper,
+          redirect:'/attendance/sheet',
+          meta:{
+            //所有人可访问
+            role:authAll
+          },
+          children:[
+            {
+              path:'sheet',
+              component:AttendanceSheet,
+              meta:{
+                //所有人可访问
+                role:authAll
+              }
+            },
+            {
+              path:'config',
+              component:AttendancePanel,
+              meta:{
+                //超管可访问
+                role:[userAuth.SUPER_ADMIN]
+              }
+            },
+          ]
+        }
       ]
     },
     //登录页面,单独的页面
