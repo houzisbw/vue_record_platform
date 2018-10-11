@@ -87,4 +87,28 @@ export default {
   deleteComment:'/message/deleteComment',//删除评论
   deleteMessage:'/message/deleteMessage',//删除新鲜事
 
+  //排班考勤页面
+  processFetchApi:'/attendance/processFetchApi',//工序的拉取数据的api
+  processAddApi:'/attendance/processAddApi',//工序的添加数据的api
+  processDeleteApi:'/attendance/processDeleteApi',//工序删除数据的api
+
+  shiftFetchApi:'/attendance/shiftFetchApi',//班次的拉取数据的api
+  shiftAddApi:'/attendance/shiftAddApi',//班次的添加数据的api
+  shiftDeleteApi:'/attendance/shiftDeleteApi',//班次删除数据的api
+
+  tempstaffFetchApi:'/attendance/tempstaffFetchApi',//临时人员的拉取数据的api
+  tempstaffAddApi:'/attendance/tempstaffAddApi',//临时人员的添加数据的api
+  tempstaffDeleteApi:'/attendance/tempstaffDeleteApi',//临时人员删除数据的api
+
+  regularstaffFetchApi:'/attendance/regularstaffFetchApi',//正式人员的拉取数据的api
+  regularstaffAddApi:'/attendance/regularstaffAddApi',//正式人员的添加数据的api
+  regularstaffDeleteApi:'/attendance/regularstaffDeleteApi',//正式人员删除数据的api
+
+
+  workContentFetchApi:'/attendance/workContentFetchApi',//工作内容的拉取数据的api
+  workContentAddApi:'/attendance/workContentAddApi',//工作内容的添加数据的api
+  workContentDeleteApi:'/attendance/workContentDeleteApi',//工作内容删除数据的api
+
+
+
 }

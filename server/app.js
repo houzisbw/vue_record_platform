@@ -18,6 +18,7 @@ var recordType = require('./routes/record_types')
 var record = require('./routes/record')
 var graph = require('./routes/graph')
 var message = require('./routes/message')
+var attendance = require('./routes/attendance');
 
 //util
 var util = require('./utils');
@@ -79,6 +80,7 @@ app.use('/modifyRecordTypes',recordType);
 app.use('/searchRecord',record);
 app.use('/graph',graph);
 app.use('/message',message);
+app.use('/attendance',attendance);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -44,6 +44,9 @@ module.exports = {
       '/message/*':{
         target:'http://localhost:6000'
       },
+      '/attendance/*':{
+        target:'http://localhost:6000'
+      },
     },
 
     // Various Dev Server settings

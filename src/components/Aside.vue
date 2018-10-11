@@ -55,18 +55,22 @@
         let targetIndex;
         this.menuData.forEach((item,index)=>{
         	item.subMenuNameList&&item.subMenuNameList.forEach((subItem,subIndex)=>{
-        		if(subItem.index === route){
+        		if(route.startsWith(subItem.index)){
               targetIndex = index
             }
           })
-        })
+        });
         //如果选择个人页面，则置空打开的数组
-        return targetIndex?[targetIndex.toString()]:[]
+        return targetIndex!==undefined?[targetIndex.toString()]:[]
       },
       //设置当前激活的二级菜单
       getActiveSubMenu: function(){
     		this.activeMenuIndex = this.$route.path;
         return this.$route.path
+      },
+      //二级菜单是否激活
+      subMenuActive: function(){
+
       }
     },
     methods:{
@@ -198,7 +202,7 @@
             ]
           },
           {
-            menuName:'考勤系统',
+            menuName:'考勤排班',
             iconName:'el-icon-time',
             role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
             subMenuNameList:[
@@ -209,10 +213,16 @@
                 subMenuTitle:'当月考勤表'
               },
               {
+                index:'/attendance/arrange',
+                iconName:'',
+                role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
+                subMenuTitle:'排班详情'
+              },
+              {
                 index:'/attendance/config',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
-                subMenuTitle:'考勤管理'
+                subMenuTitle:'排班管理'
               }
             ]
           },

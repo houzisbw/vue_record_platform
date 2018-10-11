@@ -23,7 +23,9 @@ module.exports =  {
     //车间名已存在
     CODE_WORKSHOP_EXIST:4,
     //记录名已存在
-    CODE_RECORDTYPE_EXIST:5
+    CODE_RECORDTYPE_EXIST:5,
+    //已存在
+    CODE_EXIST:6
   },
   //点赞类型
   likeType:{
