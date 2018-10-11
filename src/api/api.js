@@ -104,10 +104,10 @@ export default {
   regularstaffAddApi:'/attendance/regularstaffAddApi',//正式人员的添加数据的api
   regularstaffDeleteApi:'/attendance/regularstaffDeleteApi',//正式人员删除数据的api
 
-
   workContentFetchApi:'/attendance/workContentFetchApi',//工作内容的拉取数据的api
   workContentAddApi:'/attendance/workContentAddApi',//工作内容的添加数据的api
   workContentDeleteApi:'/attendance/workContentDeleteApi',//工作内容删除数据的api
+  workContentFetchWorkshop:'/attendance/workContentFetchWorkshop',//工作内容拉取车间以及对应工作内容条目数
 
 
 

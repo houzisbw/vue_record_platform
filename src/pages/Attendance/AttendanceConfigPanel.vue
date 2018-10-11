@@ -49,7 +49,7 @@
     </tag-item-list>
 
     <!--工作内容-->
-    <tag-item-list
+    <work-content
       title="工作内容"
       title-icon="icon-detail"
       btn-name="添加工作内容"
@@ -58,7 +58,7 @@
       :add-url="workContentAddApi"
       :delete-url="workContentDeleteApi"
     >
-    </tag-item-list>
+    </work-content>
 
   </div>
 </template>
@@ -66,10 +66,12 @@
 <script>
   import api from '@/api/api'
   import TagItemList from '@/components/AttendanceAndArrangement/TagItemList'
+  import WorkContent from '@/components/AttendanceAndArrangement/WorkContent'
 	export default {
 		name: '',
     components:{
-      TagItemList
+      TagItemList,
+      WorkContent
     },
 		data () {
 			return {

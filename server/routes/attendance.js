@@ -4,6 +4,7 @@
 //排班考勤的相关接口
 var express = require('express');
 var router = express.Router();
+var Workshop = require('./../model/workshop')
 var AttendanceWorkProcess = require('./../model/attendance_work_process')
 var AttendanceShift = require('./../model/attendance_shift')
 var AttendanceTempStaff = require('./../model/attendance_temp_staff')
@@ -227,9 +228,10 @@ router.post('/tempstaffDeleteApi',function(req,res){
  *
  * */
 
-router.get('/workContentFetchApi',function(req,res){
+router.post('/workContentFetchApi',function(req,res){
   let group = req.group;
-  AttendanceWorkContent.find({group},function(err,docs){
+  let workshop = req.body.workshop;
+  AttendanceWorkContent.find({group,workshop},function(err,docs){
     if(err){
       res.json({
         status:returnedCodes.CODE_ERROR
@@ -245,9 +247,10 @@ router.get('/workContentFetchApi',function(req,res){
 
 router.post('/workContentAddApi',function(req,res){
   let group = req.group,
-    name = req.body.name;
+    name = req.body.name,
+    workshop = req.body.workshop;
   //不能添加重复的
-  AttendanceWorkContent.findOne({name,group},function(err,doc){
+  AttendanceWorkContent.findOne({name,group,workshop},function(err,doc){
     if(err){
       res.json({
         status:returnedCodes.CODE_ERROR
@@ -262,7 +265,8 @@ router.post('/workContentAddApi',function(req,res){
         //保存
         let AT = new AttendanceWorkContent({
           name,
-          group
+          group,
+          workshop
         });
         AT.save();
         res.json({
@@ -275,8 +279,9 @@ router.post('/workContentAddApi',function(req,res){
 
 router.post('/workContentDeleteApi',function(req,res){
   let group = req.group,
-    name = req.body.name;
-  AttendanceWorkContent.findOneAndRemove({group,name},function(err){
+    name = req.body.name,
+    workshop = req.body.workshop;
+  AttendanceWorkContent.findOneAndRemove({group,name,workshop},function(err){
     if(err){
       res.json({
         status:returnedCodes.CODE_ERROR
@@ -288,6 +293,44 @@ router.post('/workContentDeleteApi',function(req,res){
     }
   })
 });
+
+router.get('/workContentFetchWorkshop',function(req,res){
+  let group = req.group;
+  Workshop.find({group:group},function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      //拉取工作内容，然后计算每一个车间的条数
+      AttendanceWorkContent.find({group},function(err1,docs1){
+        if(err1){
+          res.json({
+            status:returnedCodes.CODE_ERROR
+          })
+        }else{
+          let ret = [],map={};
+          docs.forEach((item)=>{
+            map[item.name]=0
+          });
+          docs1.forEach((item)=>{
+            map[item.workshop]++;
+          });
+          Object.keys(map).forEach((item)=>{
+            ret.push({
+              name:item,
+              count:map[item]
+            })
+          });
+          res.json({
+            status:returnedCodes.CODE_SUCCESS,
+            workshopList:ret
+          })
+        }
+      });
+    }
+  })
+})
 
 /*
  *
