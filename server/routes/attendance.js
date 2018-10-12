@@ -10,6 +10,7 @@ var AttendanceShift = require('./../model/attendance_shift')
 var AttendanceTempStaff = require('./../model/attendance_temp_staff')
 var AttendanceRegularStaff = require('./../model/attendance_regular_staff')
 var AttendanceWorkContent = require('./../model/attendance_work_content')
+var AttendanceAnnounce = require('./../model/attendance_annoucement')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
 
@@ -393,6 +394,49 @@ router.post('/regularstaffDeleteApi',function(req,res){
         status:returnedCodes.CODE_ERROR
       })
     }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+});
+
+//公告栏内容获取
+router.post('/fetchAttendanceAnnounce',function(req,res){
+  let type = req.body.type;
+  AttendanceAnnounce.findOne({type},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        announce:doc?doc.content:''
+      })
+    }
+  })
+});
+//更新公告栏内容
+router.post('/updateAttendanceAnnounce',function(req,res){
+  let type = req.body.type,
+      content = req.body.content;
+  AttendanceAnnounce.findOne({type},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      if(doc){
+        doc.content = content;
+        doc.save();
+      }else{
+        let AA = new AttendanceAnnounce({
+          type,
+          content
+        });
+        AA.save();
+      }
       res.json({
         status:returnedCodes.CODE_SUCCESS
       })

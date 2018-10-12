@@ -109,6 +109,9 @@ export default {
   workContentDeleteApi:'/attendance/workContentDeleteApi',//工作内容删除数据的api
   workContentFetchWorkshop:'/attendance/workContentFetchWorkshop',//工作内容拉取车间以及对应工作内容条目数
 
+  fetchAttendanceAnnounce:'/attendance/fetchAttendanceAnnounce',//获取考勤安排公告栏内容
+  updateAttendanceAnnounce:'/attendance/updateAttendanceAnnounce',//更新公告栏内容
+
 
 
 }

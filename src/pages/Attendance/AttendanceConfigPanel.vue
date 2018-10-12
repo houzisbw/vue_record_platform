@@ -60,6 +60,22 @@
     >
     </work-content>
 
+    <!--公告栏(上)-->
+    <public-announcement
+      title="公告栏(上)"
+      type="up"
+      fetch-url="sdf"
+      submit-url="sdf"
+      title-icon="icon-notification">
+    </public-announcement>
+    <!--公告栏(下)-->
+    <public-announcement
+      title="公告栏(下)"
+      fetch-url="sdf"
+      type="down"
+      submit-url="sdf"
+      title-icon="icon-notification">
+    </public-announcement>
   </div>
 </template>
 
@@ -67,11 +83,13 @@
   import api from '@/api/api'
   import TagItemList from '@/components/AttendanceAndArrangement/TagItemList'
   import WorkContent from '@/components/AttendanceAndArrangement/WorkContent'
+  import PublicAnnouncement from '@/components/AttendanceAndArrangement/PublicAnnouncement'
 	export default {
 		name: '',
     components:{
       TagItemList,
-      WorkContent
+      WorkContent,
+      PublicAnnouncement
     },
 		data () {
 			return {

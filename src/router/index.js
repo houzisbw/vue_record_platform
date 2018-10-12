@@ -23,6 +23,7 @@ import MessageSuscribe from '../components/MessageSubView/Subscribe.vue'
 import AttendanceWrapper from '@/pages/Attendance/AttendanceWrapper'
 import AttendanceSheet from '@/pages/Attendance/AttendanceSheet'
 import AttendancePanel from '@/pages/Attendance/AttendanceConfigPanel'
+import ShiftArrangement from '@/pages/Attendance/ShiftArrangement'
 
 import config from './../config/config'
 //用户权限
@@ -229,6 +230,14 @@ export default new Router({
             {
               path:'config',
               component:AttendancePanel,
+              meta:{
+                //超管可访问
+                role:[userAuth.SUPER_ADMIN]
+              }
+            },
+            {
+              path:'shift_arrangement',
+              component:ShiftArrangement,
               meta:{
                 //超管可访问
                 role:[userAuth.SUPER_ADMIN]

@@ -213,16 +213,22 @@
                 subMenuTitle:'当月考勤表'
               },
               {
-                index:'/attendance/arrange',
+                index:'/attendance/shift_arrangement',
+                iconName:'',
+                role:[auth.SUPER_ADMIN],
+                subMenuTitle:'排班操作'
+              },
+              {
+                index:'/attendance/history',
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
-                subMenuTitle:'排班详情'
+                subMenuTitle:'历史排班情况'
               },
               {
                 index:'/attendance/config',
                 iconName:'',
                 role:[auth.SUPER_ADMIN],
-                subMenuTitle:'排班管理'
+                subMenuTitle:'排班信息配置'
               }
             ]
           },

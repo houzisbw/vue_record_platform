@@ -46,6 +46,7 @@ import {
   Switch,
   Popover,
   MessageBox,
+  TimeSelect,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -77,6 +78,7 @@ Vue.use(Tooltip)
 Vue.use(DatePicker)
 Vue.use(Switch)
 Vue.use(Popover)
+Vue.use(TimeSelect)
 
 //特殊处理
 Vue.prototype.$message = Message;
