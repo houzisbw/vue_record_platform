@@ -47,6 +47,9 @@ import {
   Popover,
   MessageBox,
   TimeSelect,
+  Radio,
+  RadioGroup,
+  RadioButton,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -79,6 +82,9 @@ Vue.use(DatePicker)
 Vue.use(Switch)
 Vue.use(Popover)
 Vue.use(TimeSelect)
+Vue.use(Radio)
+Vue.use(RadioGroup)
+Vue.use(RadioButton)
 
 //特殊处理
 Vue.prototype.$message = Message;

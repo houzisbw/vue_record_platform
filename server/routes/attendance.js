@@ -552,5 +552,74 @@ router.post('/submitAttendanceArrange',function(req,res){
   })
 });
 
+//获取当日的排班人员情况和班次信息
+router.post('/fetchShiftDataCurrentDay',function(req,res){
+  let group = req.group;
+  let date = req.body.date;
+  console.log(date)
+  //班次数据
+  let shiftPromise = new Promise((resolve,reject)=>{
+    AttendanceShift.find({group},function(err,docs){
+      if(err){
+        reject();
+      }else{
+        let list = [];
+        docs.forEach((item)=>{
+          list.push(item.name)
+        })
+        resolve(list)
+      }
+    })
+  })
+  //当日排班情况
+  let shiftDataPromise = new Promise((resolve,reject)=>{
+    AttendanceShiftData.find({group,date},function(err,docs){
+      if(err){
+        reject();
+      }else{
+        //临时员工的list
+        let tempList = [];
+        //正式员工的list
+        let regularList = [];
+        docs.forEach((item)=>{
+          let rList = item.regularStaffList;
+          rList.forEach((subItem)=>{
+            regularList.push({
+              type:item.shift,
+              name:subItem
+            })
+          });
+          let tList = item.tempStaffList;
+          tList.forEach((subItem)=>{
+            tempList.push({
+              type:item.shift,
+              name:subItem
+            })
+          })
+        });
+        resolve({
+          tempList,
+          regularList
+        })
+      }
+    })
+  })
+
+  Promise.all([shiftPromise,shiftDataPromise]).then((results)=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+      shift:results[0],
+      tempList:results[1].tempList,
+      regularList:results[1].regularList,
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR,
+    })
+  })
+
+
+})
+
 
 module.exports = router;

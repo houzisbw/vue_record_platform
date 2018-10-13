@@ -21,6 +21,10 @@
              :clearable="false"
              placeholder="选择日期">
            </el-date-picker>
+           <!--展示当天排班情况的按钮-->
+           <el-tooltip effect="dark" content="查看当天排班情况" placement="top">
+            <i class="iconfont icon-eye eye" @click="showArrangeResult"></i>
+           </el-tooltip>
          </el-form-item>
          <el-form-item label="排班车间" prop="workshop">
            <el-select v-model="arrangeData.workshop"
@@ -174,6 +178,7 @@
        </el-form>
      </div>
     </div>
+
     <!--提交的对话框-->
     <el-dialog
       title="提交"
@@ -193,15 +198,36 @@
           </el-button>
         </span>
     </el-dialog>
+
+    <!--当日排班情况的对话框-->
+    <el-dialog
+      :title="this.arrangeData.date+'排班情况'"
+      :visible.sync="isShowArrangeResultPanel"
+      top="0"
+      @close="isShowArrangeResultPanel = false"
+      :close-on-click-modal="false"
+      custom-class="tag-edit-dialog"
+    >
+      <!--v-if强制刷新-->
+      <arrange-result-current-day :date="arrangeData.date"
+                                  v-if="isShowArrangeResultPanel">
+      </arrange-result-current-day>
+    </el-dialog>
   </div>
 </template>
 
 <script>
   import api from '@/api/api'
+  import ArrangeResultCurrentDay from '@/components/AttendanceAndArrangement/ArrangeResultCurrentDay'
 	export default {
 		name: '',
+    components:{
+      ArrangeResultCurrentDay
+    },
 		data () {
 			return {
+				//是否显示当天排班的对话框
+        isShowArrangeResultPanel:false,
 				//是否正在提交
         isSubmitting:false,
 				//是否显示提交的对话框
@@ -247,6 +273,17 @@
 			this.fetchListData();
     },
     methods:{
+    	//查看当天排班情况
+      showArrangeResult:function(){
+      	if(!this.arrangeData.date){
+          this.$message({
+            type:'warning',
+            message:'请选择日期再查看!'
+          });
+      		return
+        }
+      	this.isShowArrangeResultPanel = true;
+      },
     	//确定提交
       confirmSubmit:function(){
         this.isSubmitting = true;
@@ -286,6 +323,13 @@
             message:'请填写排班日期!'
           });
       		return
+        }
+        if(!this.arrangeData.shift){
+          this.$message({
+            type:'warning',
+            message:'请填写班次!'
+          });
+          return
         }
         this.isSubmitDialogShow = true;
       },
@@ -401,6 +445,10 @@
       font-size: 14px;
       color:rgba(0,0,0,.65);
       min-height:200px;
+      .eye{
+        margin-left: 10px;
+        cursor: pointer;
+      }
       .wrapper{
         margin:0 auto;
         width:500px;

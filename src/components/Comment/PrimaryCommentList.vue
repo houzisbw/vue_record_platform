@@ -25,8 +25,12 @@
           <span :title="commentData.time | detailTimeStr" class="time">
             {{ commentData.time | timeFormatter}}
           </span>
-          <span class="dot delete">·</span>
-          <span class="delete" @click="handleDelete">删除</span>
+          <span class="dot delete" v-if="currentUsername === commentData.userId">·</span>
+          <span class="delete"
+                v-if="currentUsername === commentData.userId"
+                @click="handleDelete">
+            删除
+          </span>
         </div>
         <div class="right">
           <div class="like-action" @click="toggleLikes">
@@ -136,6 +140,10 @@
       })
     },
     computed:{
+      //当前用户
+      currentUsername:function(){
+        return this.$store.getters.getUserName;
+      },
       //用户是否已赞该评论,通过vuex来判断
       isCurrentCommentLiked:function(){
         return this.$store.getters.getLikedCommentList.includes(this.commentData._id)
