@@ -110,7 +110,6 @@
         })
       },
       handleSubmit:function(){
-      	if(this.content === '')return
         this.isLoading = true;
       	this.axios.post(api.updateAttendanceAnnounce,{
       		content:this.content,

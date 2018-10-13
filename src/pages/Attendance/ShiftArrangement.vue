@@ -6,7 +6,7 @@
       <span class="title-text">排班操作</span>
     </div>
     <div class="content">
-     <div class="wrapper attendance-arrange">
+     <div class="wrapper attendance-arrange" v-loading="isLoading">
        <el-form label-position="right"
                 ref="arrangeForm"
                 label-width="100px"
@@ -25,6 +25,7 @@
          <el-form-item label="排班车间" prop="workshop">
            <el-select v-model="arrangeData.workshop"
                       size="small"
+                      @change="handleWorkshopChange"
                       placeholder="请选择">
              <el-option
                class="user-edit-dialog-select"
@@ -88,6 +89,7 @@
          </el-form-item>
          <el-form-item label="排班员工" prop="staff" class="narrow-el-select">
            <el-select size="small"
+                      @change="handleRegularStaffChange"
                       v-model="arrangeData.regularStaff"
                       placeholder="正式员工">
              <el-option
@@ -100,6 +102,7 @@
            </el-select>
            <el-select size="small"
                       v-model="arrangeData.tempStaff"
+                      @change="handleTempStaffChange"
                       placeholder="临时员工">
              <el-option
                class="user-edit-dialog-select"
@@ -113,7 +116,7 @@
          <!--非表单内的内容-->
          <div class="staff-tag-list">
            <!--正式员工-->
-           <div class="tag-span" v-for="item in regularStaffList">
+           <div class="tag-span" v-for="item in regularStaffListToSubmit">
              <el-tag :key="item"
                      closable
                      @close="handleRemoveStaff(item,1)"
@@ -123,7 +126,7 @@
              </el-tag>
            </div>
            <!--临时员工-->
-           <div class="tag-span" v-for="item in tempStaffList">
+           <div class="tag-span" v-for="item in tempStaffListToSubmit">
              <el-tag :key="item"
                      closable
                      @close="handleRemoveStaff(item,2)"
@@ -136,7 +139,8 @@
          <el-form-item label="工作内容" prop="content" class="no-margin-bottom">
            <el-select v-model="arrangeData.workContent"
                       size="small"
-                      placeholder="请选择">
+                      @change="handleWorkContentChange"
+                      placeholder="请先选择车间">
              <el-option
                class="user-edit-dialog-select"
                v-for="item in workContentList"
@@ -154,31 +158,56 @@
              v-model="workContentTexts">
            </el-input>
          </div>
-         <!--<el-form-item >-->
-           <!--<div class="btn-wrapper">-->
-             <!--<el-button type="primary"-->
-                        <!--@click="submit('addRecordForm')"-->
-                        <!--:disabled="isImageUploading"-->
-                        <!--class="submit-btn">-->
-               <!--提交-->
-             <!--</el-button>-->
-             <!--<el-button  class="submit-btn"-->
-                         <!--@click="reset('addRecordForm')">-->
-               <!--清空-->
-             <!--</el-button>-->
-           <!--</div>-->
-         <!--</el-form-item>-->
+         <el-form-item class="margin-top">
+           <div class="btn-wrapper">
+             <el-button type="primary"
+                        @click="submit('arrangeForm')"
+                        class="submit-btn">
+               提交
+             </el-button>
+             <el-button  class="submit-btn"
+                         @click="reset('arrangeForm')">
+               清空
+             </el-button>
+           </div>
+         </el-form-item>
        </el-form>
      </div>
     </div>
+    <!--提交的对话框-->
+    <el-dialog
+      title="提交"
+      :visible.sync="isSubmitDialogShow"
+      top="0"
+      :close-on-click-modal="false"
+      custom-class="tag-edit-dialog"
+    >
+      <span>确定提交排班数据?</span>
+      <span slot="footer" class="dialog-footer">
+          <el-button @click="isSubmitDialogShow = false" size="mini">取 消</el-button>
+          <el-button type="primary"
+                     :loading="isSubmitting"
+                     @click="confirmSubmit"
+                     size="mini">
+            确 定
+          </el-button>
+        </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+  import api from '@/api/api'
 	export default {
 		name: '',
 		data () {
 			return {
+				//是否正在提交
+        isSubmitting:false,
+				//是否显示提交的对话框
+        isSubmitDialogShow:false,
+				//是否正在加载
+        isLoading:false,
         //排班数据
         arrangeData:{
           date:'',
@@ -198,25 +227,145 @@
         //班次列表
         shiftList:[],
         //正式员工列表
-        regularStaffList:['第三方','sdf','eree','ttt'],
+        regularStaffList:[],
         //临时员工列表
-        tempStaffList:['34','5656','7878','898'],
+        tempStaffList:[],
         //工作内容列表
         workContentList:[],
 
 
         /* 要提交的数据 */
         //员工列表
-        staffListToSubmit:[],
+        regularStaffListToSubmit:[],
+        tempStaffListToSubmit:[],
         //工作内容
         workContentTexts:''
 
 			}
 		},
+    mounted:function(){
+			this.fetchListData();
+    },
     methods:{
+    	//确定提交
+      confirmSubmit:function(){
+        this.isSubmitting = true;
+        let data = {
+          date:this.arrangeData.date,
+          workshop:this.arrangeData.workshop,
+          process:this.arrangeData.process,
+          shift:this.arrangeData.shift,
+          startTime:this.arrangeData.startTime,
+          endTime:this.arrangeData.endTime,
+          regularStaffList:this.regularStaffListToSubmit,
+          tempStaffList:this.tempStaffListToSubmit,
+          workContent:this.workContentTexts
+        };
+        this.axios.post(api.submitAttendanceArrange,{data:data}).then((resp)=>{
+        	if(resp.data.status === 1){
+            this.$message({
+              type:'success',
+              message:'提交成功!'
+            });
+          }else{
+            this.$message({
+              type:'error',
+              message:'提交失败!'
+            });
+          }
+          this.isSubmitting = false;
+          this.isSubmitDialogShow = false;
+        })
+
+      },
+    	//提交
+      submit:function(formName){
+      	if(!this.arrangeData.date){
+          this.$message({
+            type:'warning',
+            message:'请填写排班日期!'
+          });
+      		return
+        }
+        this.isSubmitDialogShow = true;
+      },
+      //清空
+      reset:function(formName){
+        this.$refs[formName].resetFields();
+        this.workContentList = [];
+        this.regularStaffListToSubmit = [];
+        this.tempStaffListToSubmit = [];
+        this.workContentTexts = '';
+      },
+    	//工作内容下拉数据变化
+      handleWorkContentChange:function(current){
+        this.$set(this.arrangeData,'workContent','');
+      	this.workContentTexts = this.workContentTexts + current;
+      },
+    	//正式员工下拉数据变化
+      handleRegularStaffChange: function(current){
+        this.$set(this.arrangeData,'regularStaff','');
+      	if(this.regularStaffListToSubmit.includes(current))return
+      	this.regularStaffListToSubmit = this.regularStaffListToSubmit.concat(current)
+      },
+      //临时员工下拉数据变化
+      handleTempStaffChange: function(current){
+        this.$set(this.arrangeData,'tempStaff','');
+        if(this.tempStaffListToSubmit.includes(current))return
+        this.tempStaffListToSubmit = this.tempStaffListToSubmit.concat(current)
+      },
+    	//车间下拉数据变化
+      handleWorkshopChange: function(current){
+        //拉取对应车间的工作内容
+        this.isLoading = true;
+        this.axios.post(api.fetchAttendanceArrangeWorkContent,{workshop:current}).then((resp)=>{
+        	//清空已选择的工作内容
+          this.$set(this.arrangeData,'workContent','');
+          if(resp.data.status === 1){
+            this.workContentList = resp.data.list;
+          }else{
+            this.$message({
+              type:'error',
+              message:'数据获取失败!'
+            });
+          }
+          this.isLoading = false;
+        }).catch(()=>{
+          this.isLoading = false;
+        })
+      },
+			//拉取初始数据
+      fetchListData:function(){
+      	this.isLoading = true;
+      	this.axios.get(api.fetchAttendanceArrangeDropdown).then((resp)=>{
+      		if(resp.data.status === 1){
+            this.workshopList = resp.data.workshop;
+            this.processList = resp.data.process;
+            this.shiftList = resp.data.shift;
+            this.regularStaffList = resp.data.regularstaff;
+            this.tempStaffList = resp.data.tempstaff;
+          }else{
+            this.$message({
+              type:'error',
+              message:'数据获取失败!'
+            });
+          }
+          this.isLoading = false;
+        }).catch(()=>{
+          this.isLoading = false;
+        })
+      },
 			//删除员工
       handleRemoveStaff:function(tag,type){
-
+        if(type === 1){
+        	//正式员工
+          let index = this.regularStaffListToSubmit.indexOf(tag);
+          this.regularStaffListToSubmit.splice(index,1);
+        }else{
+        	//临时员工
+          let index = this.tempStaffListToSubmit.indexOf(tag);
+          this.tempStaffListToSubmit.splice(index,1);
+        }
       }
     }
 	}
@@ -266,6 +415,9 @@
         .textarea{
           margin-left: 100px;
         }
+        .margin-top{
+          margin-top: 20px;
+        }
 
       }
     }
@@ -287,4 +439,32 @@
   .attendance-arrange .submit-btn.el-button{
     width:100px;
   }
+  //对话框自定义类名
+  .tag-edit-dialog{
+    width:500px;
+    position: relative;
+    top:50%;
+    transform: translateY(-50%);
+    .el-dialog__header{
+      border-bottom:1px solid #e8e8e8;
+      padding-bottom: 10px;
+      padding-top:10px;
+      .el-dialog__title{
+        font-size: 16px;
+      }
+      .el-dialog__headerbtn{
+        top:15px;
+      }
+    }
+    .user-edit-dialog-form-wrapper{
+      width:70%;
+      margin: 0 auto;
+    }
+    .el-dialog__footer{
+      border-top:1px solid #e8e8e8;
+      padding-bottom:10px;
+    }
+
+  }
 </style>
+

@@ -11,6 +11,7 @@ var AttendanceTempStaff = require('./../model/attendance_temp_staff')
 var AttendanceRegularStaff = require('./../model/attendance_regular_staff')
 var AttendanceWorkContent = require('./../model/attendance_work_content')
 var AttendanceAnnounce = require('./../model/attendance_annoucement')
+var AttendanceShiftData = require('./../model/attendance_shift_data')
 //返回状态码
 var returnedCodes = require('./../config').returnedCodes;
 
@@ -440,6 +441,113 @@ router.post('/updateAttendanceAnnounce',function(req,res){
       res.json({
         status:returnedCodes.CODE_SUCCESS
       })
+    }
+  })
+});
+
+
+//获取考勤编辑界面各项下拉的数据
+router.get('/fetchAttendanceArrangeDropdown',function(req,res){
+  let group = req.group;
+  //获取车间，工序，班次，临时员工，正式员工,(工作内容单独拉取)
+  function getter(schema){
+    return new Promise((resolve,reject)=>{
+      schema.find({group},function(err,docs){
+        if(err){
+          reject();
+        }else{
+          let list = [];
+          docs.forEach((item)=>{
+            //格式是前端规定的
+            list.push({
+              value:item.name,
+              label:item.name
+            })
+          });
+          resolve(list)
+        }
+      })
+    });
+  }
+
+  //车间
+  let workshopPromise = getter(Workshop);
+  //工序
+  let processPromise = getter(AttendanceWorkProcess);
+  //班次
+  let shiftPromise = getter(AttendanceShift);
+  //临时员工
+  let tempStaffPromise = getter(AttendanceTempStaff);
+  //正式员工
+  let regularStaffPromise = getter(AttendanceRegularStaff);
+  //promise数组
+  let promises = [].concat([workshopPromise,processPromise,shiftPromise,tempStaffPromise,regularStaffPromise]);
+  Promise.all(promises).then((results)=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+      workshop:results[0],
+      process:results[1],
+      shift:results[2],
+      tempstaff:results[3],
+      regularstaff:results[4]
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR,
+    })
+  })
+});
+
+//拉取车间对应的工作内容
+router.post('/fetchAttendanceArrangeWorkContent',function(req,res){
+  let group = req.group,
+      workshop = req.body.workshop;
+  AttendanceWorkContent.find({group,workshop},function(err,docs){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR,
+      })
+    }else{
+      let list = [];
+      docs.forEach((item)=>{
+        list.push({
+          value:item.name,
+          label:item.name
+        })
+      });
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        list:list
+      })
+    }
+  })
+})
+
+//提交排班考勤数据
+router.post('/submitAttendanceArrange',function(req,res){
+  let group = req.group;
+  let data = req.body.data;
+  data.group = group;
+  console.log(data)
+  //如果找到相同排班表的则覆盖
+  AttendanceShiftData.findOne(data,function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR,
+      })
+    }else{
+      if(doc){
+        //不做任何事
+        res.json({
+          status:returnedCodes.CODE_SUCCESS,
+        })
+      }else{
+        let attendanceShiftData = new AttendanceShiftData(data)
+        attendanceShiftData.save();
+        res.json({
+          status:returnedCodes.CODE_SUCCESS,
+        })
+      }
     }
   })
 });

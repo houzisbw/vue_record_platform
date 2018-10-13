@@ -112,6 +112,10 @@ export default {
   fetchAttendanceAnnounce:'/attendance/fetchAttendanceAnnounce',//获取考勤安排公告栏内容
   updateAttendanceAnnounce:'/attendance/updateAttendanceAnnounce',//更新公告栏内容
 
+  fetchAttendanceArrangeDropdown:'/attendance/fetchAttendanceArrangeDropdown',//获考勤操作编辑界面的下拉数据
+  fetchAttendanceArrangeWorkContent:'/attendance/fetchAttendanceArrangeWorkContent',//拉取车间对应的工作内容
+  submitAttendanceArrange:'/attendance/submitAttendanceArrange',//提交排班考勤数据
+
 
 
 }
