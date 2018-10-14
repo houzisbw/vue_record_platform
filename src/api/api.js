@@ -116,6 +116,7 @@ export default {
   fetchAttendanceArrangeWorkContent:'/attendance/fetchAttendanceArrangeWorkContent',//拉取车间对应的工作内容
   submitAttendanceArrange:'/attendance/submitAttendanceArrange',//提交排班考勤数据
   fetchShiftDataCurrentDay:'/attendance/fetchShiftDataCurrentDay',//获取当日排班的员工数据以及班次信息
+  fetchShiftDataHistory:'/attendance/fetchShiftDataHistory',//获取历史排班数据(某一天)和公告数据
 
 
 

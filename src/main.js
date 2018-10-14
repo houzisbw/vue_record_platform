@@ -50,6 +50,7 @@ import {
   Radio,
   RadioGroup,
   RadioButton,
+  Card,
   MenuItemGroup,} from 'element-ui';
 Vue.use(Button)
 Vue.use(Form)
@@ -85,6 +86,7 @@ Vue.use(TimeSelect)
 Vue.use(Radio)
 Vue.use(RadioGroup)
 Vue.use(RadioButton)
+Vue.use(Card)
 
 //特殊处理
 Vue.prototype.$message = Message;

@@ -14,6 +14,12 @@
                            v-for="(item,index) in shiftList">
           </el-radio-button>
         </el-radio-group>
+        <el-tag class="repeat"
+                v-if="isRegularStaffRepeated"
+                size="small"
+                type="danger">
+          有重复
+        </el-tag>
       </div>
       <div class="content">
         <div v-if="filterdRegularStaffList.length>0">
@@ -33,6 +39,22 @@
         </div>
       </div>
     </div>
+    <!--未排班正式员工)-->
+    <div class="panel-wrapper" v-if="unshiftedRegularStaffList.length>0">
+      <div class="title">
+        <span class="title-text">未排班的正式员工</span>
+      </div>
+      <div class="content">
+        <el-tag class="staff-tag"
+                type="info"
+                :key="index"
+                v-for="(item,index) in unshiftedRegularStaffList">
+          {{item}}
+        </el-tag>
+      </div>
+    </div>
+    <div class="divider">
+    </div>
     <!--临时员工的排班情况(早中晚深的顺序)-->
     <div class="panel-wrapper">
       <div class="title">
@@ -47,6 +69,12 @@
                            v-for="(item,index) in shiftList">
           </el-radio-button>
         </el-radio-group>
+        <el-tag class="repeat"
+                v-if="isTempStaffRepeated"
+                size="small"
+                type="danger">
+          有重复
+        </el-tag>
       </div>
       <div class="content">
         <div v-if="filterdTempStaffList.length>0">
@@ -66,6 +94,20 @@
         </div>
       </div>
     </div>
+    <!--未排班临时员工)-->
+    <div class="panel-wrapper" v-if="unshiftedTempStaffList.length>0">
+      <div class="title">
+        <span class="title-text">未排班的临时员工</span>
+      </div>
+      <div class="content">
+        <el-tag class="staff-tag"
+                type="info"
+                :key="index"
+                v-for="(item,index) in unshiftedTempStaffList">
+          {{item}}
+        </el-tag>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -78,6 +120,36 @@
 				type:String,
         required:true
       }
+    },
+    computed:{
+			//未排班的正式员工列表
+      unshiftedRegularStaffList:function(){
+      	return this.totalRegularStaffList.filter((item)=>{
+      		return !this.regularStaffList.map((staff)=>{
+      			return staff.name
+          }).includes(item)
+        })
+      },
+      //未排班的临时员工列表
+      unshiftedTempStaffList:function(){
+        return this.totalTempStaffList.filter((item)=>{
+          return !this.tempStaffList.map((staff)=>{
+            return staff.name
+          }).includes(item)
+        })
+      },
+      //正式员工是否有重复排班
+      isRegularStaffRepeated:function(){
+      	return new Set(this.filterdRegularStaffList.map((item)=>{
+      		return item.name
+        })).size !== this.filterdRegularStaffList.length
+      },
+      //临时员工是否有重复班
+      isTempStaffRepeated:function(){
+        return new Set(this.filterdTempStaffList.map((item)=>{
+            return item.name
+          })).size !== this.filterdTempStaffList.length
+      },
     },
 		data () {
 			return {
@@ -103,7 +175,11 @@
         //临时员工过滤后的列表
         filterdTempStaffList:[],
         //班次列表
-        shiftList:[]
+        shiftList:[],
+        //所有正式员工列表
+        totalRegularStaffList:[],
+        //所有临时员工列表
+        totalTempStaffList:[],
 			}
 		},
     mounted:function(){
@@ -140,8 +216,14 @@
             this.filterdTempStaffList = resp.data.tempList;
             this.filterdRegularStaffList = resp.data.regularList;
             this.regularStaffList = resp.data.regularList;
-          }else{
+            this.totalRegularStaffList = resp.data.totalRegularStaffList;
+            this.totalTempStaffList = resp.data.totalTempStaffList;
 
+          }else{
+            this.$message({
+              type:'error',
+              message:'数据读取错误!'
+            });
           }
           this.isLoading = false;
         })
@@ -153,8 +235,14 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped type="text/less" lang="less">
 .wrapper{
+  .divider{
+    height:1px;
+    width:100%;
+    border-bottom: 1px solid #e8e8e8;
+    margin: 10px 0 20px 0;
+  }
   .panel-wrapper{
-    margin-bottom: 30px;
+    margin-bottom: 5px;
     .title{
       font-size: 14px;
       color:#606266;
@@ -162,10 +250,16 @@
       .title-text{
         margin-right: 10px;
       }
+      .repeat{
+        display: inline-block;
+        margin-left: 10px;
+
+      }
     }
     .content{
       .no-data{
         color: #dddddd;
+        margin-bottom: 10px;
       }
       .staff-tag{
         margin: 0 15px 15px 0;

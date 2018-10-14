@@ -258,8 +258,6 @@
         tempStaffList:[],
         //工作内容列表
         workContentList:[],
-
-
         /* 要提交的数据 */
         //员工列表
         regularStaffListToSubmit:[],
@@ -328,6 +326,13 @@
           this.$message({
             type:'warning',
             message:'请填写班次!'
+          });
+          return
+        }
+        if(this.regularStaffListToSubmit.length===0 && this.tempStaffListToSubmit.length===0){
+          this.$message({
+            type:'warning',
+            message:'请填写排班人员!'
           });
           return
         }

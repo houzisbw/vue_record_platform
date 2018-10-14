@@ -556,7 +556,6 @@ router.post('/submitAttendanceArrange',function(req,res){
 router.post('/fetchShiftDataCurrentDay',function(req,res){
   let group = req.group;
   let date = req.body.date;
-  console.log(date)
   //班次数据
   let shiftPromise = new Promise((resolve,reject)=>{
     AttendanceShift.find({group},function(err,docs){
@@ -571,6 +570,39 @@ router.post('/fetchShiftDataCurrentDay',function(req,res){
       }
     })
   })
+  //获取正式员工和临时员工列表
+  let staffPromise = new Promise((resolve,reject)=>{
+    let tempStaffPromise = new Promise((resolve1,reject1)=>{
+      AttendanceTempStaff.find({group},function(err,docs){
+        if(err){
+          reject1()
+        }else{
+          let list = [];
+          docs.forEach((item)=>{list.push(item.name)})
+          resolve1(list)
+        }
+      })
+    })
+    let regularStaffPromise = new Promise((resolve1,reject1)=>{
+      AttendanceRegularStaff.find({group},function(err,docs){
+        if(err){
+          reject1()
+        }else{
+          let list = [];
+          docs.forEach((item)=>{list.push(item.name)})
+          resolve1(list)
+        }
+      })
+    })
+    Promise.all([tempStaffPromise,regularStaffPromise]).then((results)=>{
+      resolve({
+        totalTempStaffList:results[0],
+        totalRegularStaffList:results[1]
+      })
+    }).catch(()=>{
+      reject()
+    })
+  });
   //当日排班情况
   let shiftDataPromise = new Promise((resolve,reject)=>{
     AttendanceShiftData.find({group,date},function(err,docs){
@@ -605,21 +637,64 @@ router.post('/fetchShiftDataCurrentDay',function(req,res){
     })
   })
 
-  Promise.all([shiftPromise,shiftDataPromise]).then((results)=>{
+  Promise.all([shiftPromise,shiftDataPromise,staffPromise]).then((results)=>{
     res.json({
       status:returnedCodes.CODE_SUCCESS,
       shift:results[0],
       tempList:results[1].tempList,
       regularList:results[1].regularList,
+      totalTempStaffList:results[2].totalTempStaffList,
+      totalRegularStaffList:results[2].totalRegularStaffList,
     })
   }).catch(()=>{
     res.json({
       status:returnedCodes.CODE_ERROR,
     })
   })
+});
 
+//获取历史排班数据(某一天)和公告数据
+router.post('/fetchShiftDataHistory',function(req,res){
+  let group = req.group,
+      date = req.body.date;
+  //获取公告数据
+  let announcePromise = new Promise((resolve,reject)=>{
+    AttendanceAnnounce.find({},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        let ret = {};
+        docs.forEach((item)=>{
+          ret[item.type] = item.content
+        });
+        resolve(ret)
+      }
+    })
+  });
+  //获取排班记录数据
+  let shiftPromise = new Promise((resolve,reject)=>{
+    AttendanceShiftData.find({group,date},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        resolve(docs)
+      }
+    })
+  });
 
-})
+  Promise.all([announcePromise,shiftPromise]).then((results)=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+      announce:results[0],
+      shift:results[1]
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR
+    })
+  })
+
+});
 
 
 module.exports = router;

@@ -24,6 +24,7 @@ import AttendanceWrapper from '@/pages/Attendance/AttendanceWrapper'
 import AttendanceSheet from '@/pages/Attendance/AttendanceSheet'
 import AttendancePanel from '@/pages/Attendance/AttendanceConfigPanel'
 import ShiftArrangement from '@/pages/Attendance/ShiftArrangement'
+import AttendanceHistory from '@/pages/Attendance/AttendanceHistory'
 
 import config from './../config/config'
 //用户权限
@@ -241,6 +242,14 @@ export default new Router({
               meta:{
                 //超管可访问
                 role:[userAuth.SUPER_ADMIN]
+              }
+            },
+            {
+              path:'history',
+              component:AttendanceHistory,
+              meta:{
+                //所有人可访问
+                role:authAll
               }
             },
           ]
