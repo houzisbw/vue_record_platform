@@ -18,7 +18,8 @@
     </div>
     <div class="content" v-loading="isLoading">
       <div class="empty-tips" v-show="isEmpty">
-        <span>请选择日期查看排班情况~</span>
+        <span v-if="isFirstLoaded">请选择日期查看排班情况~</span>
+        <span v-else>当天无排班数据~</span>
       </div>
       <div class="shift-content-wrapper" v-show="!isEmpty">
         <!--公告栏上-->
@@ -37,9 +38,20 @@
                  v-for="(item,index) in shiftList"
                  shadow="never">
           <div class="card-content">
-            <!--序号-->
-            <div class="card-index">
-              {{index+1}}
+            <!--编辑按钮(管理员可见)-->
+            <div class="edit-btn">
+              <el-tooltip effect="dark" content="编辑该条排班数据" placement="top">
+                <i class="iconfont icon-edit icon_no-outline"
+                   @click="handleEdit(item)"
+                   v-auth="['2']">
+                </i>
+              </el-tooltip>
+              <el-tooltip effect="dark" content="删除该条排班数据" placement="top">
+                <i class="iconfont icon-delete icon_no-outline"
+                   v-auth="['2']"
+                   @click="handleDelete(item)">
+                </i>
+              </el-tooltip>
             </div>
             <div class="item-wrapper">
               <div class="item-title">
@@ -116,9 +128,7 @@
                   排班内容
                 </el-tag>
               </div>
-              <div class="item-content">
-                {{item.workContent?item.workContent:'无'}}
-              </div>
+              <div class="item-content work-content" >{{item.workContent | workContentFormatter}}</div>
             </div>
           </div>
         </el-card>
@@ -132,17 +142,52 @@
           <div class="announcement" v-html="announcementDown">
           </div>
         </el-card>
+
+        <!--编辑排班数据的对话框-->
+        <el-dialog
+          title="修改排班数据"
+          :visible.sync="isEditDialogShow"
+          top="0"
+          :close-on-click-modal="false"
+          custom-class="tag-edit-dialog"
+        >
+          <attendance-form :fetch-url="fetchUrl"
+                           v-if="isEditDialogShow"
+                           @close="handleClose"
+                           :is-fetch-written="true"
+                           :fetch-written-data-url="fetchWrittenDataUrl"
+                           submit-text="确定修改排班数据?"
+                           :id="selectedShiftId"
+                           :submit-url="updateWrittenUrl">
+          </attendance-form>
+        </el-dialog>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  import _ from 'lodash'
   import api from '@/api/api'
+  import AttendanceForm from '@/components/AttendanceAndArrangement/AttendanceForm'
 	export default {
-		name: '',
+    name: '',
+    components:{
+      AttendanceForm
+    },
 		data () {
 			return {
+				//排班提交表单的prop
+        fetchUrl:api.fetchAttendanceArrangeDropdown,
+        fetchWrittenDataUrl:api.fetchWrittenDataUrl,
+        updateWrittenUrl:api.updateWrittenData,
+        //选择的排班的id
+        selectedShiftId:'',
+
+				//是否显示编辑对话框
+        isEditDialogShow:false,
+				//是否初次加载
+        isFirstLoaded:true,
 				//是否正在加载数据
         isLoading:false,
         //日期
@@ -155,13 +200,66 @@
         shiftList:[]
 			}
 		},
+    filters:{
+			//格式化工作内容
+      workContentFormatter:function(value){
+      	return value?value:'无'
+      }
+    },
     computed:{
       //是否展示数据
       isEmpty:function(){
       	return this.shiftList.length===0
-      }
+      },
     },
     methods:{
+    	//关闭对话框
+      handleClose:function(){
+        this.isEditDialogShow = false;
+        this.fetchData();
+      },
+    	//编辑排班数据
+      handleEdit:function(item){
+      	this.selectedShiftId = item._id;
+      	this.isEditDialogShow = true;
+      },
+    	//删除排班数据
+      handleDelete:function(item){
+      	let id = item._id;
+        this.$msgbox.confirm('是否删除该排班数据?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          //在此进行删除操作,注意去抖操作必须
+          beforeClose: _.debounce((action, instance, done) => {
+            // 确认按钮按下
+            if (action === 'confirm') {
+              instance.confirmButtonLoading = true;
+              instance.confirmButtonText = '删除中...';
+              //根据数据库的主键找到对应的回复进行删除
+              this.axios.post(api.deleteShiftData,{id}).then((resp)=>{
+                let status = resp.data.status;
+                if(status === 1){
+                  this.$message({
+                    type:'success',
+                    message:'排班数据删除成功!'
+                  });
+                }else{
+                  this.$message({
+                    type:'error',
+                    message:'排班数据不存在!'
+                  })
+                }
+                this.fetchData();
+                instance.confirmButtonLoading = false;
+                done();
+              });
+            } else {
+              done();
+            }
+          },400,{leading:true,trailing:false})
+        }).then(()=>{}).catch(()=>{})
+      },
 			//日期选择器改变
       handleDatePickerChange:function(value){
       	if(value === null)return
@@ -171,6 +269,7 @@
       //拉取数据(排班数据和公告数据)
       fetchData:function(){
       	this.isLoading = true;
+      	this.isFirstLoaded = false;
         this.axios.post(api.fetchShiftDataHistory,{date:this.date}).then((resp)=>{
         	if(resp.data.status === 1){
         		//更新公告数据
@@ -244,6 +343,16 @@
           .card-content{
             position: relative;
             @size:25px;
+            .edit-btn{
+              position: absolute;
+              right:0;
+              top:0;
+              color:#cbcbcb;
+              cursor: pointer;
+              .icon_no-outline{
+                outline: none;
+              }
+            }
             .card-index{
               height:@size;
               min-width: @size;
@@ -261,6 +370,9 @@
             display: flex;
             flex-direction: row;
             padding:10px;
+            .work-content{
+              white-space: pre-wrap;
+            }
             .item-title{
               width:100px;
               padding-right:20px;
@@ -297,6 +409,36 @@
         .card{
           margin-bottom: 20px;
         }
+      }
+    }
+  }
+</style>
+<style type="text/less" lang="less">
+  //对话框自定义类名
+  .history-wrapper {
+    .tag-edit-dialog {
+      min-width: 600px;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      .el-dialog__header {
+        border-bottom: 1px solid #e8e8e8;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        .el-dialog__title {
+          font-size: 16px;
+        }
+        .el-dialog__headerbtn {
+          top: 15px;
+        }
+      }
+      .user-edit-dialog-form-wrapper {
+        width: 70%;
+        margin: 0 auto;
+      }
+      .el-dialog__footer {
+        border-top: 1px solid #e8e8e8;
+        padding-bottom: 10px;
       }
     }
   }

@@ -4,6 +4,7 @@
 //排班考勤的相关接口
 var express = require('express');
 var router = express.Router();
+var mongoose = require('mongoose')
 var Workshop = require('./../model/workshop')
 var AttendanceWorkProcess = require('./../model/attendance_work_process')
 var AttendanceShift = require('./../model/attendance_shift')
@@ -528,7 +529,6 @@ router.post('/submitAttendanceArrange',function(req,res){
   let group = req.group;
   let data = req.body.data;
   data.group = group;
-  console.log(data)
   //如果找到相同排班表的则覆盖
   AttendanceShiftData.findOne(data,function(err,doc){
     if(err){
@@ -694,6 +694,56 @@ router.post('/fetchShiftDataHistory',function(req,res){
     })
   })
 
+});
+
+//删除排班数据
+router.post('/deleteShiftData',function(req,res){
+  let id = req.body.id;
+  AttendanceShiftData.findOneAndRemove({_id:mongoose.Types.ObjectId(id)},function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS
+      })
+    }
+  })
+})
+
+//获取已填写的排班数据
+router.post('/fetchWrittenDataUrl',function(req,res){
+  let id = req.body.id;
+  AttendanceShiftData.findOne({_id:mongoose.Types.ObjectId(id)},function(err,doc){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+        shift:doc
+      })
+    }
+  })
+});
+
+//修改已填写数据的url
+router.post('/updateWrittenData',function(req,res){
+  let data = req.body.data;
+  let id = req.body.id;
+  AttendanceShiftData.findOneAndUpdate({_id:mongoose.Types.ObjectId(id)},data,function(err){
+    if(err){
+      res.json({
+        status:returnedCodes.CODE_ERROR
+      })
+    }else{
+      res.json({
+        status:returnedCodes.CODE_SUCCESS,
+      })
+    }
+  })
 });
 
 

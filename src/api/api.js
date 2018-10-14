@@ -117,6 +117,9 @@ export default {
   submitAttendanceArrange:'/attendance/submitAttendanceArrange',//提交排班考勤数据
   fetchShiftDataCurrentDay:'/attendance/fetchShiftDataCurrentDay',//获取当日排班的员工数据以及班次信息
   fetchShiftDataHistory:'/attendance/fetchShiftDataHistory',//获取历史排班数据(某一天)和公告数据
+  deleteShiftData:'/attendance/deleteShiftData',//删除某一天的一条排班数据
+  fetchWrittenDataUrl:'/attendance/fetchWrittenDataUrl',//获取已填写的排班数据
+  updateWrittenData:'/attendance/updateWrittenData',//修改已填写的排班数据
 
 
 

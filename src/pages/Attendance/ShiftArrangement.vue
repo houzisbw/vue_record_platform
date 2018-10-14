@@ -349,7 +349,13 @@
     	//工作内容下拉数据变化
       handleWorkContentChange:function(current){
         this.$set(this.arrangeData,'workContent','');
-      	this.workContentTexts = this.workContentTexts + current;
+        //计算已经有的序号
+        let reg = /\(\d+?\)/g;
+        let indexArray=[],arr;
+        while(arr = reg.exec(this.workContentTexts)){
+          indexArray.push(arr[0])
+        }
+      	this.workContentTexts = this.workContentTexts + '('+(indexArray.length+1)+') '+current+'\n';
       },
     	//正式员工下拉数据变化
       handleRegularStaffChange: function(current){
