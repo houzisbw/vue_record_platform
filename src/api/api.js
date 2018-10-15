@@ -120,6 +120,7 @@ export default {
   deleteShiftData:'/attendance/deleteShiftData',//删除某一天的一条排班数据
   fetchWrittenDataUrl:'/attendance/fetchWrittenDataUrl',//获取已填写的排班数据
   updateWrittenData:'/attendance/updateWrittenData',//修改已填写的排班数据
+  fetchAttendanceSheetData:'/attendance/fetchAttendanceSheetData',//获取考勤表数据
 
 
 

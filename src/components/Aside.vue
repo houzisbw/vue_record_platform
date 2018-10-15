@@ -210,7 +210,7 @@
                 index:'/attendance/sheet',
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
-                subMenuTitle:'当月考勤表'
+                subMenuTitle:'考勤表'
               },
               {
                 index:'/attendance/shift_arrangement',

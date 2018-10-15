@@ -746,5 +746,62 @@ router.post('/updateWrittenData',function(req,res){
   })
 });
 
+//获取考勤表数据
+router.post('/fetchAttendanceSheetData',function(req,res){
+  let group = req.group;
+  //考勤月份
+  let date  = req.body.date;
+  //获取临时员工列表
+  let tempStaffPromise = new Promise((resolve1,reject1)=>{
+    AttendanceTempStaff.find({group},function(err,docs){
+      if(err){
+        reject1()
+      }else{
+        let list = [];
+        docs.forEach((item)=>{list.push(item.name)})
+        resolve1(list)
+      }
+    })
+  })
+  //获取正式员工列表
+  let regularStaffPromise = new Promise((resolve1,reject1)=>{
+    AttendanceRegularStaff.find({group},function(err,docs){
+      if(err){
+        reject1()
+      }else{
+        let list = [];
+        docs.forEach((item)=>{list.push(item.name)})
+        resolve1(list)
+      }
+    })
+  });
+  //获取当月的排班数据
+  let currentMonthShiftData = new Promise((resolve,reject)=>{
+    //找出以当前年月开头的记录
+    let regExp = new RegExp('^'+date);
+    AttendanceShiftData.find({date:regExp},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        resolve(docs)
+      }
+    })
+  })
+
+  Promise.all([tempStaffPromise,regularStaffPromise,currentMonthShiftData]).then((results)=>{
+    res.json({
+      status:returnedCodes.CODE_SUCCESS,
+      tempStaffList:results[0],
+      regularStaffList:results[1],
+      currentMonthData:results[2]
+    })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR
+    })
+  })
+
+});
+
 
 module.exports = router;

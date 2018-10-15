@@ -342,6 +342,7 @@
           margin-bottom: 20px;
           .card-content{
             position: relative;
+            color:rgba(0, 0, 0, 0.65);
             @size:25px;
             .edit-btn{
               position: absolute;
@@ -370,6 +371,8 @@
             display: flex;
             flex-direction: row;
             padding:10px;
+            word-break: break-all;
+            flex-wrap: wrap;
             .work-content{
               white-space: pre-wrap;
             }
@@ -379,9 +382,12 @@
               box-sizing: border-box;
             }
             .item-content{
+              word-break: break-all;
               flex:1;
               display: flex;
               align-items: center;
+              /*换行*/
+              flex-wrap: wrap;
               .staff-tag{
                 margin: 0 15px 15px 0;
                 position: relative;
