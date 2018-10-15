@@ -146,8 +146,8 @@
         <!--编辑排班数据的对话框-->
         <el-dialog
           title="修改排班数据"
+          top="5vh"
           :visible.sync="isEditDialogShow"
-          top="0"
           :close-on-click-modal="false"
           custom-class="tag-edit-dialog"
         >
@@ -423,10 +423,11 @@
   //对话框自定义类名
   .history-wrapper {
     .tag-edit-dialog {
-      min-width: 600px;
+      width: 600px;
       position: relative;
-      top: 50%;
-      transform: translateY(-50%);
+      /*这里不居中是因为如果内容太长会导致对话框显示不完整，因此给定对话框一个距离顶部的距离*/
+      /*top: 50%;*/
+      /*transform: translateY(-50%);*/
       .el-dialog__header {
         border-bottom: 1px solid #e8e8e8;
         padding-bottom: 10px;

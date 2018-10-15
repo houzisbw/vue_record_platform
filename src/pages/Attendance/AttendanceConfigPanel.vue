@@ -15,6 +15,7 @@
     <!--班次-->
     <tag-item-list
       title="班次"
+      :is-limit="true"
       title-icon="icon-apartment"
       btn-name="添加新班次"
       add-input-name="班次名称"
@@ -64,16 +65,12 @@
     <public-announcement
       title="公告栏(上)"
       type="up"
-      fetch-url="sdf"
-      submit-url="sdf"
       title-icon="icon-notification">
     </public-announcement>
     <!--公告栏(下)-->
     <public-announcement
       title="公告栏(下)"
-      fetch-url="sdf"
       type="down"
-      submit-url="sdf"
       title-icon="icon-notification">
     </public-announcement>
   </div>

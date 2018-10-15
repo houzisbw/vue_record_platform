@@ -17,81 +17,94 @@
       </div>
     </div>
     <div class="content" v-loading="isLoading">
-      <div class="table-wrapper">
-        <table class="sheet-table">
-          <!--表头()-->
-          <tr class="table-head">
-            <th rowspan="2">
-              姓名
-            </th>
-            <th v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}">
-              {{n}}
-              <span class="weekend-badge" v-show="isWeekend(n)">休</span>
-            </th>
-          </tr>
-          <tr class="table-head">
-            <th v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}" class="weekday">
-              {{caculateWeekDay(n)}}
-            </th>
-          </tr>
-          <!--表格主体-->
-          <tr>
-            <!--colspan给定一个大值，则占满所有列-->
-            <td colspan="1000" class="staff-td">
-              正式员工
-            </td>
-          </tr>
-          <tr v-for="(item,index) in regularStaffList">
-            <td class="name-td">
-              {{item}}
-            </td>
-            <td v-for="n in currentMonthDayNum"
-                :class="{'weekend-day':isWeekend(n)}">
-                <span v-if="showPopover(item,n,1)">
-                  <el-popover
-                    placement="top-start"
-                    trigger="hover">
-                    <!--弹出框内的内容-->
-                    <el-tag v-for="(it,idx) in getMultipleShiftData(item,n,1)"
-                            :style="{marginRight:'10px'}"
-                            :key="idx">
-                      {{it}}
-                    </el-tag>
-                    <!--触发弹出框的元素-->
-                    <span :style="{color:getSheetFontColor(item,n,1)}"
-                          slot="reference">
-                      {{showSheetData(item,n,1)}}
-                    </span>
-                  </el-popover>
-                </span>
-                <span v-else>
-                  <span :style="{color:getSheetFontColor(item,n,1)}">
-                      {{showSheetData(item,n,1)}}
+      <!--这里用if重新渲染防止出现表格数据逻辑错误-->
+      <div class="table-wrapper" v-if="!isLoading">
+        <div>
+          <table class="sheet-table" ref="table">
+            <!--下载excel的按钮-->
+            <div class="btn-wrapper" v-auth="['2','1']">
+              <el-button size="small"
+                         @click="downloadExcel"
+                         type="primary">
+                下载Excel
+              </el-button>
+            </div>
+            <!--表头()-->
+            <tr class="table-head">
+              <th rowspan="2">
+                姓名
+              </th>
+              <th v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}">
+                {{n}}
+                <span class="weekend-badge" v-if="isWeekend(n)">休</span>
+              </th>
+            </tr>
+            <tr class="table-head">
+              <th v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}" class="weekday">
+                {{caculateWeekDay(n)}}
+              </th>
+            </tr>
+            <!--表格主体-->
+            <tr>
+              <!--colspan给定一个大值，则占满所有列-->
+              <td colspan="1000" class="staff-td">
+                正式员工
+              </td>
+            </tr>
+            <tr v-for="(item,index) in regularStaffList">
+              <td class="name-td">
+                {{item}}
+              </td>
+              <td v-for="n in currentMonthDayNum"
+                  :class="{'weekend-day':isWeekend(n)}">
+                  <span v-if="showPopover(item,n,1)">
+                    <el-popover
+                      placement="top-start"
+                      trigger="hover">
+                      <!--弹出框内的内容-->
+                      <el-tag v-for="(it,idx) in getMultipleShiftData(item,n,1)"
+                              :style="{marginRight:'10px'}"
+                              :key="idx">
+                        {{it}}
+                      </el-tag>
+                      <!--触发弹出框的元素-->
+                      <span :style="{color:getSheetFontColor(item,n,1)}"
+                            slot="reference">
+                        {{showSheetData(item,n,1)}}
+                      </span>
+                    </el-popover>
                   </span>
-                </span>
-            </td>
-          </tr>
-          <tr>
-            <!--colspan给定一个大值，则占满所有列-->
-            <td colspan="1000" class="staff-td">
-              临时员工
-            </td>
-          </tr>
-          <tr v-for="(item,index) in tempStaffList">
-            <td class="name-td">
-              {{item}}
-            </td>
-            <td v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}">
-              <span :style="{color:getSheetFontColor(item,n,2)}">{{showSheetData(item,n,2)}}</span>
-            </td>
-          </tr>
-        </table>
+                  <span v-else>
+                    <span :style="{color:getSheetFontColor(item,n,1)}">
+                        {{showSheetData(item,n,1)}}
+                    </span>
+                  </span>
+              </td>
+            </tr>
+            <tr>
+              <!--colspan给定一个大值，则占满所有列-->
+              <td colspan="1000" class="staff-td">
+                临时员工
+              </td>
+            </tr>
+            <tr v-for="(item,index) in tempStaffList">
+              <td class="name-td">
+                {{item}}
+              </td>
+              <td v-for="n in currentMonthDayNum" :class="{'weekend-day':isWeekend(n)}">
+                <span :style="{color:getSheetFontColor(item,n,2)}">{{showSheetData(item,n,2)}}</span>
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  import xlsx from 'xlsx'
+  import _ from 'lodash'
   import api from '@/api/api'
 	export default {
 		name: '',
@@ -133,10 +146,20 @@
 			}
 		},
     mounted:function(){
-			this.getDateInfo();
+			//计算当前时间
+      let date = new Date(),year = date.getFullYear(),month = date.getMonth();
+      this.calendarDate = year+'-'+(month+1);
+			this.getDateInfo(year,month);
     },
 
     methods:{
+    	//下载excel
+      downloadExcel: _.debounce(function(){
+      	//生成工作簿
+        let table = this.$refs.table;
+      	let workbook = xlsx.utils.table_to_book(table);
+        xlsx.writeFile(workbook,'考勤表-'+this.calendarDate+'.xlsx');
+      },400,{leading:true,trailing:false}),
     	//处理弹出框内的排班信息显示
       getMultipleShiftData:function(staffName,day,type){
         if(day<10){
@@ -247,6 +270,7 @@
           }
           this.regularStaffMap[item] = dateObj
         });
+
         //初始化临时员工map
         this.tempStaffList.forEach((item)=>{
           let dateObj = {};
@@ -281,6 +305,8 @@
         this.isLoading = true;
         this.axios.post(api.fetchAttendanceSheetData,{date:this.calendarDate}).then((resp)=>{
         	if(resp.data.status === 1){
+        		this.regularStaffMap = {};
+        		this.tempStaffMap = {};
             this.regularStaffList = resp.data.regularStaffList;
             this.tempStaffList = resp.data.tempStaffList;
             this.initMapData(resp.data.currentMonthData);
@@ -295,12 +321,14 @@
       },
       //月份选择器变化
       handleDatePickerChange:function(value){
-
+      	this.calendarDate = value;
+      	let year = value.split('-')[0],
+            month = parseInt(value.split('-')[1],10);
+      	//注意month要减1，因为日历的月份已经+1
+        this.getDateInfo(year,month-1);
       },
-      //获取日期信息
-      getDateInfo:function(){
-      	let date = new Date(),year = date.getFullYear(),month = date.getMonth();
-      	this.calendarDate = year+'-'+(month+1);
+      //获取日期信息,注意month是已经减一了的月份
+      getDateInfo:function(year,month){
       	//获取当月天数(date设置成下个月第0天)
       	this.currentMonthDayNum = (new Date(year,month+1,0)).getDate();
       	//计算周末天数的序号
@@ -354,20 +382,27 @@
     min-height:200px;
     .table-wrapper{
       position: relative;
+      .btn-wrapper{
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: flex-start;
+        cursor: pointer;
+      }
       .sheet-table{
         border-collapse: collapse;
         position: relative;
         left:50%;
         transform:translateX(-50%);
+        @borderColor:#a2a2a2;
         th{
-          border: 1px solid #a2a2a2;
+          border: 1px solid @borderColor;
           width:30px;
           height:40px;
           font-weight:bold;
           vertical-align: middle!important;
         }
         td{
-          border: 1px solid #a2a2a2;
+          border: 1px solid @borderColor;
           height:30px;
           vertical-align: middle!important;
           text-align: center;

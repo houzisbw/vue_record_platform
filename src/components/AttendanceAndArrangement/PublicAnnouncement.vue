@@ -48,16 +48,6 @@
         type:String,
         default:'标题'
       },
-      //获取数据的url
-      fetchUrl:{
-        type:String,
-        required:true
-      },
-      //提交数据的url
-      submitUrl:{
-        type:String,
-        required:true
-      },
       //类型
       type:{
       	type:String,
@@ -100,6 +90,11 @@
         this.axios.post(api.fetchAttendanceAnnounce,{type:this.type}).then((resp)=>{
           if(resp.data.status === 1){
             this.content = resp.data.announce;
+            //让editor失去焦点且自动回到页面顶部
+            this.$nextTick(()=>{
+            	this.$refs.myQuillEditor.quill.blur();
+            	window.scrollTo(0,0)
+            })
           }else{
             this.$message({
               type:'error',

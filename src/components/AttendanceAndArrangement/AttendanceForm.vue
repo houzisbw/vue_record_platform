@@ -1,6 +1,6 @@
 <!--排班表单组件-->
 <template>
-  <div>
+  <div class="attendance-form-wrapper">
     <div class="content">
       <div class="wrapper attendance-arrange" v-loading="isLoading">
         <el-form label-position="right"
@@ -505,32 +505,34 @@
   .attendance-arrange .submit-btn.el-button{
     width:100px;
   }
-  //对话框自定义类名
-  .tag-edit-dialog{
-    width:500px;
-    position: relative;
-    top:50%;
-    transform: translateY(-50%);
-    .el-dialog__header{
-      border-bottom:1px solid #e8e8e8;
-      padding-bottom: 10px;
-      padding-top:10px;
-      .el-dialog__title{
-        font-size: 16px;
+  .attendance-form-wrapper{
+    //对话框自定义类名
+    .tag-edit-dialog{
+      width:500px;
+      position: relative;
+      top:50%;
+      transform: translateY(-50%);
+      .el-dialog__header{
+        border-bottom:1px solid #e8e8e8;
+        padding-bottom: 10px;
+        padding-top:10px;
+        .el-dialog__title{
+          font-size: 16px;
+        }
+        .el-dialog__headerbtn{
+          top:15px;
+        }
       }
-      .el-dialog__headerbtn{
-        top:15px;
+      .user-edit-dialog-form-wrapper{
+        width:70%;
+        margin: 0 auto;
       }
-    }
-    .user-edit-dialog-form-wrapper{
-      width:70%;
-      margin: 0 auto;
-    }
-    .el-dialog__footer{
-      border-top:1px solid #e8e8e8;
-      padding-bottom:10px;
-    }
+      .el-dialog__footer{
+        border-top:1px solid #e8e8e8;
+        padding-bottom:10px;
+      }
 
+    }
   }
 </style>
 

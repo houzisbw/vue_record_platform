@@ -363,32 +363,32 @@
       top:-1px;
       width:140px;
     }
-  }
-  //对话框自定义类名
-  .tag-edit-dialog{
-    width:500px;
-    position: relative;
-    top:50%;
-    transform: translateY(-50%);
-    .el-dialog__header{
-      border-bottom:1px solid #e8e8e8;
-      padding-bottom: 10px;
-      padding-top:10px;
-      .el-dialog__title{
-        font-size: 16px;
+    //对话框自定义类名
+    .tag-edit-dialog{
+      width:500px;
+      position: relative;
+      top:50%;
+      transform: translateY(-50%);
+      .el-dialog__header{
+        border-bottom:1px solid #e8e8e8;
+        padding-bottom: 10px;
+        padding-top:10px;
+        .el-dialog__title{
+          font-size: 16px;
+        }
+        .el-dialog__headerbtn{
+          top:15px;
+        }
       }
-      .el-dialog__headerbtn{
-        top:15px;
+      .user-edit-dialog-form-wrapper{
+        width:70%;
+        margin: 0 auto;
       }
-    }
-    .user-edit-dialog-form-wrapper{
-      width:70%;
-      margin: 0 auto;
-    }
-    .el-dialog__footer{
-      border-top:1px solid #e8e8e8;
-      padding-bottom:10px;
-    }
+      .el-dialog__footer{
+        border-top:1px solid #e8e8e8;
+        padding-bottom:10px;
+      }
 
+    }
   }
 </style>

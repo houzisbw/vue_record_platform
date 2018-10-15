@@ -8,7 +8,7 @@
     <div class="content" v-loading="loading">
       <!--操作栏-->
       <div class="top-operation-wrapper">
-        <!--添加新用户按钮-->
+        <!--添加按钮-->
         <el-button type="primary" size="small" @click="showAddModal">
           <i class="iconfont icon-plus"></i>
           <span style="padding-left: 5px;">{{btnName}}</span>
@@ -126,7 +126,13 @@
       deleteUrl:{
       	type:String,
         required:true
+      },
+      //是否限制添加的字数为1
+      isLimit:{
+      	type:Boolean,
+        default:false
       }
+
     },
     computed:{
       isTagListEmpty:function(){
@@ -221,7 +227,13 @@
       var validateItemName = (rule, value, callback)=>{
         if (value==='') {
           callback(new Error('输入不能为空!'));
-        } else {
+        } else if(value.length>1){
+        	if(this.isLimit){
+            callback(new Error('输入长度不能大于1!'));
+          }else{
+            callback();
+          }
+        } else{
           callback();
         }
       };
