@@ -121,6 +121,7 @@ export default {
   fetchWrittenDataUrl:'/attendance/fetchWrittenDataUrl',//获取已填写的排班数据
   updateWrittenData:'/attendance/updateWrittenData',//修改已填写的排班数据
   fetchAttendanceSheetData:'/attendance/fetchAttendanceSheetData',//获取考勤表数据
+  downloadAttendanceWordFile:'/attendance/downloadAttendanceWordFile',//下载word文件
 
 
 

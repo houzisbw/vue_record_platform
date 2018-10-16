@@ -5,6 +5,7 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose')
+var officegen = require('officegen')
 var Workshop = require('./../model/workshop')
 var AttendanceWorkProcess = require('./../model/attendance_work_process')
 var AttendanceShift = require('./../model/attendance_shift')
@@ -177,7 +178,7 @@ router.get('/tempstaffFetchApi',function(req,res){
   })
 });
 
-//班次的添加数据api
+//临时人员的添加数据api
 router.post('/tempstaffAddApi',function(req,res){
   let group = req.group,
     name = req.body.name;
@@ -208,7 +209,7 @@ router.post('/tempstaffAddApi',function(req,res){
   })
 });
 
-//班次删除数据的api
+//临时人员删除数据的api
 router.post('/tempstaffDeleteApi',function(req,res){
   let group = req.group,
     name = req.body.name;
@@ -218,9 +219,19 @@ router.post('/tempstaffDeleteApi',function(req,res){
         status:returnedCodes.CODE_ERROR
       })
     }else{
-      res.json({
-        status:returnedCodes.CODE_SUCCESS
-      })
+      //需要遍历所有的排班数据，删除每一条中的临时人员列表中的自己(如果存在)
+      //这里需要使用updateMany(更新多个),$pullAll删除数组中的某些值
+      AttendanceShiftData.updateMany({group},{$pullAll:{tempStaffList:[name]}},function(err1){
+        if(err1){
+          res.json({
+            status:returnedCodes.CODE_ERROR
+          })
+        }else{
+          res.json({
+            status:returnedCodes.CODE_SUCCESS
+          })
+        }
+      });
     }
   })
 });
@@ -795,6 +806,122 @@ router.post('/fetchAttendanceSheetData',function(req,res){
       regularStaffList:results[1],
       currentMonthData:results[2]
     })
+  }).catch(()=>{
+    res.json({
+      status:returnedCodes.CODE_ERROR
+    })
+  })
+
+});
+
+//下载word文档的接口
+router.post('/downloadAttendanceWordFile',function(req,res){
+  let date = req.body.date;
+  let group = req.group;
+  //获取公告数据
+  let announcePromise = new Promise((resolve,reject)=>{
+    AttendanceAnnounce.find({},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        let ret = {};
+        docs.forEach((item)=>{
+          ret[item.type] = item.content
+        });
+        resolve(ret)
+      }
+    })
+  });
+  //获取排班记录数据
+  let shiftPromise = new Promise((resolve,reject)=>{
+    AttendanceShiftData.find({group,date},function(err,docs){
+      if(err){
+        reject()
+      }else{
+        resolve(docs)
+      }
+    })
+  });
+
+  Promise.all([announcePromise,shiftPromise]).then((results)=>{
+    //匹配html标签的正则表达式
+    let htmlTagRegExp = /<[^>]+>/gim;
+    //公告数据
+    let announceData = results[0];
+    //排班数据
+    let shiftData = results[1];
+    //生成docx对象
+    let docx = officegen('docx');
+    //标题
+    let pObj = docx.createP();
+    pObj.options.align = 'center';
+    pObj.addText(date+'排班记录',{ bold: true,});
+    //换行
+    pObj.addLineBreak ();
+    pObj.addLineBreak ();
+    //公告
+    let pObj_announce = docx.createP();
+    pObj_announce.addText('公告内容',{ bold: true,})
+    pObj_announce.addLineBreak ();
+    //正则表达式除去所有的html标签
+    pObj_announce.addText(announceData.up.replace(htmlTagRegExp,'')?announceData.up.replace(htmlTagRegExp,''):'无');
+    pObj_announce.addLineBreak ();
+    pObj_announce.addLineBreak ();
+    //排班信息
+    shiftData.forEach((item)=>{
+      let pObj_shift = docx.createP();
+      pObj_shift.addText('排班车间:    ',{ bold: true,})
+      pObj_shift.addText(item.workshop?item.workshop:'无')
+      pObj_shift.addLineBreak ();
+
+      pObj_shift.addText('排班工序:    ',{ bold: true,})
+      pObj_shift.addText(item.process?item.process:'无');
+      pObj_shift.addLineBreak ();
+
+      pObj_shift.addText('排班班次:    ',{ bold: true,})
+      pObj_shift.addText(item.shift?item.shift:'无');
+      pObj_shift.addLineBreak ();
+
+      pObj_shift.addText('排班时间:    ',{ bold: true,});
+      pObj_shift.addText((item.startTime?item.startTime:'无')+'-'+(item.endTime?item.endTime:'无'));
+      pObj_shift.addLineBreak ();
+
+      //正式人员
+      pObj_shift.addText('正式人员:    ',{ bold: true,});
+      item.regularStaffList.forEach((staff)=>{
+        pObj_shift.addText(staff+'  ');
+      });
+      if(item.regularStaffList.length===0){
+        pObj_shift.addText('无');
+      }
+      pObj_shift.addLineBreak ();
+      //临时人员
+      pObj_shift.addText('临时人员:    ',{ bold: true,});
+      item.tempStaffList.forEach((staff)=>{
+        pObj_shift.addText(staff+'  ');
+      });
+      if(item.tempStaffList.length===0){
+        pObj_shift.addText('无');
+      }
+      pObj_shift.addLineBreak ();
+
+      pObj_shift.addText('排班内容:    ',{ bold: true,})
+      pObj_shift.addText(item.workContent?item.workContent:'无');
+      pObj_shift.addLineBreak ();
+    });
+    //公告
+    let pObj_announce_down = docx.createP();
+    pObj_announce_down.addLineBreak ();
+    pObj_announce_down.addText('公告内容',{ bold: true,})
+    pObj_announce_down.addLineBreak ();
+    pObj_announce_down.addText(announceData.down.replace(htmlTagRegExp,'')?announceData.down.replace(htmlTagRegExp,''):'无');
+
+    //将docx的流数据返回前端(blob类型)
+    res.status(200).set({
+      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      'Content-disposition': 'attachment; filename=out.docx'
+    });
+    docx.generate(res)
   }).catch(()=>{
     res.json({
       status:returnedCodes.CODE_ERROR

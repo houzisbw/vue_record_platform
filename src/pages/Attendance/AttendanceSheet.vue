@@ -51,6 +51,14 @@
                 正式员工
               </td>
             </tr>
+            <tr v-if="regularStaffList.length===0">
+              <!--colspan给定一个大值，则占满所有列-->
+              <td colspan="1000"
+                  :style="{color:'#ff0000'}"
+                  class="staff-td">
+                无
+              </td>
+            </tr>
             <tr v-for="(item,index) in regularStaffList">
               <td class="name-td">
                 {{item}}
@@ -85,6 +93,14 @@
               <!--colspan给定一个大值，则占满所有列-->
               <td colspan="1000" class="staff-td">
                 临时员工
+              </td>
+            </tr>
+            <tr v-if="tempStaffList.length===0">
+              <!--colspan给定一个大值，则占满所有列-->
+              <td colspan="1000"
+                  :style="{color:'#ff0000'}"
+                  class="staff-td">
+                无
               </td>
             </tr>
             <tr v-for="(item,index) in tempStaffList">
@@ -287,14 +303,14 @@
         	let shift = item.shift;
         	let day = item.date.split('-')[2];
         	regularList.forEach((it1)=>{
-        		//如果没有班次则添加班次
-        		if(!this.regularStaffMap[it1][day].includes(shift)){
+        		//如果没有班次则添加班次,首先得判断该员工存在(存在修改员工的可能)
+        		if(this.regularStaffMap[it1] && !this.regularStaffMap[it1][day].includes(shift)){
               this.regularStaffMap[it1][day].push(shift);
             }
           });
           tempList.forEach((it1)=>{
-            //如果没有班次则添加班次
-            if(!this.tempStaffMap[it1][day].includes(shift)){
+            //如果没有班次则添加班次,首先得判断该员工存在(存在修改员工的可能)
+            if(this.tempStaffMap[it1] && !this.tempStaffMap[it1][day].includes(shift)){
               this.tempStaffMap[it1][day].push(shift);
             }
           })

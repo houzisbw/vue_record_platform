@@ -142,6 +142,14 @@
           <div class="announcement" v-html="announcementDown">
           </div>
         </el-card>
+        <!--下载word按钮-->
+        <div class="word-btn-wrapper" v-auth="['1','2']">
+          <el-button type="primary"
+                     @click="downloadWord"
+                     size="small">
+            下载Word
+          </el-button>
+        </div>
 
         <!--编辑排班数据的对话框-->
         <el-dialog
@@ -207,12 +215,30 @@
       }
     },
     computed:{
-      //是否展示数据
+      //是否展示数据d
       isEmpty:function(){
       	return this.shiftList.length===0
       },
     },
     methods:{
+    	//下载word
+      downloadWord: _.debounce(function(){
+        //这里必须设置responseType为blob
+        this.axios.post(api.downloadAttendanceWordFile,
+          {date:this.date},
+          {responseType:'blob'}).then((res)=>{
+          //这里res.data是返回的blob对象
+          var blob = new Blob([res.data], {type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'}); //application/vnd.openxmlformats-officedocument.wordprocessingml.document这里表示doc类型
+          var downloadElement = document.createElement('a');
+          var href = window.URL.createObjectURL(blob); //创建下载的链接
+          downloadElement.href = href;
+          downloadElement.download = this.date+'排班记录.docx'; //下载后文件名
+          document.body.appendChild(downloadElement);
+          downloadElement.click(); //点击下载
+          document.body.removeChild(downloadElement); //下载完成移除元素
+          window.URL.revokeObjectURL(href); //释放掉blob对象
+        })
+      },400,{leading:true,trailing:false}),
     	//关闭对话框
       handleClose:function(){
         this.isEditDialogShow = false;
@@ -337,6 +363,10 @@
         .icon_pos{
           position: relative;
           top:1px;
+        }
+        .word-btn-wrapper{
+          margin-top: 20px;
+          text-align: center;
         }
         .shift-content{
           margin-bottom: 20px;
