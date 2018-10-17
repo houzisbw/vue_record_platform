@@ -42,7 +42,7 @@
   border-radius: 50%;
   background-color: #fff;
   box-shadow: 0 0 6px rgba(0,0,0,.12);
-  z-index:9999;
+  z-index:2000;
   position: fixed;
   right:50px;
   bottom:50px;

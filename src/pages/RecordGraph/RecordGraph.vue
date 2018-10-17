@@ -126,6 +126,8 @@
         let total = this.barGraphData.reduce((t,c)=>{return t+parseInt(c.value,10)},0);
         this.barTotal = total;
         this.chart.changeData(dataList);
+        this.chart.forceFit();
+        this.chart.repaint();
       },
       //画折线图
       drawLineGraph:function(){

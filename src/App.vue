@@ -21,6 +21,7 @@ export default {
       let auth = window.localStorage.getItem('auth');
       let signature = window.localStorage.getItem('signature');
       let group = window.localStorage.getItem('group');
+      let count = window.localStorage.getItem('count');
       //注意必须判断存在username才行，否则就是非登录状态
       if(username){
         this.$store.commit('updateUserName',username);
@@ -29,6 +30,7 @@ export default {
         this.$store.commit('updateUserAuth',auth);
         this.$store.commit('updateUserSignature',signature);
         this.$store.commit('updateUserGroup',group);
+        this.$store.commit('updateUnconfirmedCount',count);
       }
     }
   }

@@ -273,6 +273,8 @@ router.post('/getRecordsCount',function(req,res){
 //普通用户确认
 router.post('/ordinaryUserConfirm',function(req,res){
   let data = req.body.data;
+  let group = req.group;
+  let username = req.user;
   //删除数据库增加的属性
   if(data.__v!==undefined)delete data.__v;
   if(data._id!==undefined)delete data._id;
@@ -282,9 +284,19 @@ router.post('/ordinaryUserConfirm',function(req,res){
         status:returnedCodes.CODE_ERROR
       })
     }else{
-      res.json({
-        status:returnedCodes.CODE_SUCCESS
-      })
+      //查询剩余的未确认的记录数量
+      Record.count({group,isConfirm:'0',username},function(err1,count){
+        if(err1) {
+          res.json({
+            status: returnedCodes.CODE_ERROR
+          })
+        }else{
+          res.json({
+            count:count,
+            status:returnedCodes.CODE_SUCCESS
+          })
+        }
+      });
     }
   })
 })

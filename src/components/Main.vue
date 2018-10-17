@@ -2,7 +2,8 @@
 <template>
   <div class="main">
     <header-comp></header-comp>
-    <div class="main-wrapper">
+    <!--路由切换时显示加载效果-->
+    <div class="main-wrapper" v-loading="isRouterLoading">
       <router-view></router-view>
       <!--补丁区域-->
       <div class="padding-comp">
@@ -17,11 +18,15 @@
   	components:{
       HeaderComp
     },
+    computed:{
+  		//路由是否在加载中(vuex中获取数据)
+      isRouterLoading:function(){
+      	return this.$store.getters.getIsRouterLoading;
+      }
+    },
 		name: 'Main',
 		data () {
-			return {
-				msg: 'Welcome to Your Vue.js App'
-			}
+			return {}
 		}
 	}
 </script>

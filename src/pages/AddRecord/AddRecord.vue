@@ -156,7 +156,7 @@
             let data = {
               workshop,
               username,
-              type:subType+'*'+type,
+              type:subType.replace('*','')+'*'+type.replace('*',''),
               date,
               isImportant:isImportant?'1':'0',
               imageUrl,

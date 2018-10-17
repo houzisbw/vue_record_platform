@@ -398,6 +398,7 @@ router.post('/regularstaffAddApi',function(req,res){
   })
 });
 
+//正式员工删除的api
 router.post('/regularstaffDeleteApi',function(req,res){
   let group = req.group,
     name = req.body.name;
@@ -407,9 +408,19 @@ router.post('/regularstaffDeleteApi',function(req,res){
         status:returnedCodes.CODE_ERROR
       })
     }else{
-      res.json({
-        status:returnedCodes.CODE_SUCCESS
-      })
+      //需要遍历所有的排班数据，删除每一条中的临时人员列表中的自己(如果存在)
+      //这里需要使用updateMany(更新多个),$pullAll删除数组中的某些值
+      AttendanceShiftData.updateMany({group},{$pullAll:{regularStaffList:[name]}},function(err1){
+        if(err1){
+          res.json({
+            status:returnedCodes.CODE_ERROR
+          })
+        }else{
+          res.json({
+            status:returnedCodes.CODE_SUCCESS
+          })
+        }
+      });
     }
   })
 });

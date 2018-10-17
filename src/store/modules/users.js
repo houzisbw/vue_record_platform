@@ -25,7 +25,9 @@ const state = {
   //用户点赞的回复列表
   likedReplyList:[],
   //用户已点赞的评论列表
-  likedCommentList:[]
+  likedCommentList:[],
+  //用户未确认的错误记录总数
+  unconfirmedCount:0
 }
 
 //getter,用户获取state
@@ -48,7 +50,9 @@ const getters = {
   //获取用户已点赞的回复列表
   getLikedReplyList:state=>state.likedReplyList,
   //获取用户已点赞的评论列表
-  getLikedCommentList:state=>state.likedCommentList
+  getLikedCommentList:state=>state.likedCommentList,
+  //获取未确认的记录总数
+  getUnconfirmedCount:state=>state.unconfirmedCount
 }
 
 //mutations,用于改变state,注意要存到localStorage中避免刷新页面数据丢失
@@ -83,6 +87,11 @@ const mutations = {
     state.group = newGroup
     window.localStorage.setItem('group',newGroup)
   },
+  //更新未确认的总数
+  updateUnconfirmedCount:function(state,count){
+    state.unconfirmedCount = count
+    window.localStorage.setItem('count',count)
+  },
   //登出
   logout: function(state){
     state.username = '';
@@ -90,7 +99,8 @@ const mutations = {
     state.nickname = '';
     state.auth = '';
     state.signature = '';
-    state.group = ''
+    state.group = '';
+    state.unconfirmedCount = 0;
 
     window.localStorage.removeItem('username')
     window.localStorage.removeItem('profileImgUrl')
@@ -98,6 +108,7 @@ const mutations = {
     window.localStorage.removeItem('auth')
     window.localStorage.removeItem('signature')
     window.localStorage.removeItem('group')
+    window.localStorage.removeItem('count')
   },
 
   //点赞的新鲜事列表

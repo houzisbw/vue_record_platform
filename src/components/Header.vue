@@ -4,11 +4,17 @@
       <span class="user-group user-common">
         <el-tag >{{userGroup}}</el-tag>
       </span>
-      <span class="user-info-num user-common">
-        <el-badge :value="12">
-          <i class="el-icon-bell user-info-num-icon"></i>
-        </el-badge>
-      </span>
+      <el-dropdown size="medium" placement="bottom">
+        <span class="user-info-num user-common">
+          <el-badge :value="userUnconfirmedCount" :max="99" :hidden="userUnconfirmedCount===0">
+            <i class="el-icon-bell user-info-num-icon"></i>
+          </el-badge>
+        </span>
+        <el-dropdown-menu slot="dropdown" class="unconfirmed-dropdown">
+          {{userUnconfirmedCount===0?'您没有未确认记录':('您有'+userUnconfirmedCount+'条未确认记录')}}
+          <span v-if="userUnconfirmedCount" class="show-unconfirmed" @click="goToSearchPage">查看</span>
+        </el-dropdown-menu>
+      </el-dropdown>
       <!--用户头像-->
       <span class="user-potrait user-common">
         <span class="user-avatar-wrapper">
@@ -41,10 +47,8 @@
 
 <script>
   import api from './../api/api'
-  import ElDropdown from "../../node_modules/element-ui/packages/dropdown/src/dropdown";
   import config from './../config/config'
 	export default {
-    components: {ElDropdown},
     name: 'Header',
     computed:{
 			userNickname:function(){
@@ -55,9 +59,22 @@
       },
       userGroup: function(){
         return this.$store.getters.getUserGroup || '还没有组别呢!'
+      },
+      userUnconfirmedCount:function(){
+      	//localstorage只会保存string类型，因此数字需要转换
+      	return parseInt(this.$store.getters.getUnconfirmedCount,10);
       }
     },
     methods:{
+    	//前往错误记录页面
+      goToSearchPage: function(){
+      	this.$router.push({
+          name:'SearchRecord',
+          params:{
+          	isShowUnconfirmed:true
+          }
+      	})
+      },
     	//退出登录:清空vuex,清除token,清空localStorage
       logout: function(){
         this.axios.post(api.logout).then((resp)=>{
@@ -136,6 +153,9 @@
         left:-8px;
         display: block;
       }
+      .user-info-num{
+        cursor: pointer;
+      }
       .user-potrait{
         .user-avatar-wrapper{
           width:30px;
@@ -155,6 +175,17 @@
         font-size: 22px;
         color: #888888;
       }
+    }
+  }
+</style>
+<style type="text/less" lang="less">
+  .unconfirmed-dropdown{
+    padding:10px 20px!important;
+    font-size: 14px;
+    color:rgba(0, 0, 0, 0.65);
+    .show-unconfirmed{
+      color:#409EFF!important;
+      cursor: pointer;
     }
   }
 </style>

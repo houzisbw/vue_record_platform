@@ -43,13 +43,14 @@
 		name: 'Login',
     methods:{
 			//保存用户信息到vuex
-      saveUserInfoToVuex: function(userInfo){
+      saveUserInfoToVuex: function(userInfo,unconfirmedCount){
       	this.$store.commit('updateUserName',userInfo.username);
         this.$store.commit('updateUserProfile',userInfo.profileImgUrl);
         this.$store.commit('updateUserNickname',userInfo.nickname);
         this.$store.commit('updateUserAuth',userInfo.auth);
         this.$store.commit('updateUserSignature',userInfo.signature);
         this.$store.commit('updateUserGroup',userInfo.group);
+        this.$store.commit('updateUnconfirmedCount',unconfirmedCount);
       },
 			//提交登录请求
       submitForm:function(formRef){
@@ -67,7 +68,7 @@
             this.axios.post(api.login,data).then((resp)=>{
               this.isLogging = false;
               //保存用户信息到vuex中
-              this.saveUserInfoToVuex(resp.data.userInfo);
+              this.saveUserInfoToVuex(resp.data.userInfo,resp.data.unconfirmedCount);
               //路由跳转到主页
               this.$router.replace({path:'/'})
             }).catch((err)=>{

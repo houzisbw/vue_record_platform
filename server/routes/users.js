@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var User = require('./../model/user')
 var Announcement = require('./../model/announcement')
+var Record = require('./../model/record')
 //处理token相关
 var jwt = require('jwt-simple')
 //token密钥
@@ -54,12 +55,22 @@ router.post('/login',function(req,res,next){
               path:'/'
             })
         }
-        //返回用户的权限，用户名，昵称，头像url
-        res.json({
-          status:returnedCodes.CODE_SUCCESS,
-          userInfo:doc
-        })
 
+        //获取用户未确认的记录总数
+        Record.count({username,group:doc.group,isConfirm:'0'},function(errCnt,count){
+          if(errCnt){
+            res.json({
+              status:returnedCodes.CODE_ERROR
+            })
+          }else{
+            //返回用户的权限，用户名，昵称，头像url
+            res.json({
+              status:returnedCodes.CODE_SUCCESS,
+              userInfo:doc,
+              unconfirmedCount:count
+            })
+          }
+        });
       }else{
         //未找到用户
         res.json({

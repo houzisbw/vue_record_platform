@@ -433,6 +433,11 @@
       Printer
     },
     mounted:function(){
+    	//如果是通过header中查看按钮进入该路由则执行搜索未确认的逻辑
+    	if(this.$route.params.isShowUnconfirmed){
+    		this.onlyUnconfirmedOrdinaryUser = true;
+        this.searchAllRecords();
+      }
       this.getDropdownInfo()
     },
     computed:{
@@ -484,7 +489,9 @@
             this.$message({
               type:'success',
               message:'记录确认成功!'
-            })
+            });
+            //更新vuex中未确认的值
+            this.$store.commit('updateUnconfirmedCount',resp.data.count);
           }
           this.isOrdinaryUserConfirmDialogShow = false;
           this.isModifying = false;
@@ -543,7 +550,8 @@
           }
           this.isFormLoading = false;
           this.cancelModifyRecord();
-          this.search();
+          //this.search();
+          this.searchRecords();
         })
       },
     	//关闭修改对话框
@@ -574,6 +582,7 @@
             imageUrl:rowData.imageUrl,
             error:rowData.error,
         };
+
       	this.originRecordData = {
           workshop:rowData.workshop,
           username:rowData.username,
@@ -603,12 +612,14 @@
             value:item
           })
         })
-        //初始化错误类型列表
+        //初始化错误类型列表,加上辅/批前缀
         let typeList = [];
         data[2].forEach((item)=>{
-          typeList.push({
-            label:item,
-            value:item
+        	this.typePrefix.forEach((it)=>{
+            typeList.push({
+              label:it+'*'+item,
+              value:it+'*'+item
+            })
           })
         })
         this.usernameList = userList;
@@ -853,6 +864,7 @@
           error:'',
           date:''
         },
+        typePrefix:['辅','批'],
         modifyRecordRules:{},
         //修改对话框是否在加载数据
         isFormLoading:false,
@@ -1001,6 +1013,10 @@
   }
 </style>
 <style type="text/less" lang="less">
+  .search-dropdown{
+    padding-left:20px;
+    padding-right:20px;
+  }
   .search-record-wrapper{
     .search-wrapper{
       .el-breadcrumb__inner:not(.is-link){
@@ -1018,10 +1034,6 @@
     }
     .record-table .el-table .warning-row{
       color: #dd5b57;
-    }
-    .search-dropdown{
-      padding-left:20px;
-      padding-right:20px;
     }
     .record-content{
       .el-button+.el-button{

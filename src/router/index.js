@@ -76,19 +76,7 @@ export default new Router({
           },
           component:Records,
           //重定向到查询页面，禁止访问/record路径
-          redirect:'/record/query_records',
-          children:[
-            //查询记录页面
-            {
-              path:'query_records',
-              name:'QueryRecords',
-              component:QueryRecords,
-              meta:{
-                //所有人都可以访问
-                role:authAll
-              }
-            }
-          ]
+          redirect:'/search_records',
         },
         //公告页面
         {
