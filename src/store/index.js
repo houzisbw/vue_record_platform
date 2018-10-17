@@ -1,8 +1,10 @@
 /**
  * Created by Administrator on 2018/9/7.
  */
-import Vue from 'vue'
-import Vuex from 'vuex'
+//cdn引入
+//import Vue from 'vue'
+//import Vuex from 'vuex'
+
 import * as actions from './actions'
 import * as getters from './getters'
 //用户模块

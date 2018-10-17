@@ -55,6 +55,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
+      //设置favicon，link标签会被自动注入index.html
+      favicon: path.resolve('favicon.ico'),
       inject: true
     }),
     // copy custom static assets

@@ -1,39 +1,66 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+//cdn引入
+//import Vue from 'vue'
+//import Router from 'vue-router'
 
-import Login from './../pages/login/login.vue'
-import Home from './../pages/home.vue'
-import PersonalSetting from './../pages/personalSetting/personalSetting.vue'
-import PersonalCenter from './../pages/personlCenter/PersonalCenter.vue'
-import Records from './../pages/records/Records.vue'
-import QueryRecords from './../pages/records/QueryRecords.vue'
-import Announcement from './../pages/Announcement/Announcement.vue'
-import ModifyAnnouncement from './../pages/Announcement/ModifyAnnouncement.vue'
-import GroupSetting from './../pages/groupSetting/GroupSetting.vue'
-import ModifyUser from './../pages/ModifyUser/ModifyUser.vue'
-import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
-import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
-import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
-import AddRecord from '../pages/AddRecord/AddRecord.vue'
-import RecordGraph from '../pages/RecordGraph/RecordGraph.vue'
-import MessageBoard from '../pages/MessageBoard/MessageBoard.vue'
-import MessageRecommend from '../components/MessageSubView/Recommend.vue'
-import MessageSuscribe from '../components/MessageSubView/Subscribe.vue'
+//路由懒加载
+const Login =  resolve => require(['@/pages/login/login'],resolve);
+const Home = resolve => require(['@/pages/home'],resolve);
+const PersonalSetting = resolve => require(['@/pages/personalSetting/personalSetting'],resolve);
+const PersonalCenter = resolve => require(['@/pages/personlCenter/PersonalCenter'],resolve);
+const Records = resolve => require(['@/pages/records/Records'],resolve);
+const QueryRecords = resolve => require(['@/pages/records/QueryRecords'],resolve);
+const Announcement = resolve => require(['@/pages/Announcement/Announcement'],resolve);
+const ModifyAnnouncement = resolve => require(['@/pages/Announcement/ModifyAnnouncement'],resolve);
+const GroupSetting = resolve => require(['@/pages/groupSetting/GroupSetting'],resolve);
+const ModifyUser = resolve => require(['@/pages/ModifyUser/ModifyUser'],resolve);
+const AddWorkShop = resolve => require(['@/pages/AddWorkShop/AddWorkShop'],resolve);
+const SearchRecord = resolve => require(['@/pages/SearchRecord/SearchRecord'],resolve);
+const AddRecordType = resolve => require(['@/pages/AddRecordType/AddRecordType'],resolve);
+const AddRecord = resolve => require(['@/pages/AddRecord/AddRecord'],resolve);
+const RecordGraph = resolve => require(['@/pages/RecordGraph/RecordGraph'],resolve);
+const MessageBoard = resolve => require(['@/pages/MessageBoard/MessageBoard'],resolve);
+const MessageRecommend = resolve => require(['@/components/MessageSubView/Recommend'],resolve);
+const MessageSuscribe = resolve => require(['@/components/MessageSubView/Subscribe'],resolve);
 
-import AttendanceWrapper from '@/pages/Attendance/AttendanceWrapper'
-import AttendanceSheet from '@/pages/Attendance/AttendanceSheet'
-import AttendancePanel from '@/pages/Attendance/AttendanceConfigPanel'
-import ShiftArrangement from '@/pages/Attendance/ShiftArrangement'
-import AttendanceHistory from '@/pages/Attendance/AttendanceHistory'
+const AttendanceWrapper = resolve => require(['@/pages/Attendance/AttendanceWrapper'],resolve);
+const AttendancePanel = resolve => require(['@/pages/Attendance/AttendanceConfigPanel'],resolve);
+const ShiftArrangement = resolve => require(['@/pages/Attendance/ShiftArrangement'],resolve);
+const AttendanceSheet = resolve => require(['@/pages/Attendance/AttendanceSheet'],resolve);
+const AttendanceHistory = resolve => require(['@/pages/Attendance/AttendanceHistory'],resolve);
+//import Login from './../pages/login/login.vue'
+//import Home from './../pages/home.vue'
+//import PersonalSetting from './../pages/personalSetting/personalSetting.vue'
+//import PersonalCenter from './../pages/personlCenter/PersonalCenter.vue'
+//import Records from './../pages/records/Records.vue'
+//import QueryRecords from './../pages/records/QueryRecords.vue'
+//import Announcement from './../pages/Announcement/Announcement.vue'
+//import ModifyAnnouncement from './../pages/Announcement/ModifyAnnouncement.vue'
+//import GroupSetting from './../pages/groupSetting/GroupSetting.vue'
+//import ModifyUser from './../pages/ModifyUser/ModifyUser.vue'
+//import AddWorkShop from './../pages/AddWorkShop/AddWorkShop.vue'
+//import AddRecordType from './../pages/AddRecordType/AddRecordType.vue'
+//import SearchRecord from '../pages/SearchRecord/SearchRecord.vue'
+//import AddRecord from '../pages/AddRecord/AddRecord.vue'
+//import RecordGraph from '../pages/RecordGraph/RecordGraph.vue'
+//import MessageBoard from '../pages/MessageBoard/MessageBoard.vue'
+//import MessageRecommend from '../components/MessageSubView/Recommend.vue'
+//import MessageSuscribe from '../components/MessageSubView/Subscribe.vue'
+
+//import AttendanceWrapper from '@/pages/Attendance/AttendanceWrapper'
+// import AttendanceSheet from '@/pages/Attendance/AttendanceSheet'
+// import AttendancePanel from '@/pages/Attendance/AttendanceConfigPanel'
+// import ShiftArrangement from '@/pages/Attendance/ShiftArrangement'
+// import AttendanceHistory from '@/pages/Attendance/AttendanceHistory'
 
 import config from './../config/config'
 //用户权限
 let userAuth = config.auth;
 //所有权限
 let authAll = [userAuth.SUPER_ADMIN,userAuth.ADMIN,userAuth.ORDINARY_USER]
-Vue.use(Router)
+//VueRouter是cdn引入的全局变量
+Vue.use(VueRouter)
 
-export default new Router({
+export default new VueRouter({
   routes: [
     //根路径页面
     {

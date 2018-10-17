@@ -3,7 +3,8 @@
 //poly-fill,用于兼容处理，ie，safari,必须放在第一行
 import 'babel-polyfill'
 
-import Vue from 'vue'
+//cdn引入Vue
+//import Vue from 'vue'
 import App from './App'
 import router from './router'
 import './assets/css/normalize.css'
@@ -13,84 +14,84 @@ import store from './store/index'
 import api from './api/api'
 import directives from './directives/directives'
 
-//element的组件都在这里引入
-import {
-  Button,
-  Form,
-  FormItem,
-  Input,
-  Checkbox,
-  Message,
-  Tag,
-  Menu,
-  Submenu,
-  MenuItem,
-  Icon,
-  Badge,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Dialog,
-  Tabs,
-  TabPane,
-  Loading,
-  Table,
-  TableColumn,
-  Pagination,
-  Select,
-  Option,
-  Breadcrumb,
-  BreadcrumbItem,
-  Tooltip,
-  DatePicker,
-  Switch,
-  Popover,
-  MessageBox,
-  TimeSelect,
-  Radio,
-  RadioGroup,
-  RadioButton,
-  Card,
-  MenuItemGroup,} from 'element-ui';
-Vue.use(Button)
-Vue.use(Form)
-Vue.use(FormItem)
-Vue.use(Input)
-Vue.use(Checkbox)
-Vue.use(Tag)
-Vue.use(Menu);
-Vue.use(Submenu);
-Vue.use(MenuItem);
-Vue.use(MenuItemGroup);
-Vue.use(Icon)
-Vue.use(Badge)
-Vue.use(Dropdown);
-Vue.use(DropdownMenu);
-Vue.use(DropdownItem);
-Vue.use(Tabs);
-Vue.use(TabPane)
-Vue.use(Loading)
-Vue.use(Table)
-Vue.use(TableColumn)
-Vue.use(Pagination)
-Vue.use(Dialog)
-Vue.use(Select)
-Vue.use(Option)
-Vue.use(Breadcrumb)
-Vue.use(BreadcrumbItem)
-Vue.use(Tooltip)
-Vue.use(DatePicker)
-Vue.use(Switch)
-Vue.use(Popover)
-Vue.use(TimeSelect)
-Vue.use(Radio)
-Vue.use(RadioGroup)
-Vue.use(RadioButton)
-Vue.use(Card)
-
-//特殊处理
-Vue.prototype.$message = Message;
-Vue.prototype.$msgbox = MessageBox;
+//element的组件都在这里引入(cdn引入，因此都注释掉)
+// import {
+//   Button,
+//   Form,
+//   FormItem,
+//   Input,
+//   Checkbox,
+//   Message,
+//   Tag,
+//   Menu,
+//   Submenu,
+//   MenuItem,
+//   Icon,
+//   Badge,
+//   Dropdown,
+//   DropdownMenu,
+//   DropdownItem,
+//   Dialog,
+//   Tabs,
+//   TabPane,
+//   Loading,
+//   Table,
+//   TableColumn,
+//   Pagination,
+//   Select,
+//   Option,
+//   Breadcrumb,
+//   BreadcrumbItem,
+//   Tooltip,
+//   DatePicker,
+//   Switch,
+//   Popover,
+//   MessageBox,
+//   TimeSelect,
+//   Radio,
+//   RadioGroup,
+//   RadioButton,
+//   Card,
+//   MenuItemGroup,} from 'element-ui';
+// Vue.use(Button)
+// Vue.use(Form)
+// Vue.use(FormItem)
+// Vue.use(Input)
+// Vue.use(Checkbox)
+// Vue.use(Tag)
+// Vue.use(Menu);
+// Vue.use(Submenu);
+// Vue.use(MenuItem);
+// Vue.use(MenuItemGroup);
+// Vue.use(Icon)
+// Vue.use(Badge)
+// Vue.use(Dropdown);
+// Vue.use(DropdownMenu);
+// Vue.use(DropdownItem);
+// Vue.use(Tabs);
+// Vue.use(TabPane)
+// Vue.use(Loading)
+// Vue.use(Table)
+// Vue.use(TableColumn)
+// Vue.use(Pagination)
+// Vue.use(Dialog)
+// Vue.use(Select)
+// Vue.use(Option)
+// Vue.use(Breadcrumb)
+// Vue.use(BreadcrumbItem)
+// Vue.use(Tooltip)
+// Vue.use(DatePicker)
+// Vue.use(Switch)
+// Vue.use(Popover)
+// Vue.use(TimeSelect)
+// Vue.use(Radio)
+// Vue.use(RadioGroup)
+// Vue.use(RadioButton)
+// Vue.use(Card)
+//
+// //特殊处理
+// Vue.prototype.$message = Message;
+// Vue.prototype.$msgbox = MessageBox;
 
 Vue.config.productionTip = false
 
@@ -113,7 +114,9 @@ router.beforeEach((to,from,next)=>{
             next()
           }else{
             //无权限,提示用户
-            Message.error({
+            //cdn引入element后得这样使用message组件,挂载在全局ELEMENT对象下
+            ELEMENT.Message({
+              type:'error',
               message:'没有权限访问该页面!'
             });
             //跳转为来源路由

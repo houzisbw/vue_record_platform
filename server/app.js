@@ -1,6 +1,6 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
+var favicon = require('express-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -8,6 +8,7 @@ var ejs = require('ejs');
 var mongoose = require('mongoose');
 var jwt = require('jwt-simple');
 var helmet = require('helmet');
+var compression = require('compression');
 
 //路由
 var index = require('./routes/index');
@@ -55,17 +56,16 @@ mongoose.connection.on("error",function(){
   console.log('mongodb connection fail');
 })
 
-
-
+//开启gzip压缩
+app.use(compression())
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
-
 
 //后台统一拦截检查是否登录
 let interceptorRequest = util.interceptorRequest;

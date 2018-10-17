@@ -4,7 +4,8 @@
 import axios from 'axios'
 import api from '@/api/api'
 import config from '@/config/config'
-import { Message } from 'element-ui';
+//cdn引入
+//import { Message } from 'element-ui';
 //用户相关的状态,未登录时为空
 const state = {
   //用户名
@@ -134,7 +135,7 @@ const actions = {
         // 更新vuex
         commit('updateLikedReplyList',resp.data.likedList);
       }else{
-        Message({
+        ELEMENT.Message({
           type:'error',
           message:'点赞数据读取失败~'
         })
@@ -148,7 +149,7 @@ const actions = {
         // 更新vuex
         commit('updateLikedCommentList',resp.data.likedList);
       }else{
-        Message({
+        ELEMENT.Message({
           type:'error',
           message:'点赞数据读取失败~'
         })
