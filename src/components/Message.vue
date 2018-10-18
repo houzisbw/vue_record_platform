@@ -4,7 +4,8 @@
     <!--头部信息部分-->
     <div class="header">
       <!--头像部分-->
-      <div class="avatar-wrapper" :style="{backgroundImage:'url('+messageInfo.profileImgUrl+')'}">
+      <div class="avatar-wrapper"
+           :style="{backgroundImage:'url('+(messageInfo.profileImgUrl?messageInfo.profileImgUrl:defaultAvatar)+')'}">
       </div>
       <!--信息部分-->
       <div class="info">
@@ -30,7 +31,7 @@
           <i class="iconfont icon-ellipsis more-text"></i>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item v-if="!messageInfo.isOwnMessage">举报</el-dropdown-item>
-            <el-dropdown-item v-if="messageInfo.isOwnMessage" command="delete">删除</el-dropdown-item>
+            <el-dropdown-item v-if="messageCanDelelet" command="delete">删除</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -106,6 +107,14 @@
       });
     },
     computed:{
+    	//新鲜事是否可删除
+      messageCanDelelet:function(){
+      	//(1)超管可以删除 (2)只能删除自己的
+        if(parseInt(this.$store.getters.getUserAuth,10) === 2){
+        	return true
+        }
+        return this.messageInfo.isOwnMessage
+      },
     	//用户是否已赞该新鲜事,通过vuex来判断
       isCurrentMessageLiked:function(){
       	return this.$store.getters.getLikedMessageList.includes(this.messageInfo.messageId)
@@ -233,7 +242,9 @@
         //是否正在点赞中
         isfetchingLikes:false,
         //是否显示评论组件
-        isShowComment:false
+        isShowComment:false,
+        //默认头像(得用require引入,不能写在html中)
+        defaultAvatar:require('./../assets/images/icon/default-avatar.png')
       }
 		}
 	}

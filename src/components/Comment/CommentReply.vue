@@ -3,7 +3,7 @@
 <template>
   <div class="comment-reply-wrapper">
       <!--头像-->
-      <div class="avatar" :style="{backgroundImage:'url('+replyData.fromUserAvatar+')'}">
+      <div class="avatar" :style="{backgroundImage:'url('+(replyData.fromUserAvatar?replyData.fromUserAvatar:defaultAvatar)+')'}">
       </div>
       <!--内容部分-->
       <div class="content">
@@ -282,7 +282,9 @@
         //是否正在点赞中
         isFetchingLikes:false,
         //回复赞数
-        replyLikeNum:0
+        replyLikeNum:0,
+        //默认头像
+        defaultAvatar:require('./../../assets/images/icon/default-avatar.png')
 			}
 		}
 	}

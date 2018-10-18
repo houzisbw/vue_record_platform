@@ -367,3 +367,9 @@ body{
   color:rgba(0,0,0,0.55);
 }
 
+/*除去chrome浏览器的input黄色背景*/
+input:-webkit-autofill
+{
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+}
+

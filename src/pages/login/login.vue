@@ -3,7 +3,7 @@
     <div class="overlay">
       <div class="login-modal">
         <div class="title">
-          成都.生研所-FP错误记录平台
+          成都所-FP排班考勤及错误记录平台
         </div>
         <el-form :model="loginData" ref="loginForm" :rules="rules">
           <el-form-item prop="username">
@@ -107,10 +107,10 @@
         //校验规则
         rules:{
         	username:[
-            {validator:usernameValidator,trigger:'blur'}
+            {validator:usernameValidator,trigger:'change'}
           ],
           password:[
-            {validator:passwordValidator,trigger:'blur'}
+            {validator:passwordValidator,trigger:'change'}
           ]
         }
 			}
@@ -131,7 +131,7 @@
     .title{
       height:50px;
       position: relative;
-      margin-bottom: 50px;
+      margin-bottom: 80px;
       color: #7a7a7a;
       text-align: center;
       line-height: 50px;

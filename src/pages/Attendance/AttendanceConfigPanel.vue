@@ -16,6 +16,7 @@
     <tag-item-list
       title="班次"
       :is-limit="true"
+      :limit-cnt="1"
       title-icon="icon-apartment"
       btn-name="添加新班次"
       add-input-name="班次名称"
@@ -28,6 +29,8 @@
     <!--临时人员-->
     <tag-item-list
       title="临时人员"
+      :is-limit="true"
+      :limit-cnt="5"
       title-icon="icon-team"
       btn-name="添加临时人员"
       add-input-name="人员名称"
@@ -40,6 +43,8 @@
     <!--正式人员-->
     <tag-item-list
       title="正式人员"
+      :is-limit="true"
+      :limit-cnt="5"
       title-icon="icon-team"
       btn-name="添加正式人员"
       add-input-name="人员名称"

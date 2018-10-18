@@ -41,6 +41,7 @@
 
 <script>
   import utils from './../utils/utils'
+  import api from '@/api/api'
 	export default {
 		name: 'ImageUpload',
     props:{
@@ -137,8 +138,13 @@
       //上传图片
       uploadToThirdSite: function(formData){
         //这里的data没有大括号,api是在config/index里面设置的代理，跨域访问
-        //生产环境跨域不能像上面那样写
-        this.axios.post('/avatarUpload',formData).then((resp)=>{
+        //注意:开发环境的post的url为/avatarUpload
+
+        //设置不传cookie(这里很重要，http.js中设置了withCredentials为true，但是报错CORS)
+        //这里显式指定withCredential为false，覆盖http.js中的全局配置
+        this.axios.post(api.pictureBedSite,formData,{
+          withCredentials: false
+        }).then((resp)=>{
           //注意这里有2个data，第一个是axios的data，第二个是图床网站的data属性
           let status = resp.data.code;
           if(status === 'success'){

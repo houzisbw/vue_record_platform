@@ -115,6 +115,11 @@
                         size="small">
               </el-input>
             </el-form-item>
+            <el-form-item label="用户密码" prop="password">
+              <el-input v-model="userFormData.password"
+                        size="small">
+              </el-input>
+            </el-form-item>
             <el-form-item label="用户权限" style="margin-bottom: 0;">
               <el-select v-model="userFormData.userAuth"
                          size="small"
@@ -250,8 +255,6 @@
         },
       }
     },
-    computed:{
-    },
     filters:{
     	userAuth:function(val){
     		if(!val)return config.authName[0];
@@ -328,6 +331,7 @@
           	let data = {
           		modifiedName:this.userFormData.username,
               auth:this.userFormData.userAuth,
+              password:this.userFormData.password,
               originName:this.editUserOriginName
             };
             this.axios.post(api.modifyUserInfo,data).then((resp)=>{
@@ -405,7 +409,8 @@
         this.editUserOriginName = row.username;
         this.userFormData = {
           username:row.username,
-          userAuth:row.auth
+          userAuth:row.auth,
+          password:row.password
         }
       },
       handleDelete(index, row) {
@@ -448,7 +453,8 @@
         //修改状态下的用户数据
         userFormData:{
         	username:'',
-          userAuth:''
+          userAuth:'',
+          password:''
         },
         //编辑状态下的用户原本名字
         editUserOriginName:'',

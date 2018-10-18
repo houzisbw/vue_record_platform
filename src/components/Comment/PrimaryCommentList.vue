@@ -2,7 +2,7 @@
 <template>
   <div class="primary-comment-wrapper">
     <!--头像-->
-    <div class="avatar" :style="{backgroundImage:'url('+commentData.profileImgUrl+')'}">
+    <div class="avatar" :style="{backgroundImage:'url('+(commentData.profileImgUrl?commentData.profileImgUrl:defaultAvatar)+')'}">
     </div>
     <!--内容部分-->
     <div class="content">
@@ -203,6 +203,8 @@
         replyComponentIndex:0,
         //是否正在点赞中
         isFetchingLikes:false,
+        //默认头像
+        defaultAvatar:require('./../../assets/images/icon/default-avatar.png')
 			}
 		},
     methods:{

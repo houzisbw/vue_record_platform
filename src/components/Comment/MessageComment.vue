@@ -7,7 +7,7 @@
     <!--输入框部分-->
     <div class="message-comment-reply-input-wrapper">
       <!--头像-->
-      <div class="avatar" :style="{backgroundImage:'url('+commentAvatar+')'}">
+      <div class="avatar" :style="{backgroundImage:'url('+commentAvatar?commentAvatar:defaultAvatar+')'}">
       </div>
       <!--输入框-->
       <div class="input">
@@ -193,7 +193,9 @@
         //是否显示加载更多按钮
         isShowLoadMoreComment:false,
         //是否正在获取评论
-        isFetchingComment:false
+        isFetchingComment:false,
+        //默认头像
+        defaultAvatar:require('./../../assets/images/icon/default-avatar.png')
 
       }
     }

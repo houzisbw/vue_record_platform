@@ -37,8 +37,8 @@ function createDocumentHandler(el, binding, vnode) {
       });
       let isContain = false;
       classList.forEach((item)=>{
-        //必须获取所有的值,注意类名要加点符号
-        let targetList = document.querySelectorAll('.'+item);
+        //必须获取所有的值,注意类名要加点符号,注意转为数组而不是类数组
+        let targetList = Array.from(document.querySelectorAll('.'+item));
         targetList.forEach((innerItem)=>{
           //必须判断target存在与否
           if(innerItem && (innerItem.contains(mouseup.target)||

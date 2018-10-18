@@ -1,6 +1,9 @@
 /**
  * Created by Administrator on 2018/9/17.
  */
+import api from '@/api/api'
+
+
 //获取offsetX和offsetY
 function getOffsetX(event){
   var evt =event||window.event;
@@ -122,7 +125,9 @@ const uploadImageToPictureBed = (axios,imgList)=>{
 
         /*   生产环境改为正常的url  */
 
-        axios.post('/avatarUpload',formData).then((resp)=>{
+        axios.post(api.pictureBedSite,formData,{
+          withCredentials: false
+        }).then((resp)=>{
           let imgUrl = resp.data.data.url;
           if(resp.data.code === 'success'){
             resolve(imgUrl)

@@ -18,10 +18,11 @@
              @focus="editFocus"
              @blur="editBlur"
              ref="textArea"
+             @propertychange="handleInput"
              @input="handleInput"
              @keyup.ctrl.enter.exact="keyupSubmit"
              :placeholder="placeholder"
-             contenteditable="true"
+             contentEditable="true"
              spellcheck="false">
         </div>
         <!--图片上传组件-->
@@ -275,6 +276,7 @@
       //处理输入情况
       handleInput: function(e){
         let innerHtml = this.$refs.textArea.innerHTML;
+        console.log(innerHtml==='')
         //正则匹配表情字符串，只算一个字符,注意是非贪婪全局匹配(?)
         let emotionRegExp = /\[:.+?\]/g;
         this.currentWordLength = innerHtml.replace(emotionRegExp,'_').length;

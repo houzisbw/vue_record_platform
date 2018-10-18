@@ -20,6 +20,7 @@
     "jwt-simple": "^0.5.1",
     "mongoose": "^5.2.13",
     "morgan": "~1.9.0",
-    "serve-favicon": "~2.4.5"
+    "serve-favicon": "~2.4.5",
+    "officegen": "^0.4.7"
   }
 }

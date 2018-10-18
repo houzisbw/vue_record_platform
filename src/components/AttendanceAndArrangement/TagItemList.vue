@@ -127,10 +127,15 @@
       	type:String,
         required:true
       },
-      //是否限制添加的字数为1
+      //是否限制添加的字数
       isLimit:{
       	type:Boolean,
         default:false
+      },
+      //限制的字数
+      limitCnt:{
+      	type:Number,
+        default:undefined
       }
 
     },
@@ -227,14 +232,16 @@
       var validateItemName = (rule, value, callback)=>{
         if (value==='') {
           callback(new Error('输入不能为空!'));
-        } else if(value.length>1){
+        } else{
         	if(this.isLimit){
-            callback(new Error('输入长度不能大于1!'));
+        		if(this.limitCnt!==undefined && value.length > this.limitCnt){
+              callback(new Error('输入长度超过限制!'));
+            }else{
+              callback();
+            }
           }else{
             callback();
           }
-        } else{
-          callback();
         }
       };
 			return {

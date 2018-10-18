@@ -77,7 +77,8 @@ router.post('/modifyUserInfo',function(req,res){
   //获取用户的原始名字
   let originName = req.body.originName,
       username = req.body.modifiedName,
-      userAuth = req.body.auth;
+      userAuth = req.body.auth,
+      password = req.body.password;
   //这里要判断新的名字和已有的名字不能重复
   User.find({},function(err1,doc1){
     if(err1){
@@ -99,6 +100,7 @@ router.post('/modifyUserInfo',function(req,res){
       if(isValidName){
         User.findOneAndUpdate({username:originName},{
           username:username,
+          password:password,
           auth:userAuth
         },function(err){
           if(err){
