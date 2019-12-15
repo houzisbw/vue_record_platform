@@ -20,6 +20,7 @@ var record = require('./routes/record')
 var graph = require('./routes/graph')
 var message = require('./routes/message')
 var attendance = require('./routes/attendance');
+var kpi = require('./routes/kpi_types');
 
 //util
 var util = require('./utils');
@@ -77,6 +78,7 @@ app.use('/users',users);
 app.use('/modifyUser',modifyUser);
 app.use('/modifyWorkshop',workshop);
 app.use('/modifyRecordTypes',recordType);
+app.use('/modifyKPITypes',kpi);
 app.use('/searchRecord',record);
 app.use('/graph',graph);
 app.use('/message',message);

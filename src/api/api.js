@@ -56,6 +56,11 @@ export default {
   addRecordType:'/modifyRecordTypes/addRecordType',
   deleteRecordType:'/modifyRecordTypes/deleteRecordType',
 
+  //添加/删除KPI相关api
+  fetchKPITypesList:'/modifyKPITypes/getKPITypesList',
+  addKPIType:'/modifyKPITypes/addKPIType',
+  deleteKPIType:'/modifyKPITypes/deleteKPIType',
+
   //记录查询页面相关api
   fetchDropdownInfo:'/searchRecord/getDropdownInfo',
   searchRecords:'/searchRecord/searchRecords',
@@ -122,6 +127,8 @@ export default {
   updateWrittenData:'/attendance/updateWrittenData',//修改已填写的排班数据
   fetchAttendanceSheetData:'/attendance/fetchAttendanceSheetData',//获取考勤表数据
   downloadAttendanceWordFile:'/attendance/downloadAttendanceWordFile',//下载word文件
+
+
 
 
 

@@ -7,7 +7,7 @@
     <!--输入框部分-->
     <div class="message-comment-reply-input-wrapper">
       <!--头像-->
-      <div class="avatar" :style="{backgroundImage:'url('+commentAvatar?commentAvatar:defaultAvatar+')'}">
+      <div class="avatar" :style="{backgroundImage:'url('+(commentAvatar?commentAvatar:defaultAvatar)+')'}">
       </div>
       <!--输入框-->
       <div class="input">

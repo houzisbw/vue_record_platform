@@ -879,24 +879,25 @@ router.post('/downloadAttendanceWordFile',function(req,res){
     pObj_announce.addLineBreak ();
     pObj_announce.addLineBreak ();
     //排班信息
-    shiftData.forEach((item)=>{
+    shiftData.forEach((item,index)=>{
       let pObj_shift = docx.createP();
-      pObj_shift.addText('排班车间:    ',{ bold: true,})
+      pObj_shift.addText('车间:   ',{ bold: true,})
       pObj_shift.addText(item.workshop?item.workshop:'无')
-      pObj_shift.addLineBreak ();
 
-      pObj_shift.addText('排班工序:    ',{ bold: true,})
+      pObj_shift.addText('    工序:    ',{ bold: true,})
       pObj_shift.addText(item.process?item.process:'无');
-      pObj_shift.addLineBreak ();
 
-      pObj_shift.addText('排班班次:    ',{ bold: true,})
+      pObj_shift.addText('    班次:    ',{ bold: true,})
       pObj_shift.addText(item.shift?item.shift:'无');
-      pObj_shift.addLineBreak ();
 
-      pObj_shift.addText('排班时间:    ',{ bold: true,});
-      pObj_shift.addText((item.startTime?item.startTime:'无')+'-'+(item.endTime?item.endTime:'无'));
-      pObj_shift.addLineBreak ();
-
+      if(item.startTime||item.endTime){
+        pObj_shift.addText('    时间:    ',{ bold: true,});
+        pObj_shift.addText((item.startTime?item.startTime:'无')+'-'+(item.endTime?item.endTime:'无'));
+        pObj_shift.addLineBreak ();
+      }else{
+        pObj_shift.addText('    标准工时    ',{ bold: true,});
+        pObj_shift.addLineBreak ();
+      }
       //正式人员
       pObj_shift.addText('正式人员:    ',{ bold: true,});
       item.regularStaffList.forEach((staff)=>{
@@ -905,9 +906,9 @@ router.post('/downloadAttendanceWordFile',function(req,res){
       if(item.regularStaffList.length===0){
         pObj_shift.addText('无');
       }
-      pObj_shift.addLineBreak ();
+
       //临时人员
-      pObj_shift.addText('临时人员:    ',{ bold: true,});
+      pObj_shift.addText('    临时人员:    ',{ bold: true,});
       item.tempStaffList.forEach((staff)=>{
         pObj_shift.addText(staff+'  ');
       });
@@ -919,6 +920,9 @@ router.post('/downloadAttendanceWordFile',function(req,res){
       pObj_shift.addText('排班内容:    ',{ bold: true,})
       pObj_shift.addText(item.workContent?item.workContent:'无');
       pObj_shift.addLineBreak ();
+      if(index!==shiftData.length-1){
+        pObj_shift.addHorizontalLine ();
+      }
     });
     //公告
     let pObj_announce_down = docx.createP();

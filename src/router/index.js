@@ -27,7 +27,10 @@ const AttendancePanel = resolve => require(['@/pages/Attendance/AttendanceConfig
 const ShiftArrangement = resolve => require(['@/pages/Attendance/ShiftArrangement'],resolve);
 const AttendanceSheet = resolve => require(['@/pages/Attendance/AttendanceSheet'],resolve);
 const AttendanceHistory = resolve => require(['@/pages/Attendance/AttendanceHistory'],resolve);
-//import Login from './../pages/login/login.vue'
+
+const KPIAdd = resolve => require(['@/pages/KPIManagement/AddKPI'],resolve);
+const KPISearch = resolve => require(['@/pages/KPIManagement/SearchKPI'],resolve);
+const AddKPIType = resolve => require(['@/pages/AddKPIType/AddKPIType'],resolve);
 //import Home from './../pages/home.vue'
 //import PersonalSetting from './../pages/personalSetting/personalSetting.vue'
 //import PersonalCenter from './../pages/personlCenter/PersonalCenter.vue'
@@ -74,6 +77,26 @@ export default new VueRouter({
         role:authAll
       },
       children:[
+        //绩效查询页面
+        {
+          path:'/kpi_search',
+          name:'KPISearach',
+          component:KPISearch,
+          meta:{
+            //所有人都可以访问
+            role:[userAuth.SUPER_ADMIN,userAuth.ADMIN]
+          }
+        },
+         //绩效添加页面
+         {
+          path:'/kpi_add',
+          name:'KPIAdd',
+          component:KPIAdd,
+          meta:{
+            //所有人都可以访问
+            role:[userAuth.SUPER_ADMIN,userAuth.ADMIN]
+          }
+        },
         //个人设置页面
         {
           path:'personal_setting',
@@ -150,6 +173,16 @@ export default new VueRouter({
           path:'add_workshop',
           name:'AddWorkShop',
           component:AddWorkShop,
+          meta:{
+            //超管可以访问
+            role:[userAuth.SUPER_ADMIN]
+          },
+        },
+         //添加kpi类型
+         {
+          path:'add_kpitype',
+          name:'AddKPIType',
+          component:AddKPIType,
           meta:{
             //超管可以访问
             role:[userAuth.SUPER_ADMIN]
@@ -247,16 +280,14 @@ export default new VueRouter({
               path:'config',
               component:AttendancePanel,
               meta:{
-                //超管可访问
-                role:[userAuth.SUPER_ADMIN]
+                role:[userAuth.SUPER_ADMIN,userAuth.ADMIN]
               }
             },
             {
               path:'shift_arrangement',
               component:ShiftArrangement,
               meta:{
-                //超管可访问
-                role:[userAuth.SUPER_ADMIN]
+                role:[userAuth.SUPER_ADMIN,userAuth.ADMIN]
               }
             },
             {

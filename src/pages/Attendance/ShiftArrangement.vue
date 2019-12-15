@@ -203,7 +203,6 @@
     <el-dialog
       :title="this.arrangeData.date+'排班情况'"
       :visible.sync="isShowArrangeResultPanel"
-      top="0"
       @close="isShowArrangeResultPanel = false"
       :close-on-click-modal="false"
       custom-class="tag-edit-dialog"
@@ -502,8 +501,8 @@
   .tag-edit-dialog{
     width:500px;
     position: relative;
-    top:50%;
-    transform: translateY(-50%);
+    /*top:50%;*/
+    /*transform: translateY(-50%);*/
     .el-dialog__header{
       border-bottom:1px solid #e8e8e8;
       padding-bottom: 10px;

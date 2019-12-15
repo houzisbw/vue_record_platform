@@ -21,13 +21,14 @@
         active-text-color="#fff">
         <template v-for="(item,index) in menuData">
           <!--submenu的index必须有且唯一,且是字符串-->
-          <el-submenu :index="index+''">
+          <el-submenu :index="index+''" :key="index">
             <template slot="title">
               <i :class="item.iconName"></i>
               <span>{{item.menuName}}</span>
             </template>
             <template v-for="(subItem,subIndex) in item.subMenuNameList">
               <el-menu-item :index="subItem.index"
+                            :key="subIndex"
                             :class="subItem.index === activeMenuIndex?'sub-menu-item-bg-color-active':'sub-menu-item-bg-color'">
                 {{subItem.subMenuTitle}}
               </el-menu-item>
@@ -160,6 +161,12 @@
                 role:[auth.SUPER_ADMIN],
                 subMenuTitle:'添加记录类型'
               },
+              {
+                index:'/add_kpitype',
+                iconName:'',
+                role:[auth.SUPER_ADMIN],
+                subMenuTitle:'添加绩效类型'
+              },
             ]
           },
           {
@@ -215,7 +222,7 @@
               {
                 index:'/attendance/shift_arrangement',
                 iconName:'',
-                role:[auth.SUPER_ADMIN],
+                role:[auth.SUPER_ADMIN,auth.ADMIN],
                 subMenuTitle:'排班操作'
               },
               {
@@ -227,7 +234,7 @@
               {
                 index:'/attendance/config',
                 iconName:'',
-                role:[auth.SUPER_ADMIN],
+                role:[auth.SUPER_ADMIN,auth.ADMIN],
                 subMenuTitle:'排班信息配置'
               }
             ]
@@ -242,6 +249,25 @@
                 iconName:'',
                 role:[auth.ADMIN,auth.ORDINARY_USER,auth.SUPER_ADMIN],
                 subMenuTitle:'新鲜事'
+              }
+            ]
+          },
+           {
+            menuName:'绩效管理',
+            iconName:'el-icon-star-on',
+            role:[auth.ADMIN,auth.SUPER_ADMIN],
+            subMenuNameList:[
+              {
+                index:'/kpi_search',
+                iconName:'',
+                role:[auth.ADMIN,auth.SUPER_ADMIN],
+                subMenuTitle:'绩效查询'
+              },
+              {
+                index:'/kpi_add',
+                iconName:'',
+                role:[auth.ADMIN,auth.SUPER_ADMIN],
+                subMenuTitle:'绩效添加'
               }
             ]
           },

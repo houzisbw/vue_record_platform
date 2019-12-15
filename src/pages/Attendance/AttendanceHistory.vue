@@ -56,7 +56,7 @@
             <div class="item-wrapper">
               <div class="item-title">
                 <el-tag size="small">
-                  排班车间
+                  车间
                 </el-tag>
               </div>
               <div class="item-content">
@@ -66,7 +66,7 @@
             <div class="item-wrapper">
               <div class="item-title">
                 <el-tag size="small">
-                  排班工序
+                  工序
                 </el-tag>
               </div>
               <div class="item-content">
@@ -76,7 +76,7 @@
             <div class="item-wrapper">
               <div class="item-title">
                 <el-tag size="small">
-                  排班班次
+                  班次
                 </el-tag>
               </div>
               <div class="item-content">
@@ -86,7 +86,7 @@
             <div class="item-wrapper">
               <div class="item-title">
                 <el-tag size="small">
-                  排班时间
+                  时间
                 </el-tag>
               </div>
               <div class="item-content">
@@ -96,7 +96,7 @@
             <div class="item-wrapper">
               <div class="item-title">
                 <el-tag size="small">
-                  排班人员
+                  人员
                 </el-tag>
               </div>
               <div class="item-content">
@@ -125,7 +125,7 @@
             <div class="item-wrapper" style="margin-top:-15px">
               <div class="item-title">
                 <el-tag size="small">
-                  排班内容
+                  内容
                 </el-tag>
               </div>
               <div class="item-content work-content" >{{item.workContent | workContentFormatter}}</div>
@@ -407,8 +407,7 @@
               white-space: pre-wrap;
             }
             .item-title{
-              width:100px;
-              padding-right:20px;
+              width:70px;
               box-sizing: border-box;
             }
             .item-content{

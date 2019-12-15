@@ -16,7 +16,7 @@
     <tag-item-list
       title="班次"
       :is-limit="true"
-      :limit-cnt="1"
+      :limit-cnt="2"
       title-icon="icon-apartment"
       btn-name="添加新班次"
       add-input-name="班次名称"
