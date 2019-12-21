@@ -53,7 +53,7 @@
            <el-date-picker
              v-model="kpiData.date"
              type="month"
-             value-format="yyyy-MM-dd"
+             value-format="yyyy-MM"
              size="small"
              :editable="false"
              :clearable="false"
@@ -67,10 +67,10 @@
                       placeholder="请选择">
              <el-option
                class="user-edit-dialog-select"
-               v-for="item in kpiTypeList"
-               :key="item.value"
-               :label="item.label"
-               :value="item.value">
+               v-for="(item,index) in kpiTypeList"
+               :key="index"
+               :label="item"
+               :value="item">
              </el-option>
            </el-select>
          </el-form-item>
@@ -110,11 +110,29 @@
        </el-form>
        </div>
     </div>
+    <!--提交的对话框-->
+    <el-dialog
+      title="提交"
+      :visible.sync="isSubmitDialogShow"
+      :close-on-click-modal="false"
+      custom-class="tag-edit-dialog"
+    >
+      <span>确定提交绩效数据?</span>
+      <span slot="footer" class="dialog-footer">
+          <el-button @click="isSubmitDialogShow = false" size="mini">取 消</el-button>
+          <el-button type="primary"
+                     :loading="isSubmitting"
+                     @click="confirmSubmit"
+                     size="mini">
+            确 定
+          </el-button>
+        </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-    import api from '@/api/api'
+  import api from '@/api/api'
 	export default {
 		name: 'KPIAdd',
 		data () {
@@ -137,11 +155,16 @@
                 //kpi类型列表
                 kpiTypeList:[],
                 //选择的员工名
-                selectedStaff:'222'
+                selectedStaff:'222',
+                //是否正在提交
+                isSubmitting:false,
+				        //是否显示提交的对话框
+                isSubmitDialogShow:false,
 			}
         },
         mounted(){
             this.fetchListData();
+            this.fetchKPITypeList()
         },
         methods:{
             //正式员工下拉数据变化
@@ -181,10 +204,100 @@
                     this.isLoading = false;
                 })
             },
-             reset:function(formName){
+
+            // 获取kpi类型列表
+            fetchKPITypeList:function(){
+                 this.axios.get(api.fetchKPITypesList).then((resp)=>{
+                    if(resp.data.status === 1){
+                    this.kpiTypeList = resp.data.kpiTypeList
+                }else{
+                    this.$message({
+                    type:'error',
+                    message:'数据获取失败!'
+                    });
+                }
+                    this.isLoading = false;
+                }).catch(()=>{
+                    this.isLoading = false;
+                })
+            },
+
+            reset:function(formName){
                 this.$refs[formName].resetFields();
                 this.regularStaffListToSubmit = [];
                 this.tempStaffListToSubmit = [];
+            },
+            	//提交
+            submit:function(formName){
+              if(!this.kpiData.staffName){
+                this.$message({
+                  type:'warning',
+                  message:'请填写人员姓名!'
+                });
+                return
+              }
+              if(!this.kpiData.kpiType){
+                this.$message({
+                  type:'warning',
+                  message:'请填写绩效类型!'
+                });
+                return
+              }
+              if(!this.kpiData.date){
+                this.$message({
+                  type:'warning',
+                  message:'请填写月份!'
+                });
+                return
+              }
+              if(!this.kpiData.kpiValue){
+                this.$message({
+                  type:'warning',
+                  message:'请填写绩效值!'
+                });
+                return
+              }
+               if(!this.kpiData.comment){
+                this.$message({
+                  type:'warning',
+                  message:'请填写备注!'
+                });
+                return
+              }
+              this.isSubmitDialogShow = true;
+            },
+            //确定提交
+            confirmSubmit:function(){
+              this.isSubmitting = true;
+              let data = {
+                staffName:this.kpiData.staffName,
+                date:this.kpiData.date,
+                kpiType:this.kpiData.kpiType,
+                kpiValue:this.kpiData.kpiValue,
+                comment:this.kpiData.comment,
+              };
+
+              this.axios.post(api.saveKPI,{data:data}).then((resp)=>{
+                if(resp.data.status === 1){
+                  this.$message({
+                    type:'success',
+                    message:'提交成功!'
+                  });
+                }else if(resp.data.status === 5){
+                  this.$message({
+                    type:'error',
+                    message:'已有该员工当月绩效，不要重复提交!'
+                  });
+                }else{
+                   this.$message({
+                    type:'error',
+                    message:'提交失败请重试!'
+                  });
+                }
+                this.isSubmitting = false;
+                this.isSubmitDialogShow = false;
+              })
+
             },
         }
 	}

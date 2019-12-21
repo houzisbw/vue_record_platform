@@ -56,10 +56,13 @@ export default {
   addRecordType:'/modifyRecordTypes/addRecordType',
   deleteRecordType:'/modifyRecordTypes/deleteRecordType',
 
-  //添加/删除KPI相关api
+  //添加/删除KPI type相关api
   fetchKPITypesList:'/modifyKPITypes/getKPITypesList',
   addKPIType:'/modifyKPITypes/addKPIType',
   deleteKPIType:'/modifyKPITypes/deleteKPIType',
+
+  //添加/删除/查询kpi
+  saveKPI:'/kpi/saveKPI',
 
   //记录查询页面相关api
   fetchDropdownInfo:'/searchRecord/getDropdownInfo',

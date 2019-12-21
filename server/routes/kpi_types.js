@@ -17,7 +17,7 @@ router.get('/getKPITypesList',function(req,res){
     }else{
       res.json({
         status:returnedCodes.CODE_SUCCESS,
-        kpiTypeList:docs
+        kpiTypeList:docs.map((item)=>item.name)
       })
     }
   })

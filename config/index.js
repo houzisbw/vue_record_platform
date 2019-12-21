@@ -35,6 +35,9 @@ module.exports = {
       '/modifyKPITypes/*':{
         target:'http://localhost:6000'
       },
+      '/kpi/*':{
+        target:'http://localhost:6000'
+      },
       '/searchRecord/*':{
         target:'http://localhost:6000'
       },
