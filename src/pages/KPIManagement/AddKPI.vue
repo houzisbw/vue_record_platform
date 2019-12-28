@@ -64,6 +64,7 @@
          <el-form-item label="绩效类型" prop="kpiType" class="narrow-el-select">
            <el-select v-model="kpiData.kpiType"
                       size="small"
+                      @change="handleTypesChange"
                       placeholder="请选择">
              <el-option
                class="user-edit-dialog-select"
@@ -74,6 +75,20 @@
              </el-option>
            </el-select>
          </el-form-item>
+
+         <!--非表单内的内容-->
+         <div class="staff-tag-list">
+           <!--正式员工-->
+           <div class="tag-span" v-for="item in kpiData.type">
+             <el-tag :key="item"
+                     closable
+                     @close="handleRemoveType(item)"
+                     type=""
+             >
+               {{item}}
+             </el-tag>
+           </div>
+         </div>
 
         <el-form-item label="绩效值" prop="kpiValue">
           <el-input-number
@@ -143,7 +158,7 @@
                     regularstaff:'',
                     tempstaff:'',
                     date:'',
-                    type:'',
+                    type:[],
                     kpiValue:'',
                     kpiType:'',
                     comment:''
@@ -167,6 +182,17 @@
             this.fetchKPITypeList()
         },
         methods:{
+            //绩效类型改变
+            handleRemoveType:function(item){
+              let index = this.kpiData.type.indexOf(item);
+              this.kpiData.type.splice(index,1)
+            },
+            //绩效类型改变
+            handleTypesChange:function(current){
+              if(!this.kpiData.type.includes(current)){
+                this.kpiData.type.push(current)
+              }   
+            },
             //正式员工下拉数据变化
             handleRegularStaffChange: function(current){
                //this.$set(this.kpiData,'staffName',current);
@@ -236,7 +262,7 @@
                 });
                 return
               }
-              if(!this.kpiData.kpiType){
+              if(!this.kpiData.type.length){
                 this.$message({
                   type:'warning',
                   message:'请填写绩效类型!'
@@ -272,7 +298,7 @@
               let data = {
                 staffName:this.kpiData.staffName,
                 date:this.kpiData.date,
-                kpiType:this.kpiData.kpiType,
+                kpiType:this.kpiData.type,
                 kpiValue:this.kpiData.kpiValue,
                 comment:this.kpiData.comment,
               };
@@ -331,7 +357,7 @@
         .wrapper{
             margin:0 auto;
             width:500px;
-            .staff-tag{
+            .staff-tag-list,.staff-tag{
                 margin-left: 100px;
                 margin-bottom:20px;
                 .tag-span{

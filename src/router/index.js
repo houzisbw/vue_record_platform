@@ -84,7 +84,7 @@ export default new VueRouter({
           component:KPISearch,
           meta:{
             //所有人都可以访问
-            role:[userAuth.SUPER_ADMIN,userAuth.ADMIN]
+            role:[userAuth.SUPER_ADMIN,userAuth.ADMIN,userAuth.ORDINARY_USER],
           }
         },
          //绩效添加页面

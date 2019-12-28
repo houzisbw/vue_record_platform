@@ -18,12 +18,12 @@
       <div class="modify-user-table-wrapper clearfix">
         <div v-if="isTagListEmpty">
           <span class="tag-span" v-for="(tag,index) in kpiTypeList">
-            <el-tag :key="tag.name"
+            <el-tag :key="index"
                     closable
-                    @close="handleRemoveTag(tag.name)"
+                    @close="handleRemoveTag(tag)"
                     type=""
             >
-              {{tag.name}}
+              {{tag}}
             </el-tag>
           </span>
         </div>
@@ -145,7 +145,7 @@
         this.$refs[formName].validate((valid) => {
           if(valid){
             this.isModifying = true;
-            this.axios.post(api.addKPIType,{name:this.addKPITypeData.kpiType}).then((resp)=>{
+            this.axios.post(api.addKPIType,{name:this.addKPITypeData.kpiType.replace(/,/g,'')}).then((resp)=>{
               if(resp.data.status === 1){
                 this.fetchKPITypeData();
                 this.$message({
@@ -178,10 +178,7 @@
         this.axios.get(api.fetchKPITypesList).then((resp)=>{
           if(resp.data.status === 1){
             resp.data.kpiTypeList.forEach((item)=>{
-              this.kpiTypeList.push({
-                name:item.name,
-                group:item.group
-              })
+              this.kpiTypeList.push(item)
             })
           }
           this.loading = false;

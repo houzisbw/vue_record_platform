@@ -63,6 +63,8 @@ export default {
 
   //添加/删除/查询kpi
   saveKPI:'/kpi/saveKPI',
+  searchKPI:'/kpi/searchKPI',
+  deleteKPI:'/kpi/deleteKPI',
 
   //记录查询页面相关api
   fetchDropdownInfo:'/searchRecord/getDropdownInfo',

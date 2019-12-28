@@ -41,4 +41,52 @@ router.post('/saveKPI',function(req,res){
     })
 })
 
+//查询KPI
+router.post('/searchKPI',function(req,res){
+    let group = req.group;
+    let name = req.body.data.staffName;
+    let date = req.body.data.date;
+    KPI.find({group:group},function(err,docs){
+        if(err){
+          res.json({
+            status:returnedCodes.CODE_ERROR
+          })
+        }else{
+            let list = docs.slice();
+            if(name){
+                list = docs.filter(function(item){
+                    return item.staffName === name
+                })
+            }
+            if(date){
+                list = list.filter(function(item){
+                    return item.date === date
+                })
+            }
+            res.json({
+                status:returnedCodes.CODE_SUCCESS,
+                kpiList:list
+            })
+        }
+      })
+})
+
+//删除KPI
+router.post('/deleteKPI',function(req,res){
+    let group = req.group;
+    let name = req.body.data.staffName;
+    let date = req.body.data.date;
+    KPI.findOneAndRemove({group:group,staffName:name,date:date},function(err,docs){
+        if(err){
+            res.json({
+              status:returnedCodes.CODE_ERROR
+            })
+          }else{
+            res.json({
+              status:returnedCodes.CODE_SUCCESS
+            })
+          }
+        })
+})
+
 module.exports = router

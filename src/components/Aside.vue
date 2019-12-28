@@ -255,12 +255,12 @@
            {
             menuName:'绩效管理',
             iconName:'el-icon-star-on',
-            role:[auth.ADMIN,auth.SUPER_ADMIN],
+            role:[auth.ADMIN,auth.SUPER_ADMIN,auth.ORDINARY_USER],
             subMenuNameList:[
               {
                 index:'/kpi_search',
                 iconName:'',
-                role:[auth.ADMIN,auth.SUPER_ADMIN],
+                role:[auth.ADMIN,auth.SUPER_ADMIN,auth.ORDINARY_USER],
                 subMenuTitle:'绩效查询'
               },
               {
