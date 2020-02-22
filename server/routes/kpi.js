@@ -11,34 +11,48 @@ router.post('/saveKPI',function(req,res){
     let kpiType = req.body.data.kpiType;
     let kpiValue = req.body.data.kpiValue;
     let comment = req.body.data.comment;
-    
-    KPI.findOne({staffName:name,group:group,date:date},function(err,doc){
-      if(err){
-        res.json({
-          status:returnedCodes.CODE_ERROR
-        })
-      }else{
-        if(doc){
-          //名字已经存在
-          res.json({
-            status:returnedCodes.CODE_RECORDTYPE_EXIST
-          })
-        }else{
-          let kpi = new KPI({
-            group:group,
-            staffName:name,
-            date:date,
-            kpiType:kpiType,
-            kpiValue:kpiValue,
-            comment:comment,
-          });
-          kpi.save();
-          res.json({
-            status:returnedCodes.CODE_SUCCESS
-          })
-        }
-      }
+
+    // KPI.findOne({staffName:name,group:group,date:date},function(err,doc){
+    //   if(err){
+    //     res.json({
+    //       status:returnedCodes.CODE_ERROR
+    //     })
+    //   }else{
+    //     if(doc){
+    //       //名字已经存在
+    //       res.json({
+    //         status:returnedCodes.CODE_RECORDTYPE_EXIST
+    //       })
+    //     }else{
+    //       let kpi = new KPI({
+    //         group:group,
+    //         staffName:name,
+    //         date:date,
+    //         kpiType:kpiType,
+    //         kpiValue:kpiValue,
+    //         comment:comment,
+    //       });
+    //       kpi.save();
+    //       res.json({
+    //         status:returnedCodes.CODE_SUCCESS
+    //       })
+    //     }
+    //   }
+    // })
+
+    let kpi = new KPI({
+      group:group,
+      staffName:name,
+      date:date,
+      kpiType:kpiType,
+      kpiValue:kpiValue,
+      comment:comment,
+    });
+    kpi.save();
+    res.json({
+      status:returnedCodes.CODE_SUCCESS
     })
+
 })
 
 //查询KPI

@@ -92,7 +92,7 @@
 
         <el-form-item label="绩效值" prop="kpiValue">
           <el-input-number
-            :step="0.1" 
+            :step="0.01" 
             v-model="kpiData.kpiValue">
           </el-input-number>
         </el-form-item>
