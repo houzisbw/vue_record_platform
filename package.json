@@ -16,7 +16,7 @@
     "babel-polyfill": "^6.26.0",
     "element-ui": "^2.4.6",
     "html2canvas": "^1.0.0-alpha.12",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.19",
     "officegen": "^0.4.7",
     "print-js": "^1.0.51",
     "vue": "^2.5.2",
